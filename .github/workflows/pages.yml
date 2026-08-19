@@ -1,0 +1,34 @@
+name: pages
+# Deploys the judge-facing surface in docs/ to GitHub Pages.
+# NOTE: Pages on a private repo requires a paid plan. This workflow builds on every push
+# regardless; the deploy job only runs once Pages is enabled (i.e. after the repo is public).
+on:
+  push: { branches: [main] }
+  workflow_dispatch:
+permissions: { contents: read, pages: write, id-token: write }
+concurrency: { group: pages, cancel-in-progress: true }
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify the surface exists and is self-contained
+        run: |
+          test -f docs/index.html || { echo "::error::docs/index.html missing"; exit 1; }
+          # no runtime CDN dependencies — everything inline or beside the page
+          if grep -nE '<(script|link)[^>]+(src|href)="https?://' docs/index.html; then
+            echo "::error::external CDN reference in docs/index.html — must be self-contained"; exit 1; fi
+          echo "surface OK: $(wc -c < docs/index.html) bytes"
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: docs }
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
