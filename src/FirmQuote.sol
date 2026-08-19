@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {IBinaryPool, IERC20} from "./IBinaryPool.sol";
+import {IBinaryPool, IBinaryMarket, IERC20} from "./IBinaryPool.sol";
 
 /// @title FirmQuote — a resting quote nobody can pull, enforced by the pool
 /// @notice Holds collateral and rests BUY-side orders on a Somnia BinaryPool so
@@ -64,7 +64,9 @@ contract FirmQuote {
     constructor(address _pool, uint64 _unlockAt) {
         depositor = msg.sender;
         pool = IBinaryPool(_pool);
-        collateral = IERC20(IBinaryPool(_pool).collateral());
+        // Resolved through the MARKET, not the pool: `pool.collateral()` reverts on a real
+        // BinaryPool (verified on Shannon 2026-08-19). See IBinaryPool.market().
+        collateral = IERC20(IBinaryMarket(IBinaryPool(_pool).market()).collateral());
         unlockAt = _unlockAt;
         // One allowance, set once at construction. Buy-side escrow is pulled by
         // the pool from THIS contract at placement time.

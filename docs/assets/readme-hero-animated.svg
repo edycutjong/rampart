@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-label="rampart — locks a resting quote into the book so the pool refuses even its own funder's cancel. A cancel strikes the resting quote and bounces; pullable amber hardens into held cyan and never returns.">
+<!-- STORYBOARD (dur 8s — must equal this file's single master dur)
+  0-10%   steady state: opaque plate, grid, mini mark, outlined two-tone wordmark, tagline, pulsing 0xf5e39c1f, tech pills; the right ladder rests — PULLABLE amber above, FIRM cyan below (poster rule satisfied)
+  10-25%  trigger:      the cancel arrow dives from above and tears through the amber rung   data-story="beat-2"
+  25-55%  mechanism:    A cancel strikes the resting quote and bounces; pullable amber hardens into held cyan and never returns.   data-story="beat-3"
+  55-80%  resolution:   the held rung stays solid and cyan with a HELD badge; arrow gone; from 52% the dissolved rung re-emerges at y=107 as a 0.2-alpha dashed amber ghost with the PULLABLE label at 0.3 — evidence of what happened, so the two-rung comparison never leaves the frame (hard rule 7)   data-story="beat-4"
+  80-100% breathe + seam fade — ghost and label deepen back to full as the amber level refills so the last frame equals frame 0
+-->
+  <title>rampart — order-book depth the protocol itself will not let you withdraw</title>
+  <style>
+    .ha-b1 { animation: ha-d1 16s ease-in-out infinite alternate; }
+    .ha-b2 { animation: ha-d2 19s ease-in-out infinite alternate; }
+    @keyframes ha-d1 { from { transform: translate(0, 0); } to { transform: translate(-46px, 26px); } }
+    @keyframes ha-d2 { from { transform: translate(0, 0); } to { transform: translate(52px, -20px); } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+  <defs>
+    <radialGradient id="ha-flash" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#22D3EE" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#22D3EE" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ha-blob1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#22D3EE" stop-opacity="0.055"/>
+      <stop offset="100%" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ha-blob2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ha-wmgrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8BEFFB"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="ha-beam" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#E2E8F0" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#E2E8F0" stop-opacity="0.09"/>
+      <stop offset="100%" stop-color="#E2E8F0" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="ha-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M0 0.5H44" stroke="#94A3B8" stroke-opacity="0.05" stroke-width="1"/>
+      <path d="M0.5 0V44" stroke="#94A3B8" stroke-opacity="0.04" stroke-width="1"/>
+    </pattern>
+    <clipPath id="ha-plate">
+      <rect x="0" y="0" width="1280" height="320" rx="24"/>
+    </clipPath>
+    <clipPath id="ha-ringclip">
+      <!-- bottom edge y=219 = the FIRM rung's centreline: the refusal ring may
+           never show an arc beneath the surface nothing is supposed to cross -->
+      <rect x="772" y="60" width="200" height="159"/>
+    </clipPath>
+    <clipPath id="ha-wmclip">
+      <path d="M12.54 12.80L4.48 12.80L4.48-31.74L12.42-31.74L12.42-27.90L13.57-27.90Q14.66-29.76 16.96-31.20Q19.26-32.64 23.55-32.64Q27.39-32.64 30.66-30.75Q33.92-28.86 35.90-25.22Q37.89-21.57 37.89-16.38L37.89-15.36Q37.89-10.18 35.90-6.53Q33.92-2.88 30.66-0.99Q27.39 0.90 23.55 0.90Q20.67 0.90 18.72 0.22Q16.77-0.45 15.58-1.50Q14.40-2.56 13.70-3.65L12.54-3.65L12.54 12.80M21.12-6.14Q24.90-6.14 27.36-8.54Q29.82-10.94 29.82-15.55L29.82-16.19Q29.82-20.80 27.33-23.20Q24.83-25.60 21.12-25.60Q17.41-25.60 14.91-23.20Q12.42-20.80 12.42-16.19L12.42-15.55Q12.42-10.94 14.91-8.54Q17.41-6.14 21.12-6.14M55.17 0.90Q51.78 0.90 49.09-0.29Q46.40-1.47 44.83-3.74Q43.26-6.02 43.26-9.28Q43.26-12.54 44.83-14.75Q46.40-16.96 49.18-18.08Q51.97-19.20 55.55-19.20L64.26-19.20L64.26-20.99Q64.26-23.23 62.85-24.67Q61.44-26.11 58.37-26.11Q55.36-26.11 53.89-24.74Q52.42-23.36 51.97-21.18L44.54-23.68Q45.31-26.11 47.01-28.13Q48.70-30.14 51.55-31.39Q54.40-32.64 58.50-32.64Q64.77-32.64 68.42-29.50Q72.06-26.37 72.06-20.42L72.06-8.58Q72.06-6.66 73.86-6.66L76.42-6.66L76.42 0L71.04 0Q68.67 0 67.14-1.15Q65.60-2.30 65.60-4.22L65.60-4.29L64.38-4.29Q64.13-3.52 63.23-2.27Q62.34-1.02 60.42-0.06Q58.50 0.90 55.17 0.90M56.58-5.63Q59.97-5.63 62.11-7.52Q64.26-9.41 64.26-12.54L64.26-13.18L56.13-13.18Q53.89-13.18 52.61-12.22Q51.33-11.26 51.33-9.54Q51.33-7.81 52.67-6.72Q54.02-5.63 56.58-5.63M90.37 0L82.30 0L82.30-31.74L90.24-31.74L90.24-28.16L91.39-28.16Q92.10-30.08 93.73-30.98Q95.36-31.87 97.54-31.87L101.38-31.87L101.38-24.70L97.41-24.70Q94.34-24.70 92.35-23.07Q90.37-21.44 90.37-18.05L90.37 0M128.77 0L119.81 0Q116.67 0 114.72-1.95Q112.77-3.90 112.77-7.17L112.77-25.09L104.83-25.09L104.83-31.74L112.77-31.74L112.77-41.60L120.83-41.60L120.83-31.74L129.54-31.74L129.54-25.09L120.83-25.09L120.83-8.58Q120.83-6.66 122.62-6.66L128.77-6.66"/>
+    </clipPath>
+  </defs>
+
+  <!-- Opaque plate — mandatory, fully opaque: the banner must survive white
+       GitHub light mode (cyan on white measures 1.81:1) -->
+  <rect x="0" y="0" width="1280" height="320" rx="24" fill="#0B1220"/>
+  <rect x="1" y="1" width="1278" height="318" rx="23" fill="none" stroke="rgba(226,232,240,0.08)" stroke-width="2"/>
+
+  <g clip-path="url(#ha-plate)">
+
+    <!-- Backdrop: grid, free-running aurora drift, one beam sweep per loop -->
+    <rect x="0" y="0" width="1280" height="320" fill="url(#ha-grid)"/>
+    <circle cx="1120" cy="30" r="200" fill="url(#ha-blob1)" class="ha-b1"/>
+    <circle cx="640" cy="310" r="180" fill="url(#ha-blob2)" class="ha-b2"/>
+    <g transform="skewX(-14)">
+      <rect x="0" y="-40" width="130" height="400" fill="url(#ha-beam)">
+        <animateTransform attributeName="transform" type="translate" values="-200 0;-200 0;1560 0;1560 0" keyTimes="0;0.30;0.75;1" dur="8s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+
+    <!-- ledger hairlines — exchange-terminal instrumentation -->
+    <g stroke="#94A3B8" stroke-opacity="0.07" stroke-width="1">
+      <line x1="600" y1="60" x2="1240" y2="60"/>
+      <line x1="600" y1="152" x2="1240" y2="152"/>
+      <line x1="600" y1="264" x2="1240" y2="264"/>
+    </g>
+
+    <!-- ================= RIGHT — THE PRODUCT STORY ================= -->
+
+    <!-- book-level labels -->
+    <text x="644" y="84" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" letter-spacing="1.5" fill="#F59E0B" opacity="0.85">PULLABLE · wallet-owned
+      <animate attributeName="opacity" values="0.85;0.85;0.85;0;0;0.3;0.3;0.85;0.85" keyTimes="0;0.10;0.24;0.30;0.52;0.55;0.90;0.96;1" dur="8s" repeatCount="indefinite"/>
+    </text>
+    <text x="644" y="199" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" letter-spacing="1.5" fill="#22D3EE" opacity="0.85">FIRM · contract-owned</text>
+
+    <!-- UPPER RUNG — a wallet's depth. Under the strike it dissolves into
+         dashes, drifts up-right and fades; from 52% it re-emerges at y=107 as a
+         0.2-alpha dashed amber ghost — evidence of what happened, so the
+         two-rung comparison never leaves the frame (hard rule 7) — then deepens
+         back to full during the 90-96% refill so the seam still closes. -->
+    <line x1="668" y1="107" x2="1102" y2="107" stroke="#F59E0B" stroke-width="24" stroke-linecap="round" pathLength="100" stroke-dasharray="100 100" opacity="1">
+      <animate attributeName="opacity" values="1;1;1;0.9;0;0;0.2;0.2;1;1" keyTimes="0;0.10;0.27;0.36;0.50;0.52;0.55;0.90;0.96;1" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-dasharray" values="100 100;100 100;10 6;10 6;100 100;100 100" keyTimes="0;0.26;0.42;0.89;0.955;1" dur="8s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="translate" values="0 0;0 0;0 0;20 -24;38 -46;0 0;0 0" keyTimes="0;0.10;0.28;0.40;0.50;0.52;1" dur="8s" repeatCount="indefinite"/>
+    </line>
+
+    <!-- chips torn loose at the strike -->
+    <g fill="#F59E0B" opacity="0" data-story="beat-3">
+      <animate attributeName="opacity" values="0;0;0;0.9;0.3;0;0" keyTimes="0;0.10;0.30;0.38;0.47;0.53;1" dur="8s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="translate" values="0 0;0 0;0 0;26 -30;54 -62;54 -62" keyTimes="0;0.10;0.30;0.40;0.53;1" dur="8s" repeatCount="indefinite"/>
+      <rect x="856" y="96" width="20" height="14" rx="4"/>
+      <rect x="884" y="92" width="14" height="12" rx="4"/>
+      <rect x="838" y="94" width="12" height="10" rx="3"/>
+      <circle cx="906" cy="90" r="4"/>
+    </g>
+
+    <!-- THE CANCEL — dives through the amber rung, meets the cyan surface at
+         25% of the loop, and the reflected leg kicks back up -->
+    <polyline points="846,6 872,207 1008,44" fill="none" stroke="#E2E8F0" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100 104" stroke-dashoffset="104" opacity="1" data-story="beat-2">
+      <animate attributeName="stroke-dashoffset" values="104;104;51;0;0;104;104" keyTimes="0;0.115;0.25;0.38;0.78;0.785;1" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;1;0;0;1;1" keyTimes="0;0.68;0.76;0.84;0.90;1" dur="8s" repeatCount="indefinite"/>
+    </polyline>
+    <polygon points="1013,38 1006,66 987,50" fill="#E2E8F0" opacity="0" data-story="beat-3">
+      <animate attributeName="opacity" values="0;0;0;1;1;0;0" keyTimes="0;0.10;0.34;0.38;0.68;0.76;1" dur="8s" repeatCount="indefinite"/>
+    </polygon>
+    <text x="890" y="66" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#E2E8F0" opacity="0" data-story="beat-2">pool.cancelOrder()
+      <animate attributeName="opacity" values="0;0;0.8;0.8;0;0" keyTimes="0;0.13;0.18;0.30;0.36;1" dur="8s" repeatCount="indefinite"/>
+    </text>
+
+    <!-- the bounce: flash, surface ripple, sparks — the accent fires exactly
+         here. The ripple is a FLAT ellipse riding the FIRM centreline (ry 7,
+         rx expanding): a shockwave across the surface, never a dome/shield arc. -->
+    <ellipse cx="872" cy="212" rx="70" ry="26" fill="url(#ha-flash)" opacity="0" data-story="beat-3">
+      <animate attributeName="opacity" values="0;0;0;1;0.4;0.3;0.3;0;0" keyTimes="0;0.10;0.245;0.27;0.36;0.55;0.86;0.94;1" dur="8s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="872" cy="219" rx="12" ry="7" fill="none" stroke="#22D3EE" stroke-width="5" opacity="0" clip-path="url(#ha-ringclip)" data-story="beat-3">
+      <animate attributeName="opacity" values="0;0;0;0.9;0;0" keyTimes="0;0.10;0.245;0.28;0.40;1" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="rx" values="12;12;12;34;96;96" keyTimes="0;0.10;0.245;0.30;0.40;1" dur="8s" repeatCount="indefinite"/>
+    </ellipse>
+    <g stroke="#22D3EE" stroke-width="6" stroke-linecap="round" opacity="0" data-story="beat-3">
+      <animate attributeName="opacity" values="0;0;0;1;0;0" keyTimes="0;0.10;0.25;0.30;0.42;1" dur="8s" repeatCount="indefinite"/>
+      <line x1="836" y1="198" x2="810" y2="186"/>
+      <line x1="908" y1="198" x2="934" y2="186"/>
+      <line x1="858" y1="188" x2="846" y2="168"/>
+    </g>
+    <text x="908" y="254" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#22D3EE" opacity="0" data-story="beat-3">revert IncorrectSender (0xf5e39c1f)
+      <animate attributeName="opacity" values="0;0;0;0.95;0.95;0;0" keyTimes="0;0.10;0.26;0.30;0.52;0.60;1" dur="8s" repeatCount="indefinite"/>
+    </text>
+
+    <!-- HELD badge — the resolution -->
+    <g opacity="0" data-story="beat-4">
+      <animate attributeName="opacity" values="0;0;0;1;1;0;0" keyTimes="0;0.10;0.56;0.61;0.83;0.90;1" dur="8s" repeatCount="indefinite"/>
+      <rect x="1130" y="196" width="64" height="26" rx="13" fill="rgba(34,211,238,0.14)" stroke="#22D3EE" stroke-width="1.5"/>
+      <text x="1162" y="214" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" font-weight="700" letter-spacing="1.5" fill="#22D3EE">HELD</text>
+    </g>
+
+    <!-- LOWER RUNG — the contract's depth. Drawn last: nothing crosses it.
+         One-beat 2px compress at the 25% impact: the bounce lands with mass,
+         then the surface springs back. Gated inside the single master dur. -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0 0;0 0;0 2;0 0;0 0" keyTimes="0;0.245;0.26;0.30;1" dur="8s" repeatCount="indefinite"/>
+      <line x1="668" y1="219" x2="1102" y2="219" stroke="#22D3EE" stroke-width="24" stroke-linecap="round"/>
+      <line x1="676" y1="213.5" x2="1094" y2="213.5" stroke="#E2E8F0" stroke-width="4" stroke-linecap="round" opacity="0.18"/>
+    </g>
+
+    <!-- ================= LEFT — THE BRAND ================= -->
+
+    <!-- mini mark (chip of the static icon), flash synced to the bounce -->
+    <g transform="translate(44,40) scale(0.15)">
+      <rect x="0" y="0" width="512" height="512" rx="116" fill="#101B2E" stroke="rgba(226,232,240,0.12)" stroke-width="8"/>
+      <g fill="#F59E0B">
+        <rect x="84" y="140" width="64" height="56" rx="14"/>
+        <rect x="218" y="142" width="78" height="52" rx="13" opacity="0.9"/>
+        <rect x="372" y="124" width="34" height="42" rx="11" opacity="0.68" transform="rotate(-9 389 145)"/>
+      </g>
+      <polyline points="150,84 256,344 352,106" fill="none" stroke="#E2E8F0" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="377,45 387,120 317,92" fill="#E2E8F0"/>
+      <ellipse cx="256" cy="348" rx="84" ry="34" fill="url(#ha-flash)" opacity="0.75">
+        <animate attributeName="opacity" values="0.75;0.75;1;0.75;0.75" keyTimes="0;0.24;0.27;0.33;1" dur="8s" repeatCount="indefinite"/>
+      </ellipse>
+      <rect x="84" y="348" width="344" height="56" rx="16" fill="#22D3EE"/>
+      <rect x="94" y="354" width="324" height="11" rx="5.5" fill="#E2E8F0" opacity="0.16"/>
+    </g>
+
+    <!-- outlined wordmark — Space Grotesk 700 vector paths, never <text>.
+         Two-tone at the ram|part boundary; shimmer clipped to part's own paths. -->
+    <g transform="translate(140,97) scale(1.06)">
+      <path fill="#E2E8F0" d="M12.54 0L4.48 0L4.48-31.74L12.42-31.74L12.42-28.16L13.57-28.16Q14.27-30.08 15.90-30.98Q17.54-31.87 19.71-31.87L23.55-31.87L23.55-24.70L19.58-24.70Q16.51-24.70 14.53-23.07Q12.54-21.44 12.54-18.05L12.54 0M38.91 0.90Q35.52 0.90 32.83-0.29Q30.14-1.47 28.58-3.74Q27.01-6.02 27.01-9.28Q27.01-12.54 28.58-14.75Q30.14-16.96 32.93-18.08Q35.71-19.20 39.30-19.20L48-19.20L48-20.99Q48-23.23 46.59-24.67Q45.18-26.11 42.11-26.11Q39.10-26.11 37.63-24.74Q36.16-23.36 35.71-21.18L28.29-23.68Q29.06-26.11 30.75-28.13Q32.45-30.14 35.30-31.39Q38.14-32.64 42.24-32.64Q48.51-32.64 52.16-29.50Q55.81-26.37 55.81-20.42L55.81-8.58Q55.81-6.66 57.60-6.66L60.16-6.66L60.16 0L54.78 0Q52.42 0 50.88-1.15Q49.34-2.30 49.34-4.22L49.34-4.29L48.13-4.29Q47.87-3.52 46.98-2.27Q46.08-1.02 44.16-0.06Q42.24 0.90 38.91 0.90M40.32-5.63Q43.71-5.63 45.86-7.52Q48-9.41 48-12.54L48-13.18L39.87-13.18Q37.63-13.18 36.35-12.22Q35.07-11.26 35.07-9.54Q35.07-7.81 36.42-6.72Q37.76-5.63 40.32-5.63M74.11 0L66.05 0L66.05-31.74L73.98-31.74L73.98-28.29L75.14-28.29Q75.97-29.89 77.89-31.07Q79.81-32.26 82.94-32.26Q86.34-32.26 88.38-30.94Q90.43-29.63 91.52-27.52L92.67-27.52Q93.76-29.57 95.74-30.91Q97.73-32.26 101.38-32.26Q104.32-32.26 106.72-31.01Q109.12-29.76 110.56-27.23Q112-24.70 112-20.86L112 0L103.94 0L103.94-20.29Q103.94-22.91 102.59-24.22Q101.25-25.54 98.82-25.54Q96.06-25.54 94.56-23.78Q93.06-22.02 93.06-18.75L93.06 0L84.99 0L84.99-20.29Q84.99-22.91 83.65-24.22Q82.30-25.54 79.87-25.54Q77.12-25.54 75.62-23.78Q74.11-22.02 74.11-18.75"/>
+      <g transform="translate(116.22 0)">
+        <path fill="url(#ha-wmgrad)" d="M12.54 12.80L4.48 12.80L4.48-31.74L12.42-31.74L12.42-27.90L13.57-27.90Q14.66-29.76 16.96-31.20Q19.26-32.64 23.55-32.64Q27.39-32.64 30.66-30.75Q33.92-28.86 35.90-25.22Q37.89-21.57 37.89-16.38L37.89-15.36Q37.89-10.18 35.90-6.53Q33.92-2.88 30.66-0.99Q27.39 0.90 23.55 0.90Q20.67 0.90 18.72 0.22Q16.77-0.45 15.58-1.50Q14.40-2.56 13.70-3.65L12.54-3.65L12.54 12.80M21.12-6.14Q24.90-6.14 27.36-8.54Q29.82-10.94 29.82-15.55L29.82-16.19Q29.82-20.80 27.33-23.20Q24.83-25.60 21.12-25.60Q17.41-25.60 14.91-23.20Q12.42-20.80 12.42-16.19L12.42-15.55Q12.42-10.94 14.91-8.54Q17.41-6.14 21.12-6.14M55.17 0.90Q51.78 0.90 49.09-0.29Q46.40-1.47 44.83-3.74Q43.26-6.02 43.26-9.28Q43.26-12.54 44.83-14.75Q46.40-16.96 49.18-18.08Q51.97-19.20 55.55-19.20L64.26-19.20L64.26-20.99Q64.26-23.23 62.85-24.67Q61.44-26.11 58.37-26.11Q55.36-26.11 53.89-24.74Q52.42-23.36 51.97-21.18L44.54-23.68Q45.31-26.11 47.01-28.13Q48.70-30.14 51.55-31.39Q54.40-32.64 58.50-32.64Q64.77-32.64 68.42-29.50Q72.06-26.37 72.06-20.42L72.06-8.58Q72.06-6.66 73.86-6.66L76.42-6.66L76.42 0L71.04 0Q68.67 0 67.14-1.15Q65.60-2.30 65.60-4.22L65.60-4.29L64.38-4.29Q64.13-3.52 63.23-2.27Q62.34-1.02 60.42-0.06Q58.50 0.90 55.17 0.90M56.58-5.63Q59.97-5.63 62.11-7.52Q64.26-9.41 64.26-12.54L64.26-13.18L56.13-13.18Q53.89-13.18 52.61-12.22Q51.33-11.26 51.33-9.54Q51.33-7.81 52.67-6.72Q54.02-5.63 56.58-5.63M90.37 0L82.30 0L82.30-31.74L90.24-31.74L90.24-28.16L91.39-28.16Q92.10-30.08 93.73-30.98Q95.36-31.87 97.54-31.87L101.38-31.87L101.38-24.70L97.41-24.70Q94.34-24.70 92.35-23.07Q90.37-21.44 90.37-18.05L90.37 0M128.77 0L119.81 0Q116.67 0 114.72-1.95Q112.77-3.90 112.77-7.17L112.77-25.09L104.83-25.09L104.83-31.74L112.77-31.74L112.77-41.60L120.83-41.60L120.83-31.74L129.54-31.74L129.54-25.09L120.83-25.09L120.83-8.58Q120.83-6.66 122.62-6.66L128.77-6.66"/>
+        <g clip-path="url(#ha-wmclip)">
+          <g transform="skewX(-18)">
+            <rect x="0" y="-48" width="30" height="66" fill="#FFFFFF" opacity="0.35">
+              <animateTransform attributeName="transform" type="translate" values="-40 0;-40 0;190 0;190 0" keyTimes="0;0.05;0.22;1" dur="8s" repeatCount="indefinite"/>
+            </rect>
+          </g>
+        </g>
+      </g>
+    </g>
+
+    <!-- tagline — the one-liner, two lines -->
+    <text x="140" y="155" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="17" fill="#94A3B8">Order-book depth the protocol itself</text>
+    <text x="140" y="179" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="17" fill="#94A3B8">will not let you withdraw</text>
+
+    <!-- hero metric — the revert that proves it -->
+    <rect x="134" y="224" width="216" height="36" rx="9" fill="url(#ha-flash)" opacity="0.3"/>
+    <text x="140" y="218" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" letter-spacing="1.2" fill="#94A3B8" opacity="0.8">the revert that proves it</text>
+    <text x="140" y="250" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="30" font-weight="700" letter-spacing="1" fill="#22D3EE" opacity="1">0xf5e39c1f
+      <animate attributeName="opacity" values="1;0.7;1;1" keyTimes="0;0.45;0.8;1" dur="8s" repeatCount="indefinite"/>
+    </text>
+
+    <!-- tech pills -->
+    <text x="140" y="288" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" letter-spacing="0.5" fill="#94A3B8" opacity="0.72">Solidity · Somnia · markets-sdk · Foundry · viem</text>
+
+  </g>
+</svg>

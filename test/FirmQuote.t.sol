@@ -16,8 +16,14 @@ import {IBinaryPool, IERC20} from "../src/IBinaryPool.sol";
 ///      that — only `gate.sh` running against Shannon can, and its evidence is a
 ///      pair of explorer links (LESSONS R11: assert the external side effect, not
 ///      the return value).
-contract MockBinaryPool {
+contract MockBinaryMarket {
     address public collateral;
+    constructor(address c) { collateral = c; }
+}
+
+contract MockBinaryPool {
+    address public market;
+    address public collateral;   // deliberately present but UNUSED by FirmQuote — the real pool reverts here
     uint64 public marketExpiryNs;
     bool public placeSucceeds = true;
     uint128 public nextId = 1;
@@ -31,6 +37,7 @@ contract MockBinaryPool {
     constructor(address _collateral, uint64 _expiryNs) {
         collateral = _collateral;
         marketExpiryNs = _expiryNs;
+        market = address(new MockBinaryMarket(_collateral));
     }
 
     function setPlaceSucceeds(bool v) external { placeSucceeds = v; }

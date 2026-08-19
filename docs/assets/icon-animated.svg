@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="rampart — locks a resting quote into the book so the pool refuses even its own funder's cancel">
+<!-- STORYBOARD (dur 6s — must equal this file's single master dur)
+  0-10%   steady state: the full mark — opaque plate, broken amber rung, solid cyan rung, white bounce-V with arrowhead, resting flash and sparks (poster rule: identical to icon.svg)
+  10-25%  trigger:      rewind — the V retracts, the broken amber knits back as both rungs draw themselves in; the cancel begins its descent   data-story="beat-2"
+  25-55%  mechanism:    A cancel strikes the resting quote and bounces; pullable amber hardens into held cyan and never returns.   data-story="beat-3"
+  55-80%  resolution:   the held rung stays solid and cyan; the reflected V rests; the held glow swells; from 48% the broken-amber residue re-emerges as a 22% ghost — evidence of what happened to the other rung, so the two-rung comparison never leaves the frame (hard rule 7)   data-story="beat-4"
+  80-100% breathe + seam fade — the amber ghost deepens back to the full broken-amber residue so the last frame equals frame 0
+-->
+  <title>rampart — the strike that bounces</title>
+  <style>
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+  <defs>
+    <radialGradient id="ia-flash" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#22D3EE" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#22D3EE" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="ia-plate">
+      <rect x="0" y="0" width="512" height="512" rx="116"/>
+    </clipPath>
+    <clipPath id="ia-ringclip">
+      <!-- bottom edge y=376 = the held rung's centreline: the refusal ripple may
+           never show an arc beneath the surface nothing is supposed to cross
+           (same construction as the hero's #ha-ringclip) -->
+      <rect x="168" y="288" width="176" height="88"/>
+    </clipPath>
+  </defs>
+
+  <!-- Opaque plate — measured requirement: cyan #22D3EE is 1.81:1 on white,
+       so the mark carries its own ground. Never themable. -->
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="#0B1220"/>
+  <rect x="1" y="1" width="510" height="510" rx="115" fill="none" stroke="rgba(226,232,240,0.07)" stroke-width="2"/>
+
+  <g clip-path="url(#ia-plate)">
+
+    <!-- Ambient held-state halo — breathes, ends where it starts -->
+    <ellipse cx="256" cy="376" rx="232" ry="96" fill="url(#ia-flash)" opacity="0.4">
+      <animate attributeName="opacity" values="0.4;0.4;0.28;0.28;0.5;0.62;0.4" keyTimes="0;0.10;0.20;0.30;0.42;0.80;1" dur="6s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- Broken-amber residue (poster state, from icon.svg) — hides while the
+         intact rung carries the story, then re-emerges as a 22% ghost the moment
+         the debris clears (ramp 48-56%, right as the arrowhead relights) so the
+         amber-vs-cyan comparison stays on screen through the resolution with no
+         amber-free dwell; deepens to full at the seam so the loop closes -->
+    <g fill="#F59E0B" opacity="1">
+      <animate attributeName="opacity" values="1;1;0;0;0.22;0.22;1;1" keyTimes="0;0.10;0.16;0.48;0.56;0.86;0.97;1" dur="6s" repeatCount="indefinite"/>
+      <rect x="84" y="140" width="64" height="56" rx="14"/>
+      <rect x="218" y="142" width="78" height="52" rx="13" opacity="0.9"/>
+      <rect x="372" y="124" width="34" height="42" rx="11" opacity="0.68" transform="rotate(-9 389 145)"/>
+      <rect x="410" y="110" width="22" height="24" rx="8" opacity="0.48" transform="rotate(-16 421 122)"/>
+      <circle cx="443" cy="99" r="6" opacity="0.35"/>
+      <circle cx="456" cy="84" r="4" opacity="0.25"/>
+    </g>
+
+    <!-- UPPER RUNG intact (story: the wallet's resting quote) — draws itself in,
+         then dissolves into dashes and blows away under the strike -->
+    <line x1="112" y1="168" x2="400" y2="168" stroke="#F59E0B" stroke-width="56" stroke-linecap="round" pathLength="100" stroke-dasharray="100 100" stroke-dashoffset="100" opacity="0" data-story="beat-2">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.095;0.13;0.36;0.46;1" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-dashoffset" values="100;100;0;0" keyTimes="0;0.10;0.20;1" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-dasharray" values="100 100;100 100;12 7;12 7" keyTimes="0;0.30;0.42;1" dur="6s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="translate" values="0 0;0 0;0 0;26 -34;40 -52;0 0;0 0" keyTimes="0;0.10;0.36;0.46;0.525;0.53;1" dur="6s" repeatCount="indefinite"/>
+    </line>
+
+    <!-- Pullable chips torn loose at the strike — lift up-right and vanish.
+         Dead by 46%, before the arrowhead relights at 45-48.5%: no drifting
+         amber ever crosses the white head (QA: muddy-smear finding). -->
+    <g fill="#F59E0B" opacity="0" data-story="beat-3">
+      <animate attributeName="opacity" values="0;0;0;0.9;0.35;0;0" keyTimes="0;0.10;0.36;0.42;0.44;0.46;1" dur="6s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="translate" values="0 0;0 0;0 0;22 -26;44 -56;44 -56" keyTimes="0;0.10;0.36;0.45;0.56;1" dur="6s" repeatCount="indefinite"/>
+      <rect x="300" y="150" width="26" height="20" rx="6"/>
+      <rect x="336" y="142" width="18" height="16" rx="5"/>
+      <circle cx="362" cy="138" r="5"/>
+    </g>
+
+    <!-- Entry motion streaks (poster parity with icon.svg) -->
+    <g stroke="#E2E8F0" stroke-linecap="round" opacity="1">
+      <animate attributeName="opacity" values="1;1;0;0;1;1" keyTimes="0;0.10;0.16;0.22;0.30;1" dur="6s" repeatCount="indefinite"/>
+      <line x1="124" y1="21" x2="129" y2="33" stroke-width="10" opacity="0.3"/>
+      <line x1="134" y1="44" x2="143" y2="66" stroke-width="16" opacity="0.55"/>
+    </g>
+
+    <!-- THE CANCEL — one strike, reflected. Full V at poster; retracts in the
+         rewind; redraws: descending leg to impact at 33.5%, reflected leg
+         kicks back up. dasharray 100 104 keeps the hidden state truly empty. -->
+    <polyline points="150,84 256,344 352,106" fill="none" stroke="#E2E8F0" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100 104" stroke-dashoffset="0">
+      <animate attributeName="stroke-dashoffset" values="0;0;104;104;48;0;0" keyTimes="0;0.10;0.17;0.24;0.335;0.45;1" dur="6s" repeatCount="indefinite"/>
+    </polyline>
+    <polygon points="377,45 387,120 317,92" fill="#E2E8F0" opacity="1">
+      <animate attributeName="opacity" values="1;1;0;0;1;1" keyTimes="0;0.10;0.155;0.45;0.485;1" dur="6s" repeatCount="indefinite"/>
+    </polygon>
+
+    <!-- Bounce flash — off during the rewind, relights exactly on the bounce -->
+    <ellipse cx="256" cy="348" rx="84" ry="34" fill="url(#ia-flash)" opacity="1">
+      <animate attributeName="opacity" values="1;1;0;0;1;1" keyTimes="0;0.10;0.17;0.33;0.37;1" dur="6s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Burst overlay — fires only at impact -->
+    <ellipse cx="256" cy="344" rx="130" ry="52" fill="url(#ia-flash)" opacity="0" data-story="beat-3">
+      <animate attributeName="opacity" values="0;0;0;1;0;0" keyTimes="0;0.10;0.325;0.35;0.46;1" dur="6s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Refusal ripple — same family as the hero: a FLAT ellipse riding the held
+         rung's centreline (cy 376, static ry 16, rx expanding), clipped by
+         #ia-ringclip at the centreline. The refusal spreads ALONG the held
+         surface — never a dome/shield arc bulging across it. -->
+    <ellipse cx="256" cy="376" rx="16" ry="16" fill="none" stroke="#22D3EE" stroke-width="6" opacity="0" clip-path="url(#ia-ringclip)" data-story="beat-3">
+      <animate attributeName="opacity" values="0;0;0;0.9;0;0" keyTimes="0;0.10;0.33;0.36;0.47;1" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="rx" values="16;16;16;30;72;72" keyTimes="0;0.10;0.33;0.38;0.47;1" dur="6s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Refusal sparks -->
+    <g stroke="#22D3EE" stroke-width="10" stroke-linecap="round" opacity="0.9">
+      <animate attributeName="opacity" values="0.9;0.9;0;0;1;0.9" keyTimes="0;0.10;0.16;0.33;0.38;1" dur="6s" repeatCount="indefinite"/>
+      <line x1="204" y1="318" x2="182" y2="304"/>
+      <line x1="308" y1="318" x2="330" y2="304"/>
+    </g>
+
+    <!-- Held glow — the resolution's breath under the rung -->
+    <ellipse cx="256" cy="392" rx="200" ry="60" fill="url(#ia-flash)" opacity="0" data-story="beat-4">
+      <animate attributeName="opacity" values="0;0;0;0.5;0.5;0;0" keyTimes="0;0.10;0.55;0.66;0.80;0.90;1" dur="6s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- LOWER RUNG draw-in stroke (story) — the contract's depth asserting itself -->
+    <line x1="112" y1="376" x2="400" y2="376" stroke="#22D3EE" stroke-width="56" stroke-linecap="round" pathLength="100" stroke-dasharray="100 100" stroke-dashoffset="100" opacity="0" data-story="beat-2">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.095;0.13;0.22;0.28;1" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-dashoffset" values="100;100;0;0" keyTimes="0;0.10;0.20;1" dur="6s" repeatCount="indefinite"/>
+    </line>
+
+    <!-- LOWER RUNG held fill — drawn last, nothing crosses its surface.
+         Dips only while its own draw-in stroke passes over it. -->
+    <g opacity="1">
+      <animate attributeName="opacity" values="1;1;0.18;0.18;1;1" keyTimes="0;0.105;0.135;0.19;0.25;1" dur="6s" repeatCount="indefinite"/>
+      <rect x="84" y="348" width="344" height="56" rx="16" fill="#22D3EE"/>
+      <rect x="94" y="354" width="324" height="11" rx="5.5" fill="#E2E8F0" opacity="0.16"/>
+    </g>
+
+  </g>
+</svg>

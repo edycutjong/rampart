@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="rampart-icon-title rampart-icon-desc">
+  <title id="rampart-icon-title">rampart — the strike that bounces</title>
+  <desc id="rampart-icon-desc">A two-rung order-book depth ladder under identical pressure: the upper amber rung, owned by a wallet, has broken into fragments that drift away; the lower cyan rung, owned by a contract, stays solid and the cancel arrow that strikes it kicks back up.</desc>
+
+  <!-- THE MARK = the bounce and the comparison. Not a barrier, wall, shield,
+       lock or rampart. Three shapes at 16px: broken amber bar / white bounce
+       arrow / solid cyan bar. Colour is state: amber = pullable (vanishes in
+       one block), cyan = held (the pool will not release it). -->
+
+  <defs>
+    <!-- Cyan flash: "fires exactly on the bounce" -->
+    <radialGradient id="rampart-flash" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="var(--accent, #22D3EE)" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="var(--accent, #22D3EE)" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="var(--accent, #22D3EE)" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Opaque plate — REQUIRED, not styling: cyan #22D3EE measures 1.81:1 on
+       white (floor 3), so the mark carries its own measured-safe ground.
+       Hard-coded on purpose; never swap for a themable variable. -->
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="#0B1220"/>
+  <rect x="1" y="1" width="510" height="510" rx="115" fill="none" stroke="rgba(226, 232, 240, 0.07)" stroke-width="2"/>
+
+  <!-- Ambient held-state halo around the lower rung -->
+  <ellipse cx="256" cy="376" rx="232" ry="96" fill="url(#rampart-flash)" opacity="0.4"/>
+
+  <!-- UPPER RUNG — a wallet's depth (pull state · amber). Same nominal bar as the
+       lower rung, but dissolved: chunks left, fragments lifting up-right,
+       dust trailing off. The gaps are where the strike already passed. -->
+  <g fill="var(--primary, #F59E0B)">
+    <rect x="84" y="140" width="64" height="56" rx="14"/>
+    <rect x="218" y="142" width="78" height="52" rx="13" opacity="0.9"/>
+    <rect x="372" y="124" width="34" height="42" rx="11" opacity="0.68" transform="rotate(-9 389 145)"/>
+    <rect x="410" y="110" width="22" height="24" rx="8" opacity="0.48" transform="rotate(-16 421 122)"/>
+    <circle cx="443" cy="99" r="6" opacity="0.35"/>
+    <circle cx="456" cy="84" r="4" opacity="0.25"/>
+  </g>
+
+  <!-- THE CANCEL — one strike, reflected. Enters upper-left through the gap
+       it tore in the amber rung, meets the cyan rung, kicks back up. Drawn
+       BENEATH the lower rung so the vertex terminates exactly at the
+       surface: the arrow never gets in. -->
+  <g stroke="var(--text-hi, #E2E8F0)" stroke-linecap="round">
+    <line x1="124" y1="21" x2="129" y2="33" stroke-width="10" opacity="0.3"/>
+    <line x1="134" y1="44" x2="143" y2="66" stroke-width="16" opacity="0.55"/>
+    <polyline points="150,84 256,344 352,106" fill="none" stroke-width="34" stroke-linejoin="round"/>
+  </g>
+  <polygon points="377,45 387,120 317,92" fill="var(--text-hi, #E2E8F0)"/>
+
+  <!-- The bounce flash + refusal sparks, at the exact point of contact -->
+  <ellipse cx="256" cy="348" rx="84" ry="34" fill="url(#rampart-flash)"/>
+  <g stroke="var(--accent, #22D3EE)" stroke-width="10" stroke-linecap="round" opacity="0.9">
+    <line x1="204" y1="318" x2="182" y2="304"/>
+    <line x1="308" y1="318" x2="330" y2="304"/>
+  </g>
+
+  <!-- LOWER RUNG — the contract's depth (held state · cyan). Identical bar, intact.
+       Drawn last: nothing crosses its surface. -->
+  <rect x="84" y="348" width="344" height="56" rx="16" fill="var(--accent, #22D3EE)"/>
+  <rect x="94" y="354" width="324" height="11" rx="5.5" fill="var(--text-hi, #E2E8F0)" opacity="0.16"/>
+</svg>

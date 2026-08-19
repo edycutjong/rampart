@@ -58,7 +58,25 @@ interface IBinaryPool {
     /// @notice Nanosecond expiry of the market this pool currently serves.
     function marketExpiryNs() external view returns (uint64);
 
+    /// @notice The per-window Market contract this pool currently serves.
+    /// @dev VERIFIED ON SHANNON 2026-08-19: `collateral()` / `yesId()` / `noId()` REVERT on the
+    ///      pool — they live on the MARKET (`binaryMarketReadAbi` in the SDK, not
+    ///      `binaryPoolReadAbi`). The pool answers `outcomeToken()` and `market()`. Reading
+    ///      collateral off the pool made FirmQuote's constructor revert on deploy, which would
+    ///      have failed the day-1 gate for an interface bug rather than for the thesis.
+    function market() external view returns (address);
+
+    /// @notice The ERC-6909 outcome-token singleton (0xB52c…55b9 on both chains).
+    function outcomeToken() external view returns (address);
+}
+
+/// @notice The per-window Market contract. Pools are recycled across windows, so this binding is
+///         time-varying — read it per market, never cache it against a pool address (gotcha #12).
+interface IBinaryMarket {
     function collateral() external view returns (address);
+    /// @dev 0 Listed · 1 Trading · 2 Locked · 4 Resolved · 5 Voided. Only 1 accepts orders.
+    function status() external view returns (uint8);
+    function expiry() external view returns (uint64);
 }
 
 interface IERC20 {

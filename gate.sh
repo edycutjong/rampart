@@ -32,7 +32,10 @@ ok()  { printf '\033[32m  ok\033[0m  %s\n' "$1"; }
 step(){ printf '\n\033[1m%s\033[0m\n' "$1"; }
 
 [ -n "$KEY" ]  || die "PRIVATE_KEY unset. export it; never commit it."
-[ -n "$POOL" ] || die "POOL unset. Pick a LIVE 1h market's pool (expiry headroom — constraint #9) and pass POOL=0x..."
+# Verified live on Shannon 2026-08-19 (BTC 24h window, status Trading). Re-check headroom before use:
+#   node scripts/find-pool.mjs   — lists live binary pools with their headroom
+POOL="${POOL:-0x1b8ed5380a4741df019acf5faa0ce6ecbf6167ee}"
+[ -n "$POOL" ] || die "POOL unset"
 
 ME=$(cast wallet address --private-key "$KEY") || die "bad PRIVATE_KEY"
 echo "eoa   $ME"
@@ -40,11 +43,17 @@ echo "pool  $POOL"
 echo "rpc   $RPC"
 
 step "0. sanity: pool is live and has expiry headroom"
-COLLAT=$(cast call "$POOL" "collateral()(address)" --rpc-url "$RPC") || die "pool.collateral() failed — is POOL a BinaryPool?"
+# VERIFIED ON SHANNON 2026-08-19: `collateral()` REVERTS on the pool — it lives on the MARKET.
+# The pool exposes market(); the market exposes collateral()/status()/expiry().
+MARKET=$(cast call "$POOL" "market()(address)" --rpc-url "$RPC") || die "pool.market() failed — is POOL a BinaryPool?"
+COLLAT=$(cast call "$MARKET" "collateral()(address)" --rpc-url "$RPC") || die "market.collateral() failed"
+STATUS=$(cast call "$MARKET" "status()(uint8)" --rpc-url "$RPC" | awk '{print $1}')
+[ "$STATUS" = "1" ] || die "market status is $STATUS, not 1 (Trading) — only Trading accepts orders (gotcha #1)"
 EXPNS=$(cast call "$POOL" "marketExpiryNs()(uint64)" --rpc-url "$RPC") || die "pool.marketExpiryNs() failed"
 EXPNS=${EXPNS%% *}
 NOWNS=$(( $(date +%s) * 1000000000 ))
 LEFT=$(( (EXPNS - NOWNS) / 1000000000 ))
+ok "market $MARKET · status 1 (Trading)"
 ok "collateral $COLLAT"
 ok "market expires in ${LEFT}s"
 [ "$LEFT" -gt 900 ] || die "under 15m of headroom — the market can lock mid-gate (constraint #9). Pick a fresher window."
