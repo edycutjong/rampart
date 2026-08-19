@@ -61,18 +61,40 @@ This repository is **early**. What is here is real; what is not here is named.
 - `src/IBinaryPool.sol` — the pool surface, transcribed from `@somnia-chain/markets-sdk@0.27.0`.
 - `test/FirmQuote.t.sol` — **42 tests, 0 failures** (`forge test`), including seven that assert the
   *absence* of every withdrawal selector. What is missing is the product.
-- `gate.sh` — the day-1 go/no-go against Somnia Shannon testnet.
+- `gate.sh` — the day-1 go/no-go against Somnia Shannon testnet. **Run 2026-08-19: PASSED.**
 
 **Not built yet** — these are specified, not shipped, and this section will shrink as they land:
 
 - the typed-book classifier and the attested-codehash registry
 - the adversarial corpus that proves the classification
-- any deployment, and therefore any on-chain proof
+- ~~any deployment, and therefore any on-chain proof~~ — **done**, see DEMO.md
 
-**The one open question the project rests on:** does a `BinaryPool` accept a *contract* as
-`Order.owner` and deliver fills to it? `gate.sh` answers it against Shannon in about an hour, and
-**has not been run yet.** Until it passes, treat everything above as designed rather than
-demonstrated.
+### ✅ Proven on-chain — 2026-08-19
+
+**The gate passed.** A `BinaryPool` accepts a contract as `Order.owner`, and the funder cannot take
+the order back. Order `…9685` rested with real escrow while its own funder's cancel **reverted**:
+
+```
+0xf5e39c1f  IncorrectSender(
+  caller   = 0xFbc73Ce1…3595   ← the wallet that paid for the order
+  expected = 0x2a09b4c4…191a   ← FirmQuote
+)
+```
+
+The failed transaction is public and permanent:
+**[`0x959b4770…6ddb`](https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb)** (status `0x0`).
+Control: the same call `--from` the contract returns `0x` — the pool *would* allow its owner to
+cancel; the owner simply has no code path to ask.
+
+Full evidence, including why the first attempt was invalid and was re-run: **[DEMO.md](DEMO.md)**.
+
+Verify it yourself with no wallet, no funds, no gas:
+
+```bash
+cast call 0x1b8ed5380a4741df019acf5faa0ce6ecbf6167ee "cancelOrder(uint128)" \
+  129127208515966879685 --from 0xFbc73Ce1C0B43f87cD065f82df24697dEc653595 \
+  --rpc-url https://api.infra.testnet.somnia.network
+```
 
 ```bash
 forge test                       # 42 passing
