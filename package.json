@@ -1,0 +1,18 @@
+{
+  "name": "rampart-firm-book",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Off-chain classifier + firmness metric for Rampart — types a Somnia binary order book FIRM / PULLABLE / UNVERIFIED by attested EXTCODEHASH.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node script/test.mjs",
+    "headline": "node script/headline.mjs",
+    "headline:live": "node script/headline.mjs --live",
+    "firmness": "node script/firmness.mjs",
+    "bench": "node script/bench.mjs --n 200 --scale 2000",
+    "analyze": "node script/analyze.mjs --corpus",
+    "deploy-corpus": "node script/deploy-corpus.mjs"
+  },
+  "license": "MIT"
+}
