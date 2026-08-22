@@ -68,6 +68,39 @@ interface IBinaryPool {
 
     /// @notice The ERC-6909 outcome-token singleton (0xB52c…55b9 on both chains).
     function outcomeToken() external view returns (address);
+
+    /// @notice Cancel on behalf of `owner`, callable by an operator the OWNER approved
+    ///         for selector `0xe37b444b` in the shared `OperatorPermissionsRegistry`.
+    /// @dev Reverts `OnlyApprovedContracts()` (`0x3fb0ba2e`) for an unapproved caller —
+    ///      confirmed live on Shannon 2026-08-22 against pool 0x54d9…be00. The system
+    ///      contract allowlist does NOT admit callers here (unlike `placeOrderFor`),
+    ///      so the ONLY way in is a grant the order owner itself made.
+    ///
+    ///      This is attack A4's doorway: a contract that grants that approval AFTER
+    ///      its order is resting hands an EOA a working cancel, while its own runtime
+    ///      code still contains no `cancelOrder`. `FirmQuote` never calls the registry,
+    ///      which is why the door has no handle on its side.
+    function cancelOrderFor(address owner, uint128 orderId) external;
+
+    /// @dev The reduce twin of the above. Same per-user-approval-only gate.
+    function reduceOrderFor(address owner, uint128 orderId, uint256 newQuantityRemaining) external;
+}
+
+/// @notice The shared per-user operator grant registry.
+///         Shannon (50312): `0x15C7e8CE38F021c5b45d098AaD788f63090bF20A`
+///         Mainnet (5031):  `0xE7a190736B6024a4DbafadC04E283075877005ce`
+/// @dev Both setters key off `msg.sender` as the granting owner — there is no
+///      third-party form. That is precisely why a CONTRACT owner can open the
+///      door for an EOA, and why "does this contract ever touch the registry?"
+///      is one of the static policy's checks.
+interface IOperatorPermissionsRegistry {
+    function setOperatorApprovalGlobal(address operator, bytes4[] calldata selectors, bool approved) external;
+    function setOperatorApprovalForPool(address pool, address operator, bytes4[] calldata selectors, bool approved)
+        external;
+    function isApprovedForPool(address pool, address owner, address operator, bytes4 selector)
+        external
+        view
+        returns (bool);
 }
 
 /// @notice The per-window Market contract. Pools are recycled across windows, so this binding is
