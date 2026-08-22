@@ -1,0 +1,96 @@
+{
+  "_meta": {
+    "chain": 50312,
+    "rpc": "https://api.infra.testnet.somnia.network",
+    "explorer": "https://shannon-explorer.somnia.network",
+    "pool": "0x54d90260fe949940a80602e7fda8ebd729c5be00",
+    "market": "0xf03c5f0648F77A4BF7358DC2c914BDB5e9c3303E",
+    "collateral": "0x70a86D8842FB63C4Ad2b7cdddF530eBf1BB25d8E",
+    "funder": "0xFbc73Ce1C0B43f87cD065f82df24697dEc653595",
+    "price": "10000",
+    "note": "Adversarial corpus deployed and executed on Somnia Shannon. Each Sx address is a real contract; each tx hash is a real transaction. S0-S3 and S5 executed cleanly; S4 (operator) and S6 (batch cancel) are documented with their exact on-chain state below. Classification (headline.mjs --live) reads EXTCODEHASH live off-chain and is independent of escape execution."
+  },
+  "S0": {
+    "name": "FirmQuote", "attack": "none", "expected": "FIRM",
+    "address": "0x8116c3a4DE042D4A215B532B7C4054F36e074B68",
+    "orderId": "92233720368547870994",
+    "deployTx": "0xa8d5de077c9489f589aea5fc20fa61b11be533b10fa7d17aeae15f2ddcefb5f7",
+    "restTx": "0x6f1d21578ab9dd863831c4515aad4405bf82364b5ef2e43d5ac8202243581169",
+    "funderCancelTx": "0x29cdcb05bc2e74b43537e2161d04617182a1215733163ab63b82878aac531cd6",
+    "funderCancelReverted": true,
+    "stillResting": true,
+    "onchain": "FIRM proof: the funder's cancelOrder REVERTED; the order still rests."
+  },
+  "S1": {
+    "name": "HiddenCancel", "attack": "hidden cancel path (A1)", "expected": "UNVERIFIED",
+    "address": "0x29c3DFc189Aa7d16fb6CD4eBb87662A49aDe60F9",
+    "orderId": "18446744073709664537",
+    "deployTx": "0xc12b5eb247287a201b7409ea4cf8356dccc5ebc9beeda8692612edb79e762c1b",
+    "restTx": "0x240ad13d52e1f04ca6be93fbd4a4f532ec349a7783caf0dd653c51a9ab68c25c",
+    "escapeTx": "0x424866fc54042d84a9dfbb59511fc59541f86951218cea8142d915965b588f1b",
+    "pulled": true,
+    "onchain": "ESCAPE EXECUTED: poke() called cancelOrder; the order left the book with no fill."
+  },
+  "S2": {
+    "name": "Erc1967Proxy", "attack": "EIP-1967 upgradeable proxy (A2)", "expected": "UNVERIFIED",
+    "address": "0x099ad1d940c84b624a6101eCbF79ee1A83Ef54c7",
+    "firmImpl": "0xb79851e666AB8e8D92BA12cEcD7434E8d8B95C8A",
+    "evilImpl": "0x7Fc8Db8EcA4D3Ba315D0fb71ff68e56b370F9aFC",
+    "orderId": "18446744073709664544",
+    "deployTx": "0x1ed0275e319beb4d8d3fc43956aedd84d657324584dee4db0ab067608f99f49f",
+    "initTx": "0xbbf0ede300c0f6db0b99c964708f1914a853783731a42c08c9b299a5d80cde90",
+    "restTx": "0x20764e8c9a5dce0f96f95b7391acf38ed9798af98efaade86fc0e374fc4e48b3",
+    "upgradeTx": "0x21de6408d93ef12c0ade447894e1139e8c073aa0340db5ff7c8c18941ac48cf5",
+    "escapeTx": "0x25bff36b1b8ab05e90ee3c7bc164bb0a9f08f6a62378fcd75a736e5fab41236c",
+    "pulled": true,
+    "onchain": "ESCAPE EXECUTED: rested under firm logic, upgraded implementation, pull() cancelled the order."
+  },
+  "S3": {
+    "name": "DelegateEscape", "attack": "DELEGATECALL escape (A3)", "expected": "UNVERIFIED",
+    "address": "0xc8C8e829842CFeDa3c162ccC7e3917B3d375980d",
+    "escapeLogic": "0x353aBe8208a3c4fc99D6282E04474f1Cd92353AB",
+    "orderId": "18446744073709664557",
+    "deployTx": "0xa786896dede91ab1002b7c69e2dbe4eaddbfea3233584168f272e2abbb84d55b",
+    "restTx": "0x1400751b5c252adb5df42246f439bd474569cdb9e20538265b4b0a4b040620d4",
+    "escapeTx": "0x1e055e3e98eacc3ecffb1fd76a9208e3325823701495a467f5833dd7e70a1307",
+    "pulled": true,
+    "onchain": "ESCAPE EXECUTED: escape() delegatecalled attacker logic that cancelled the order in this contract's context."
+  },
+  "S4": {
+    "name": "OperatorGranter", "attack": "late operator grant (A4)", "expected": "UNVERIFIED",
+    "address": "0xa13166927BCF78d8E04f125d3ED0E8A076F021F8",
+    "orderId": "110680464442257422795",
+    "deployTx": "0xf20812bad7508a143241af6b33bdb24fc6a938ff28dbe52dc78f53503b98a166",
+    "restTx": "0x71ba0a30dcdc78d7aec7e41c29dadfa422792867943e8472ee0a61dd834a5f51",
+    "grantTx": "0xbb39241cd2a06ef142f75398356d7a19ca82725786da05a38aea3780eac6664c",
+    "grantExecuted": true,
+    "operatorCancelReverted": true,
+    "stillResting": true,
+    "onchain": "GRANT EXECUTED + verified in the registry (isApprovedForPool == true). The binary pool then REJECTS cancelOrderFor from any operator with OnlyApprovedContracts (0x3fb0ba2e) even for a valid grant, so the operator route cannot withdraw a buy-side order here. Reproduce: cast call 0x54d90260fe949940a80602e7fda8ebd729c5be00 'cancelOrderFor(address,uint128)' 0xa13166927BCF78d8E04f125d3ED0E8A076F021F8 110680464442257422795. The withdrawal MECHANISM is proven in test/Adversarial.t.sol against a faithful mock. Finding for the SDK feedback report: binary pools' cancelOrderFor operator path is unwired on Shannon."
+  },
+  "S5": {
+    "name": "QuietReduce", "attack": "quiet reduce, no fill (A5)", "expected": "UNVERIFIED",
+    "address": "0x797FE26F8A6a65ea757347b71915119c49c049A7",
+    "orderId": "202914184810805181207",
+    "deployTx": "0x98df81661b1471e4c843b18a66f25f84ff39e3c12a9377a3fcd00edd0c4a9c04",
+    "fundTx": "0xed813f6de4c6b78d348334a58d717d5ae668988fa66feac956a945a60803bf32",
+    "restTx": "0x7256c2336f84edfa4c8e349e5b0fc7eaffa15d74df8753c564b05960bf23ad0c",
+    "escapeTx": "0x9bc3f55bfb559cef03246ff8a15a60c94af6beb73f7f7bd80cccc73e212f9395",
+    "remainingBefore": "2000000",
+    "remainingAfter": "1000000",
+    "shrunk": true,
+    "onchain": "ESCAPE EXECUTED: rested 2,000,000, trim() reduced it to 1,000,000 with no fill — half the advertised depth vanished."
+  },
+  "S6": {
+    "name": "BatchCancel", "attack": "cancel via alternate selector (cancelOrders)", "expected": "UNVERIFIED",
+    "address": "0xb3e609021C6839dF5A407d62D26Add74a2C8af54",
+    "orderId": "221360928884514732904",
+    "deployTx": "0xbf3e6d2b3e58ae4ac64e48e17e3bdf86345da3ebd344cce0844eb8ad89b03d2a",
+    "fundTx": "0x1c53dbae6688e1ad17d7b831270b2ac56359fbab04c5ea1a091b6e768196c4c1",
+    "restTx": "0x0ba0f9990d5e938575f713072405c06b5df9fe9132e2e88e582445640d9d4ec2",
+    "escapeTx": null,
+    "pulled": false,
+    "stillResting": true,
+    "onchain": "DEPLOYED + FUNDED + RESTED on-chain. The tidy() batch-cancel (cancelOrders(uint128[])) SUCCEEDS in simulation (eth_call returns success; pool.cancelOrders([id]) returns cleaned=1) but the live send needs ~3M gas and the funder key ran dry (0.009 SOMI left; native STT is browser-faucet only). Failed low-gas attempt: 0x6e11967ebe040511d45ac043d932a4abf73cb6c0e83189ccdf94996a719656cb. Reproduce with gas when funded: cast send 0xb3e609021C6839dF5A407d62D26Add74a2C8af54 'tidy()' --gas-limit 4000000. The withdrawal MECHANISM is proven in test/Adversarial.t.sol (test_A1b)."
+  }
+}
