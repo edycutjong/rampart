@@ -50,24 +50,43 @@ orders are signed messages inside a private matching engine, with no on-chain ow
 
 ---
 
-## Status — honest, day 1
+## The headline number
 
-This repository is **early**. What is here is real; what is not here is named.
+```bash
+node script/headline.mjs        # attested classifier 8/8  ·  naive EXTCODESIZE 2/8
+```
 
-**Built and passing**
+The corpus is the real `FirmQuote`, **six attacker contracts that each look firm to a naive check**
+(hidden cancel, EIP-1967 proxy, `DELEGATECALL`, late operator grant, quiet `reduceOrder`, and cancel
+via an alternate selector), and a plain wallet. The attested-`EXTCODEHASH` classifier types all eight
+correctly; the naive `EXTCODESIZE > 0` check is fooled by all six contract attacks. The whole corpus
+is **deployed on Shannon** and the escapes are **executed as real transactions** — see
+[DEMO.md](DEMO.md) and [`script/corpus.deployed.json`](script/corpus.deployed.json).
 
-- `src/FirmQuote.sol` — the contract above. Buy-side only by design: a sell escrows outcome tokens,
-  which needs an ERC-6909 `setOperator` grant, and granting no operator is what keeps the lock airtight.
+## Status — what is real
+
+**Built and passing — `forge test`: 70 tests, 0 failures**
+
+- `src/FirmQuote.sol` — a resting quote the pool will not let its funder withdraw. Buy-side only by
+  design: a sell escrows outcome tokens, which needs an ERC-6909 `setOperator` grant, and granting
+  no operator is what keeps the lock airtight. (42 tests, incl. seven asserting the *absence* of every
+  withdrawal selector.)
+- `src/FirmnessRegistry.sol` — the ternary classifier (**FIRM / PULLABLE / UNVERIFIED**) on-chain:
+  attested-`EXTCODEHASH` set + `classify` / `classifyBatch` with the lock-window horizon. (21 tests.)
+- `src/adversarial/*.sol` — six attacker contracts, each with a real working escape proven against a
+  faithful mock pool. (7 tests.)
+- `script/` — the off-chain engine: a dependency-free `keccak256`, an EVM disassembler + static
+  bytecode policy (`analyze`), the FIRM/PULLABLE/UNVERIFIED classifier, the **headline** comparison,
+  the **firmness %** over a live market, and the **bench** (retype p95 **0.25 ms** inside a 100 ms
+  block). `node script/test.mjs` → 12 checks; the analyzer's hash matches on-chain `EXTCODEHASH`.
 - `src/IBinaryPool.sol` — the pool surface, transcribed from `@somnia-chain/markets-sdk@0.27.0`.
-- `test/FirmQuote.t.sol` — **42 tests, 0 failures** (`forge test`), including seven that assert the
-  *absence* of every withdrawal selector. What is missing is the product.
 - `gate.sh` — the day-1 go/no-go against Somnia Shannon testnet. **Run 2026-08-19: PASSED.**
 
-**Not built yet** — these are specified, not shipped, and this section will shrink as they land:
-
-- the typed-book classifier and the attested-codehash registry
-- the adversarial corpus that proves the classification
-- ~~any deployment, and therefore any on-chain proof~~ — **done**, see DEMO.md
+**Honest edges** (detailed in [DEMO.md](DEMO.md) → *Honest limits*): four of the six attacker escapes
+execute a full on-chain withdrawal; the operator-grant escape's grant executes but the binary pool's
+`cancelOrderFor` operator path is unwired (a finding), and the batch-cancel is rested with its `tidy()`
+gas-blocked (native faucet dry). Both mechanisms are proven in unit tests; the 8/8-vs-2/8
+classification is computed from **live on-chain EXTCODEHASH** and does not depend on the escapes running.
 
 ### ✅ Proven on-chain — 2026-08-19
 
@@ -97,7 +116,7 @@ cast call 0x1b8ed5380a4741df019acf5faa0ce6ecbf6167ee "cancelOrder(uint128)" \
 ```
 
 ```bash
-forge test                       # 42 passing
+forge test                       # 70 passing
 PRIVATE_KEY=0x… POOL=0x… ./gate.sh   # the day-1 gate — steps 4 and 5 SUCCEED BY REVERTING
 ```
 

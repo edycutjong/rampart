@@ -103,14 +103,132 @@ cast call 0x1b8ed5380a4741df019acf5faa0ce6ecbf6167ee "cancelOrder(uint128)" \
 
 The last command needs no wallet and no funds. Anyone can run it and watch the chain refuse.
 
+---
+
+# The classifier and the adversarial corpus — 2026-08-22
+
+The gate proved one contract's quote is un-withdrawable. The classifier answers the next
+question for a *whole book*: **which resting depth is firm, and which only looks firm?**
+
+## The defect it fixes
+
+Typing a level FIRM because `EXTCODESIZE(owner) > 0` is **forgeable**. A contract can hide a
+cancel, sit behind an upgradeable proxy, `DELEGATECALL` to attacker code, grant an operator
+after resting, shrink itself with `reduceOrder`, or cancel through an alternate selector — all
+while reading FIRM to a naive check. So Rampart classifies on **attested `EXTCODEHASH`** (a
+keccak-256 commitment to exact runtime bytecode, EIP-1052) under a static policy. Unattested
+code is **UNVERIFIED — no claim**. An attacker cannot mint fake FIRM depth, only UNVERIFIED depth.
+
+## THE HEADLINE NUMBER — one command
+
+```bash
+node script/headline.mjs           # offline, deterministic, from local artifacts
+node script/headline.mjs --live    # reads EXTCODEHASH live off Shannon for the deployed corpus
+```
+
+> **Attested classifier: 8/8.  Naive EXTCODESIZE classifier: 2/8.**
+
+The corpus is the real `FirmQuote`, six attacker contracts that each look firm, and a plain EOA.
+The attested classifier types every one correctly; the naive check is fooled by all six contract
+attacks and gets only the two trivial ends (pure-firm, pure-EOA) right. The naive column is right
+there in the same table, computed the same way, so the comparison is not rhetorical.
+
+Each attacker is caught by a distinct policy check — verify with `node script/analyze.mjs --corpus`:
+
+| # | Contract | Escape | Caught by | Verdict |
+|---|---|---|---|---|
+| S0 | `FirmQuote` | none | — clean | **FIRM** |
+| S1 | `HiddenCancel` | hidden `cancelOrder` | forbidden selector `cancelOrder(uint128)` | UNVERIFIED |
+| S2 | `Erc1967Proxy` | upgrade impl post-rest | `DELEGATECALL` + EIP-1967 slot | UNVERIFIED |
+| S3 | `DelegateEscape` | `DELEGATECALL` to attacker | `DELEGATECALL` opcode | UNVERIFIED |
+| S4 | `OperatorGranter` | late operator grant | forbidden `setOperatorApproval*` selector | UNVERIFIED |
+| S5 | `QuietReduce` | `reduceOrder` shrinks depth | forbidden `reduceOrder(uint128,uint256)` | UNVERIFIED |
+| S6 | `BatchCancel` | cancel via `cancelOrders[]` | forbidden `cancelOrders(uint128[])` | UNVERIFIED |
+| S7 | EOA | trivially cancels | empty code hash | PULLABLE |
+
+The analyzer's code hash **matches on-chain EXTCODEHASH exactly** (verified against `cast keccak $(cast code …)`),
+so the attestation is genuinely content-addressed — it binds to code, not an address.
+
+## The escapes, EXECUTED on Shannon (not just unit-tested)
+
+Every attacker is deployed on Shannon and each escape was run as a real transaction. Full map with
+all tx hashes: [`script/corpus.deployed.json`](script/corpus.deployed.json). Summary:
+
+| # | Contract | On-chain result | Escape tx |
+|---|---|---|---|
+| S0 | [`0x8116c3a4…4B68`](https://shannon-explorer.somnia.network/address/0x8116c3a4DE042D4A215B532B7C4054F36e074B68) | **FIRM** — funder cancel reverted, order still rests | [cancel reverts](https://shannon-explorer.somnia.network/tx/0x29cdcb05bc2e74b43537e2161d04617182a1215733163ab63b82878aac531cd6) |
+| S1 | [`0x29c3DFc1…60F9`](https://shannon-explorer.somnia.network/address/0x29c3DFc189Aa7d16fb6CD4eBb87662A49aDe60F9) | **pulled** — `poke()` cancelled it | [`0x424866fc…88f1b`](https://shannon-explorer.somnia.network/tx/0x424866fc54042d84a9dfbb59511fc59541f86951218cea8142d915965b588f1b) |
+| S2 | [`0x099ad1d9…54c7`](https://shannon-explorer.somnia.network/address/0x099ad1d940c84b624a6101eCbF79ee1A83Ef54c7) | **pulled** — upgraded impl, then `pull()` | [`0x25bff36b…236c`](https://shannon-explorer.somnia.network/tx/0x25bff36b1b8ab05e90ee3c7bc164bb0a9f08f6a62378fcd75a736e5fab41236c) |
+| S3 | [`0xc8C8e829…980d`](https://shannon-explorer.somnia.network/address/0xc8C8e829842CFeDa3c162ccC7e3917B3d375980d) | **pulled** — `escape()` delegatecalled a cancel | [`0x1e055e3e…1307`](https://shannon-explorer.somnia.network/tx/0x1e055e3e98eacc3ecffb1fd76a9208e3325823701495a467f5833dd7e70a1307) |
+| S4 | [`0xa1316692…21F8`](https://shannon-explorer.somnia.network/address/0xa13166927BCF78d8E04f125d3ED0E8A076F021F8) | **grant executed** — pool then blocks the operator cancel (see below) | [grant](https://shannon-explorer.somnia.network/tx/0xbb39241cd2a06ef142f75398356d7a19ca82725786da05a38aea3780eac6664c) |
+| S5 | [`0x797FE26F…49A7`](https://shannon-explorer.somnia.network/address/0x797FE26F8A6a65ea757347b71915119c49c049A7) | **pulled** — `trim()` shrank 2,000,000 → 1,000,000, no fill | [`0x9bc3f55b…9395`](https://shannon-explorer.somnia.network/tx/0x9bc3f55bfb559cef03246ff8a15a60c94af6beb73f7f7bd80cccc73e212f9395) |
+| S6 | [`0xb3e60902…af54`](https://shannon-explorer.somnia.network/address/0xb3e609021C6839dF5A407d62D26Add74a2C8af54) | **rested**; `tidy()` gas-blocked (see below) | — |
+
+**Four escapes execute a full on-chain withdrawal** (S1 hidden cancel, S2 proxy upgrade, S3
+delegatecall, S5 quiet reduce), and S0's firm quote stands with its funder's cancel reverted.
+
+## % of book that cannot be withdrawn — over the live market
+
+```bash
+node script/firmness.mjs           # pool 0x54d9…be00 (ETH 24h), live
+```
+
+Reads the resting book via `getAllOpenOrdersOffChain`, takes each distinct owner's `EXTCODEHASH`,
+classifies, and reports `Σ firm ÷ Σ displayed`. On the live pool the number is **~0.1%** — only the
+small attested `FirmQuote` is firm against a market-maker bot flooding the book with UNVERIFIED
+depth. That low number is the honest point: **UNVERIFIED depth cannot masquerade as firm**, so the
+metric never overstates. This observable exists on no off-chain exchange.
+
+## Bench gate — retype inside one 100 ms block
+
+```bash
+node script/bench.mjs --n 200 --scale 2000
+```
+
+Full-book retype (classify every order against memoised owner code hashes, aggregate the %):
+
+| | p50 | p95 | max |
+|---|---|---|---|
+| live book (12 orders) | 0.00 ms | 0.00 ms | 0.08 ms |
+| synthetic 2,000 orders | 0.05 ms | **0.25 ms** | 0.51 ms |
+
+**p95 0.25 ms ≤ 100 ms block → PASS.** Network hydration (cold read + EXTCODEHASH per distinct
+owner) is a separate ~2–3 s one-time cost, reported alongside; the per-block *retype* is what must
+fit the block, and it does with three orders of magnitude to spare.
+
+## Reproduce the whole thing
+
+```bash
+cd build
+forge test                         # 70 passing (FirmQuote 42 · FirmnessRegistry 21 · Adversarial 7)
+node script/test.mjs               # 12 off-chain checks (keccak vectors, static policy, headline)
+node script/headline.mjs           # 8/8 attested vs 2/8 naive (offline, deterministic)
+node script/headline.mjs --live    # same, classified from EXTCODEHASH read live off Shannon
+node script/firmness.mjs           # % of the live book that cannot be withdrawn
+node script/bench.mjs              # retype p50/p95 vs the 100 ms block budget
+node script/analyze.mjs --corpus   # the static policy verdict + reason for each contract
+```
+
 ## Honest limits
 
 - **Testnet only.** Nothing is deployed to Somnia mainnet.
-- Order `…9685` rests until the market's expiry (~2026-08-20 08:00 UTC), after which the
-  permissionless expiry sweep may clear it. **The transactions above are permanent regardless.**
-- The order rests at 0.01 — deliberately far from the touch so it could not cross. It is a proof of
-  the lock, not a market-making strategy.
 - The **buy side only** is implemented. Selling firm needs an ERC-6909 operator grant, and granting
   no operator is what keeps the lock airtight.
-- The typed-book classifier (FIRM / PULLABLE / UNVERIFIED) and its adversarial corpus are
-  **specified and not yet built**. No firmness percentage is claimed anywhere.
+- **S4 (operator grant) — grant executed, withdrawal pool-blocked.** The grant is a real tx and is
+  verifiable in the registry (`isApprovedForPool == true`), but the Somnia binary pool rejects
+  `cancelOrderFor` from **any** operator with `OnlyApprovedContracts` (`0x3fb0ba2e`) even for a valid
+  grant — the pool's operator-cancel path is unwired on the buy side. So the operator route cannot
+  withdraw here; the classifier still types the contract UNVERIFIED because its bytecode *can* grant
+  operators. The escape mechanism is proven in `test/Adversarial.t.sol` against a faithful mock, and
+  the pool-block is reproducible: `cast call 0x54d9…be00 "cancelOrderFor(address,uint128)" 0xa131…21F8 110680464442257422795`. This is a genuine finding for the SDK feedback report.
+- **S6 (batch cancel) — deployed, funded, RESTED; `tidy()` gas-blocked.** The batch-cancel succeeds
+  in simulation (`cast call` returns success; `cancelOrders([id])` returns `cleaned = 1`) but the
+  live send needs ~3 M gas and the funder key ran dry at 0.009 SOMI (native STT is browser-faucet
+  only). One command finishes it when funded: `cast send 0xb3e6…af54 "tidy()" --gas-limit 4000000`.
+  The mechanism is proven in `test/Adversarial.t.sol` (`test_A1b`).
+- So **four of the six attacker escapes execute a full on-chain withdrawal**; the other two are a
+  documented pool limitation (S4) and a documented faucet-gas blocker (S6), neither faked. The
+  classification result (8/8 vs 2/8) is computed from **live on-chain EXTCODEHASH** and does not
+  depend on the escapes running.
+- The static analyzer is **sound for the six known escapes, not a general proof of irrevocability**.
+  The registry is a transparency list anyone can re-derive from the same bytes, not a trustless oracle.
