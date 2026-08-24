@@ -60,8 +60,9 @@ The corpus is the real `FirmQuote`, **six attacker contracts that each look firm
 (hidden cancel, EIP-1967 proxy, `DELEGATECALL`, late operator grant, quiet `reduceOrder`, and cancel
 via an alternate selector), and a plain wallet. The attested-`EXTCODEHASH` classifier types all eight
 correctly; the naive `EXTCODESIZE > 0` check is fooled by all six contract attacks. The whole corpus
-is **deployed on Shannon** and the escapes are **executed as real transactions** — see
-[DEMO.md](DEMO.md) and [`script/corpus.deployed.json`](script/corpus.deployed.json).
+is **deployed on Shannon**, and **four of the six escapes are executed as real transactions** — the
+other two are rested on-chain with their exact blocked state documented. See [DEMO.md](DEMO.md) and
+[`script/corpus.deployed.json`](script/corpus.deployed.json).
 
 ## Status — what is real
 
@@ -71,8 +72,10 @@ is **deployed on Shannon** and the escapes are **executed as real transactions**
   design: a sell escrows outcome tokens, which needs an ERC-6909 `setOperator` grant, and granting
   no operator is what keeps the lock airtight. (42 tests, incl. seven asserting the *absence* of every
   withdrawal selector.)
-- `src/FirmnessRegistry.sol` — the ternary classifier (**FIRM / PULLABLE / UNVERIFIED**) on-chain:
-  attested-`EXTCODEHASH` set + `classify` / `classifyBatch` with the lock-window horizon. (21 tests.)
+- `src/FirmnessRegistry.sol` — the ternary classifier (**FIRM / PULLABLE / UNVERIFIED**) expressed as
+  a Solidity contract: attested-`EXTCODEHASH` set + `classify` / `classifyBatch` with the lock-window
+  horizon. (21 tests.) **Not deployed** — the classification the demo runs on is the off-chain engine
+  in `script/`, which reads `EXTCODEHASH` live from the same chain state.
 - `src/adversarial/*.sol` — six attacker contracts, each with a real working escape proven against a
   faithful mock pool. (7 tests.)
 - `script/` — the off-chain engine: a dependency-free `keccak256`, an EVM disassembler + static
