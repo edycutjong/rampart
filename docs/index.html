@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0B1220">
+<title>rampart — the cancel the chain refused</title>
+<meta name="description" content="Order-book depth the protocol itself will not let you withdraw. A contract-owned resting order on Somnia whose own funder's cancel reverts IncorrectSender — proven by a failed transaction, mined and permanent.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="rampart — the cancel the chain refused">
+<meta property="og:description" content="The wallet that paid for a resting order tried to cancel it and the chain said no: IncorrectSender, status 0x0, mined and permanent on Somnia Shannon testnet. Depth the pool itself will not release.">
+<meta property="og:url" content="https://edycutjong.github.io/rampart/">
+<meta property="og:image" content="https://edycutjong.github.io/rampart/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<style>
+/* ---------- tokens (family: rampart asset suite, frozen palette) ---------- */
+:root{
+  color-scheme:dark;
+  --plate:#0B1220;      /* the mandatory dark ground — cyan fails on white (1.81:1) */
+  --panel-hi:#101B30;   /* raised card, top of gradient */
+  --panel-lo:#0D1728;   /* raised card, bottom of gradient */
+  --ink-bg:#0A101D;     /* terminal / code ground */
+  --line:#1E2B44;       /* hairline borders */
+  --line-soft:#16223A;  /* section separators */
+  --text:#E2E8F0;       /* wordmark base */
+  --muted:#94A3B8;      /* secondary text; also the UNVERIFIED state */
+  --pull:#F59E0B;       /* state: depth that can vanish in one block — a wallet owner */
+  --held:#22D3EE;       /* state: depth the pool will not release — fires on the bounce */
+  --held-ink:#0B1220;   /* text on a solid cyan fill */
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --r-card:14px; --r-code:12px; --r-pill:999px;
+  --container:984px;
+}
+/* ---------- reset-ish ---------- */
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--plate);scroll-behavior:smooth}
+body{
+  margin:0;background:var(--plate);color:var(--text);
+  font:400 1rem/1.65 var(--sans);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+img,svg{max-width:100%;height:auto;display:block}
+a{color:var(--held);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--held);outline-offset:3px;border-radius:4px}
+::selection{background:rgba(34,211,238,.28)}
+code,pre,kbd{font-family:var(--mono)}
+/* faint instrument grid, fading out below the hero — paint-only, no filters */
+.gridbg{
+  position:absolute;inset:0 0 auto 0;height:820px;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(148,163,184,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(148,163,184,.05) 1px,transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:linear-gradient(to bottom,#000 40%,transparent);
+          mask-image:linear-gradient(to bottom,#000 40%,transparent);
+}
+.wrap{max-width:var(--container);margin:0 auto;padding:0 22px;position:relative;z-index:1}
+/* ---------- header ---------- */
+.skip{position:absolute;left:-9999px;top:0;background:var(--held);color:var(--held-ink);
+  padding:.6rem 1rem;border-radius:0 0 8px 0;font-weight:600;z-index:99}
+.skip:focus{left:0}
+header.site{
+  position:sticky;top:0;z-index:50;background:rgba(11,18,32,.94);
+  border-bottom:1px solid var(--line-soft);
+}
+.site .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-top:.8rem;padding-bottom:.8rem}
+.brand{display:inline-flex;align-items:center;border-radius:6px}
+.wordmark{height:19px;width:auto}
+nav.toc{display:flex;gap:1.25rem;align-items:center}
+nav.toc a{color:var(--muted);font-size:.86rem;font-weight:500}
+nav.toc a:hover{color:var(--text);text-decoration:none}
+.gh{border:1px solid var(--line);border-radius:var(--r-pill);padding:.38rem .85rem;
+  color:var(--text) !important;font-size:.84rem;font-weight:600;
+  transition:border-color .16s ease,transform .16s ease;white-space:nowrap}
+.gh:hover{border-color:rgba(34,211,238,.55);text-decoration:none;transform:translateY(-1px)}
+@media (max-width:760px){nav.toc a:not(.gh){display:none}}
+/* ---------- shared ---------- */
+main{display:block}
+section{padding:clamp(54px,7vw,88px) 0;border-top:1px solid var(--line-soft);scroll-margin-top:76px}
+section:first-of-type{border-top:0}
+.eyebrow{
+  font:700 .75rem/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--held);margin:0 0 14px;
+}
+h1{font-size:clamp(1.95rem,1.15rem + 3.6vw,3.3rem);line-height:1.13;letter-spacing:-.022em;
+  font-weight:700;margin:.6rem 0 1rem;max-width:21ch}
+h2{font-size:clamp(1.4rem,1.15rem + 1.1vw,1.85rem);line-height:1.22;letter-spacing:-.015em;
+  font-weight:700;margin:0 0 .5rem;max-width:30ch}
+h3{font-size:1.06rem;margin:0 0 .35rem;letter-spacing:-.008em}
+p{margin:.55rem 0;max-width:70ch;color:var(--text)}
+p.sub{color:var(--muted)}
+.lede{font-size:clamp(1.02rem,.95rem + .45vw,1.19rem);color:var(--muted);max-width:62ch}
+.lede strong,.callout strong,p strong{color:var(--text)}
+.mono{font-family:var(--mono)}
+.amber{color:var(--pull)}
+.cyan{color:var(--held)}
+.dim{color:var(--muted)}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 1.1rem;padding:0;list-style:none}
+.chip{display:inline-flex;align-items:center;gap:.45rem;border:1px solid var(--line);
+  border-radius:var(--r-pill);padding:.34rem .75rem;
+  font:600 .72rem/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
+  background:rgba(148,163,184,.05);white-space:nowrap}
+.chip-held{color:var(--held);border-color:rgba(34,211,238,.35);background:rgba(34,211,238,.07)}
+.chip-amber{color:var(--pull);border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.07)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.dot-pulse{animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.45;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+/* buttons */
+.cta{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.6rem}
+.btn{display:inline-flex;align-items:center;gap:.5rem;font-weight:600;font-size:.95rem;
+  border-radius:10px;padding:.72rem 1.15rem;border:1px solid transparent;cursor:pointer;
+  transition:transform .16s ease,border-color .16s ease,background-color .16s ease}
+.btn-primary{background:var(--held);color:var(--held-ink);box-shadow:0 8px 28px -10px rgba(34,211,238,.55)}
+.btn-primary:hover{transform:translateY(-2px);text-decoration:none}
+.btn-ghost{border-color:var(--line);color:var(--text);background:rgba(148,163,184,.06)}
+.btn-ghost:hover{border-color:rgba(34,211,238,.55);transform:translateY(-2px);text-decoration:none}
+/* terminal / code blocks */
+.term{border:1px solid var(--line);border-radius:var(--r-code);background:var(--ink-bg);
+  margin:1.5rem 0 0;overflow:hidden}
+.term-bar{display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  padding:.6rem .95rem;border-bottom:1px solid var(--line-soft);
+  font:500 .78rem/1.4 var(--mono);color:var(--muted);flex-wrap:wrap}
+.term-bar a{white-space:nowrap}
+.term pre{margin:0;padding:1.05rem 1.15rem;overflow-x:auto;
+  font-size:clamp(.78rem,.72rem + .3vw,.9rem);line-height:1.62;color:var(--text)}
+.term .comment{color:var(--muted)}
+.term .sel{color:var(--held);font-weight:700}
+.proof-note{padding:.8rem 1.15rem;border-top:1px solid var(--line-soft);
+  color:var(--muted);font-size:.9rem;max-width:none}
+.proof-note strong{color:var(--text)}
+/* the control compare */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.compare .card{min-width:0}
+@media (max-width:720px){.compare{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:var(--r-card);
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));padding:1.1rem 1.2rem;
+  transition:transform .16s ease,border-color .16s ease}
+.card:hover{border-color:rgba(148,163,184,.35)}
+.card .who{font:600 .74rem/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;margin:0 0 .55rem}
+.card .addr{font-family:var(--mono);font-size:.86rem;word-break:break-all;margin:0 0 .6rem}
+.card .result{font-family:var(--mono);font-size:.86rem;margin:0;padding:.55rem .7rem;border-radius:8px;background:var(--ink-bg);border:1px solid var(--line-soft)}
+.card.pull{border-top:3px solid var(--pull)}
+.card.held{border-top:3px solid var(--held)}
+.card.slate{border-top:3px solid var(--muted)}
+.compare-cap{color:var(--muted);font-size:.92rem;margin-top:12px;max-width:75ch}
+/* hero art */
+.heroart{margin:clamp(40px,6vw,64px) 0 0;border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;background:var(--plate)}
+.heroart img{width:100%;height:auto}
+.heroart-cap{color:var(--muted);font-size:.85rem;padding:.7rem 1rem;border-top:1px solid var(--line-soft);margin:0;max-width:none}
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:1.4rem}
+@media (max-width:820px){.steps{grid-template-columns:1fr}}
+.step .k{font:700 .95rem/1 var(--mono);color:var(--held);display:block;margin-bottom:.55rem}
+.step p{color:var(--muted);font-size:.93rem;margin:.3rem 0 0}
+.step h3 .mono{font-size:.95em}
+/* data table */
+table.data{width:100%;border-collapse:collapse;margin-top:1.2rem;font-size:.92rem;min-width:560px}
+table.data th{font:700 .72rem/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);text-align:left;padding:.55rem .8rem;border-bottom:1px solid var(--line)}
+table.data td{padding:.7rem .8rem;border-bottom:1px solid var(--line-soft);vertical-align:top}
+table.data td:first-child{font-family:var(--mono);white-space:nowrap}
+/* classification cards */
+.classes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:1.4rem}
+@media (max-width:820px){.classes{grid-template-columns:1fr}}
+.classes h3{font:700 .95rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.classes .cond{color:var(--muted);font-size:.92rem;min-height:0;margin:.5rem 0 .8rem}
+.classes .claim{font-size:.92rem;margin:0;padding-top:.7rem;border-top:1px dashed var(--line)}
+.classes .claim b{font-weight:700}
+.pill-flag{display:inline-flex;align-items:center;gap:.5rem;border:1px dashed rgba(245,158,11,.55);
+  color:var(--pull);border-radius:var(--r-pill);padding:.4rem .9rem;
+  font:700 .74rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem}
+/* copy row */
+.copyrow{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.btn-copy{font:600 .78rem/1 var(--mono);letter-spacing:.05em;color:var(--held);
+  background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.35);border-radius:8px;
+  padding:.45rem .8rem;cursor:pointer;transition:transform .16s ease,border-color .16s ease}
+.btn-copy:hover{border-color:var(--held);transform:translateY(-1px)}
+.btn-copy.done{color:var(--held-ink);background:var(--held)}
+.visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* status */
+.statuscols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:1.4rem}
+@media (max-width:820px){.statuscols{grid-template-columns:1fr}}
+.statuscols ul{list-style:none;margin:.6rem 0 0;padding:0}
+.statuscols li{display:flex;gap:.65rem;padding:.5rem 0;border-top:1px solid var(--line-soft);
+  color:var(--muted);font-size:.93rem}
+.statuscols li:first-child{border-top:0}
+.statuscols li b{color:var(--text);font-weight:600}
+.mark{flex:none;font-family:var(--mono);font-weight:700}
+.mark.ok{color:var(--held)}
+.mark.no{color:var(--muted)}
+.statuscols .head{font:700 .78rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;margin:0 0 .4rem}
+/* tx rows */
+.txs{margin-top:1.4rem;display:grid;gap:10px}
+.txrow{display:grid;grid-template-columns:2.2rem 1fr auto;gap:.9rem;align-items:baseline;
+  border:1px solid var(--line);border-radius:12px;padding:.85rem 1rem;
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));
+  transition:transform .16s ease,border-color .16s ease}
+.txrow:hover{border-color:rgba(148,163,184,.4);transform:translateX(3px)}
+.txrow .n{font:700 1rem/1 var(--mono);color:var(--muted)}
+.txrow .what{font-size:.94rem;margin:0}
+.txrow .what small{display:block;color:var(--muted);font-size:.8rem;margin-top:.15rem}
+.txrow .hash{font-family:var(--mono);font-size:.84rem;white-space:nowrap}
+.txrow.hero-tx{border-color:rgba(34,211,238,.5);background:linear-gradient(180deg,rgba(34,211,238,.08),var(--panel-lo))}
+.txrow.hero-tx .n{color:var(--held)}
+@media (max-width:640px){.txrow{grid-template-columns:2rem 1fr}.txrow .hash{grid-column:2;justify-self:start}}
+/* callout */
+.callout{border:1px dashed var(--line);border-left:3px solid var(--pull);border-radius:12px;
+  background:var(--ink-bg);padding:1.2rem 1.3rem;margin-top:1.6rem}
+.callout h3{margin-top:0}
+.callout p{color:var(--muted);font-size:.94rem}
+table.acct{width:100%;border-collapse:collapse;margin-top:.9rem;font-size:.86rem;min-width:520px}
+table.acct th{font:700 .7rem/1.3 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--line)}
+table.acct td{font-family:var(--mono);padding:.5rem .6rem;border-bottom:1px solid var(--line-soft);color:var(--text)}
+table.acct td.meaning{font-family:var(--sans);color:var(--muted)}
+/* footer */
+footer.site{border-top:1px solid var(--line-soft);padding:2.6rem 0 3.2rem;margin-top:1rem}
+footer .cols{display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap;align-items:flex-start}
+footer p{color:var(--muted);font-size:.88rem}
+footer ul{list-style:none;margin:.2rem 0 0;padding:0;display:grid;gap:.45rem}
+footer li a{font-size:.9rem}
+.foot-fact{font-family:var(--mono);font-size:.78rem;color:var(--muted);margin-top:1.6rem;word-break:break-all}
+/* reveal-on-scroll (JS adds .js-anim; reduced-motion never gets it) */
+.js-anim .rv{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+.js-anim .rv.in{opacity:1;transform:none}
+.js-anim .rv.d1{transition-delay:.08s}.js-anim .rv.d2{transition-delay:.16s}.js-anim .rv.d3{transition-delay:.24s}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .js-anim .rv{opacity:1;transform:none}
+}
+/* the plate is the design in BOTH schemes — never a white flash */
+@media (prefers-color-scheme:light){
+  html,body{background:var(--plate);color:var(--text)}
+}
+</style>
+</head>
+<body id="top">
+<div class="gridbg" aria-hidden="true"></div>
+<a class="skip" href="#proof">Skip to the proof</a>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="rampart — back to top">
+      <svg class="wordmark" viewBox="-1 -44 251 59" role="img" aria-label="rampart" focusable="false">
+        <g id="wm-glyphs">
+          <path fill="#E2E8F0" d="M12.54 0L4.48 0L4.48-31.74L12.42-31.74L12.42-28.16L13.57-28.16Q14.27-30.08 15.90-30.98Q17.54-31.87 19.71-31.87L23.55-31.87L23.55-24.70L19.58-24.70Q16.51-24.70 14.53-23.07Q12.54-21.44 12.54-18.05L12.54 0M38.91 0.90Q35.52 0.90 32.83-0.29Q30.14-1.47 28.58-3.74Q27.01-6.02 27.01-9.28Q27.01-12.54 28.58-14.75Q30.14-16.96 32.93-18.08Q35.71-19.20 39.30-19.20L48-19.20L48-20.99Q48-23.23 46.59-24.67Q45.18-26.11 42.11-26.11Q39.10-26.11 37.63-24.74Q36.16-23.36 35.71-21.18L28.29-23.68Q29.06-26.11 30.75-28.13Q32.45-30.14 35.30-31.39Q38.14-32.64 42.24-32.64Q48.51-32.64 52.16-29.50Q55.81-26.37 55.81-20.42L55.81-8.58Q55.81-6.66 57.60-6.66L60.16-6.66L60.16 0L54.78 0Q52.42 0 50.88-1.15Q49.34-2.30 49.34-4.22L49.34-4.29L48.13-4.29Q47.87-3.52 46.98-2.27Q46.08-1.02 44.16-0.06Q42.24 0.90 38.91 0.90M40.32-5.63Q43.71-5.63 45.86-7.52Q48-9.41 48-12.54L48-13.18L39.87-13.18Q37.63-13.18 36.35-12.22Q35.07-11.26 35.07-9.54Q35.07-7.81 36.42-6.72Q37.76-5.63 40.32-5.63M74.11 0L66.05 0L66.05-31.74L73.98-31.74L73.98-28.29L75.14-28.29Q75.97-29.89 77.89-31.07Q79.81-32.26 82.94-32.26Q86.34-32.26 88.38-30.94Q90.43-29.63 91.52-27.52L92.67-27.52Q93.76-29.57 95.74-30.91Q97.73-32.26 101.38-32.26Q104.32-32.26 106.72-31.01Q109.12-29.76 110.56-27.23Q112-24.70 112-20.86L112 0L103.94 0L103.94-20.29Q103.94-22.91 102.59-24.22Q101.25-25.54 98.82-25.54Q96.06-25.54 94.56-23.78Q93.06-22.02 93.06-18.75L93.06 0L84.99 0L84.99-20.29Q84.99-22.91 83.65-24.22Q82.30-25.54 79.87-25.54Q77.12-25.54 75.62-23.78Q74.11-22.02 74.11-18.75"/>
+          <path fill="#22D3EE" transform="translate(116.22 0)" d="M12.54 12.80L4.48 12.80L4.48-31.74L12.42-31.74L12.42-27.90L13.57-27.90Q14.66-29.76 16.96-31.20Q19.26-32.64 23.55-32.64Q27.39-32.64 30.66-30.75Q33.92-28.86 35.90-25.22Q37.89-21.57 37.89-16.38L37.89-15.36Q37.89-10.18 35.90-6.53Q33.92-2.88 30.66-0.99Q27.39 0.90 23.55 0.90Q20.67 0.90 18.72 0.22Q16.77-0.45 15.58-1.50Q14.40-2.56 13.70-3.65L12.54-3.65L12.54 12.80M21.12-6.14Q24.90-6.14 27.36-8.54Q29.82-10.94 29.82-15.55L29.82-16.19Q29.82-20.80 27.33-23.20Q24.83-25.60 21.12-25.60Q17.41-25.60 14.91-23.20Q12.42-20.80 12.42-16.19L12.42-15.55Q12.42-10.94 14.91-8.54Q17.41-6.14 21.12-6.14M55.17 0.90Q51.78 0.90 49.09-0.29Q46.40-1.47 44.83-3.74Q43.26-6.02 43.26-9.28Q43.26-12.54 44.83-14.75Q46.40-16.96 49.18-18.08Q51.97-19.20 55.55-19.20L64.26-19.20L64.26-20.99Q64.26-23.23 62.85-24.67Q61.44-26.11 58.37-26.11Q55.36-26.11 53.89-24.74Q52.42-23.36 51.97-21.18L44.54-23.68Q45.31-26.11 47.01-28.13Q48.70-30.14 51.55-31.39Q54.40-32.64 58.50-32.64Q64.77-32.64 68.42-29.50Q72.06-26.37 72.06-20.42L72.06-8.58Q72.06-6.66 73.86-6.66L76.42-6.66L76.42 0L71.04 0Q68.67 0 67.14-1.15Q65.60-2.30 65.60-4.22L65.60-4.29L64.38-4.29Q64.13-3.52 63.23-2.27Q62.34-1.02 60.42-0.06Q58.50 0.90 55.17 0.90M56.58-5.63Q59.97-5.63 62.11-7.52Q64.26-9.41 64.26-12.54L64.26-13.18L56.13-13.18Q53.89-13.18 52.61-12.22Q51.33-11.26 51.33-9.54Q51.33-7.81 52.67-6.72Q54.02-5.63 56.58-5.63M90.37 0L82.30 0L82.30-31.74L90.24-31.74L90.24-28.16L91.39-28.16Q92.10-30.08 93.73-30.98Q95.36-31.87 97.54-31.87L101.38-31.87L101.38-24.70L97.41-24.70Q94.34-24.70 92.35-23.07Q90.37-21.44 90.37-18.05L90.37 0M128.77 0L119.81 0Q116.67 0 114.72-1.95Q112.77-3.90 112.77-7.17L112.77-25.09L104.83-25.09L104.83-31.74L112.77-31.74L112.77-41.60L120.83-41.60L120.83-31.74L129.54-31.74L129.54-25.09L120.83-25.09L120.83-8.58Q120.83-6.66 122.62-6.66L128.77-6.66"/>
+        </g>
+      </svg>
+    </a>
+    <nav class="toc" aria-label="Sections">
+      <a href="#proof">Proof</a>
+      <a href="#mechanism">Mechanism</a>
+      <a href="#typed-book">Typed book</a>
+      <a href="#verify">Verify</a>
+      <a href="#status">Status</a>
+      <a href="#transactions">Transactions</a>
+      <a class="gh" href="https://github.com/edycutjong/rampart">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ============ 00 · THE HOOK — the failed transaction ============ -->
+  <section id="proof" aria-labelledby="proof-h">
+    <div class="wrap">
+      <ul class="chips">
+        <li class="chip">Somnia Shannon testnet · chain 50312</li>
+        <li class="chip">mined 2026-08-19 · permanent</li>
+        <li class="chip chip-held"><span class="dot dot-pulse" aria-hidden="true"></span>status 0x0 — reverted, on purpose</li>
+      </ul>
+      <h1 id="proof-h">The wallet that paid for this order tried to cancel it. The chain said no.</h1>
+      <p class="lede"><strong>rampart</strong> makes order-book depth the protocol itself will not let you
+        withdraw: a <span class="mono">FirmQuote</span> contract owns the resting order and has no cancel
+        function, so the pool refuses everyone — including its own funder. The refusal below is a real
+        transaction: it failed, it was mined, and it is permanently public.</p>
+
+      <figure class="term" role="group" aria-label="The failed cancel transaction, decoded">
+        <figcaption class="term-bar">
+          <span>tx <span class="cyan">0x959b4770…6ddb</span> · the funder calls cancelOrder on the contract's resting order</span>
+          <a href="https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb">open in explorer ↗</a>
+        </figcaption>
+<pre><code>$ cast call 0x1b8ed538…67ee "cancelOrder(uint128)" 129127208515966879685 \
+    --from <span class="amber">0xFbc73Ce1…3595</span>            <span class="comment"># the funder's own wallet</span>
+
+<span class="comment">execution reverted, data:</span>
+
+  <span class="sel">0xf5e39c1f</span>  IncorrectSender(
+    caller    <span class="amber">0xFbc73Ce1C0B43f87cD065f82df24697dEc653595</span>   <span class="comment">← the wallet that PAID for the order</span>
+    expected  <span class="cyan">0x2a09b4c474828e6895af273e51Ba8C181c91191a</span>   <span class="comment">← FirmQuote — a contract with no cancel function</span>
+  )</code></pre>
+        <p class="proof-note"><strong>The pool names both parties in its own revert data.</strong> It knows
+          exactly who is asking — the wallet that funded the order — and it refuses, because the order's
+          owner is the contract. That error message is the product.</p>
+      </figure>
+
+      <div class="compare" role="group" aria-label="The control: same call from two senders">
+        <div class="card pull">
+          <p class="who amber">Same call · from the funder wallet</p>
+          <p class="addr">0xFbc73Ce1…3595 <span class="dim">(EOA)</span></p>
+          <p class="result">execution reverted · <span class="cyan">0xf5e39c1f</span> IncorrectSender</p>
+        </div>
+        <div class="card held">
+          <p class="who cyan">Same call · from FirmQuote itself</p>
+          <p class="addr">0x2a09b4c4…191a <span class="dim">(contract)</span></p>
+          <p class="result">0x <span class="dim">— no revert. The pool would let its owner cancel.</span></p>
+        </div>
+      </div>
+      <p class="compare-cap">Same pool, same order, same calldata. So this is <em>not</em> "orders can't be
+        cancelled here" — the pool would honour a cancel from the owner. The owner is a contract with
+        <strong>no code path to ask</strong>. That distinction is the entire mechanism.</p>
+
+      <div class="cta">
+        <a class="btn btn-primary" href="https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb">See the failed transaction ↗</a>
+        <a class="btn btn-ghost" href="#verify">Verify it yourself — no wallet needed</a>
+      </div>
+
+      <figure class="heroart">
+        <picture>
+          <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme-hero.png">
+          <img src="assets/readme-hero-animated.svg" width="1280" height="320" loading="lazy" decoding="async"
+               alt="rampart locks a resting quote into the book: a cancel strikes the resting quote and bounces; pullable amber hardens into held cyan and never returns.">
+        </picture>
+        <figcaption class="heroart-cap">The mechanism, drawn: <span class="amber">pullable</span> amber is
+          wallet-owned depth — it dissolves under a cancel. <span class="cyan">Held</span> cyan is the
+          contract-owned quote; the cancel that strikes it bounces.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============ 01 · MECHANISM ============ -->
+  <section id="mechanism" aria-labelledby="mech-h">
+    <div class="wrap">
+      <p class="eyebrow rv">01 · The lock</p>
+      <h2 id="mech-h" class="rv">Three moves close every exit</h2>
+      <p class="sub rv" style="max-width:66ch">123 lines of Solidity. The trick is not what the contract
+        does — it is what it <strong>cannot</strong> do.</p>
+
+      <div class="steps">
+        <div class="card step rv d1">
+          <span class="k">1</span>
+          <h3>Hold &amp; approve</h3>
+          <p><span class="mono">FirmQuote</span> holds the tUSDC collateral and approves the Somnia
+            <span class="mono">BinaryPool</span>. The funder's wallet only ever funds the contract.</p>
+        </div>
+        <div class="card step rv d2">
+          <span class="k">2</span>
+          <h3>Rest as the owner</h3>
+          <p>The contract calls <span class="mono">placeBinaryOrder</span>, so the order's
+            <span class="mono">owner</span> is the contract — not any wallet.</p>
+        </div>
+        <div class="card step rv d3">
+          <span class="k">3</span>
+          <h3>No way to ask</h3>
+          <p>No cancel function, no reduce function, no operator ever granted. The pool will only take
+            instructions from an owner that cannot give them.</p>
+        </div>
+      </div>
+
+      <div class="tscroll rv">
+        <table class="data">
+          <caption class="visually-hidden">Every withdrawal path and why it is closed</caption>
+          <thead><tr><th scope="col">Withdrawal path</th><th scope="col">Why it is closed</th></tr></thead>
+          <tbody>
+            <tr><td>cancelOrder(uint128)</td>
+                <td>Owner-only. Any other caller — including the funder — reverts
+                    <span class="mono cyan">IncorrectSender</span> <span class="mono">0xf5e39c1f</span>. Proven above.</td></tr>
+            <tr><td>cancelOrderFor(owner, id)</td>
+                <td>Needs an operator the <em>owner</em> approved. FirmQuote never grants one — there is no code path that could.</td></tr>
+            <tr><td>reduceOrderFor(owner, id, qty)</td>
+                <td>Per-user approval only, no system allowlist. Same closed door.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="rv" style="margin-top:1.2rem">The quote stands until <strong>a taker fills it</strong> or its
+        mandatory <span class="mono">expireTimestampNs</span> lapses. Two exits — neither of them is
+        "the maker changed their mind."</p>
+      <p class="sub rv"><span class="mono cyan">forge test</span> — 42 tests, 0 failures. Seven of them assert
+        the <em>absence</em> of every withdrawal selector from FirmQuote's ABI: the lock is tested as a
+        missing feature, because it is one.</p>
+    </div>
+  </section>
+
+  <!-- ============ 02 · WHAT IT MAKES POSSIBLE ============ -->
+  <section id="typed-book" aria-labelledby="typed-h">
+    <div class="wrap">
+      <p class="eyebrow rv">02 · What this makes possible</p>
+      <h2 id="typed-h" class="rv">A book where every level tells you if it can run away</h2>
+      <p class="pill-flag rv" role="note">Designed · not built yet</p>
+      <p class="rv" style="max-width:70ch"><span class="mono">Order.owner</span> is readable on-chain. That
+        means every price level can be <strong>typed by who owns it</strong> — the layer rampart's lock
+        exists to enable. What follows is the design, stated plainly so it cannot be mistaken for a
+        shipped feature: <strong>none of it is built.</strong></p>
+
+      <div class="classes">
+        <div class="card held rv d1">
+          <h3 class="cyan">Firm</h3>
+          <p class="cond">Owner is a contract whose <span class="mono">EXTCODEHASH</span> is attested,
+            still inside its lock window.</p>
+          <p class="claim"><b>Claim:</b> this depth cannot be withdrawn.</p>
+        </div>
+        <div class="card pull rv d2">
+          <h3 class="amber">Pullable</h3>
+          <p class="cond">Owner is a wallet.</p>
+          <p class="claim"><b>Claim:</b> this depth can vanish in one block.</p>
+        </div>
+        <div class="card slate rv d3">
+          <h3 class="dim">Unverified</h3>
+          <p class="cond">Owner is a contract nobody attested.</p>
+          <p class="claim"><b>Claim:</b> none. No claim is made — and that refusal is the point.</p>
+        </div>
+      </div>
+
+      <p class="rv" style="margin-top:1.4rem;max-width:70ch"><strong>UNVERIFIED is load-bearing.</strong>
+        A naive "owner is a contract → firm" check is forgeable: a hidden cancel, an upgradeable proxy, a
+        <span class="mono">DELEGATECALL</span>, or an operator granted <em>after</em> resting would all fake
+        FIRM. Under attestation an attacker can only mint UNVERIFIED depth — which renders as exactly what
+        it is.</p>
+      <p class="sub rv" style="max-width:70ch">Firmness is a <strong>horizon, not a badge</strong>: a quote is
+        firm only until <span class="mono">min(unlockAt, order expiry)</span> — a countdown, never a static
+        label. The observable this unlocks — <em>percent of the book that cannot be withdrawn</em> — exists
+        on no other exchange: Polymarket, Kalshi and every CEX keep resting orders as signed messages inside
+        a private matching engine, with no on-chain owner to inspect. rampart will compute that number only
+        when the classifier exists. <strong>No number is claimed today.</strong></p>
+    </div>
+  </section>
+
+  <!-- ============ 03 · VERIFY ============ -->
+  <section id="verify" aria-labelledby="verify-h">
+    <div class="wrap">
+      <p class="eyebrow rv">03 · Verify it yourself</p>
+      <h2 id="verify-h" class="rv">One read-only call. No wallet, no funds, no gas.</h2>
+      <p class="sub rv" style="max-width:66ch">The RPC answers anyone. Ask the pool to cancel the resting
+        order as the wallet that paid for it, and watch the chain refuse:</p>
+
+      <div class="term rv">
+        <div class="term-bar copyrow">
+          <span>anyone, anywhere — foundry's <span class="mono">cast</span></span>
+          <button class="btn-copy" type="button" data-copy="verify-cmd" aria-label="Copy the verification command">copy command</button>
+        </div>
+<pre id="verify-cmd"><code>cast call 0x1b8ed5380a4741df019acf5faa0ce6ecbf6167ee "cancelOrder(uint128)" \
+  129127208515966879685 \
+  --from 0xFbc73Ce1C0B43f87cD065f82df24697dEc653595 \
+  --rpc-url https://api.infra.testnet.somnia.network</code></pre>
+      </div>
+      <p class="visually-hidden" aria-live="polite" id="copy-live"></p>
+
+      <div class="term rv">
+        <div class="term-bar"><span>what comes back</span></div>
+<pre><code><span class="comment">execution reverted, data:</span>
+  <span class="sel">0xf5e39c1f</span>
+  000000000000000000000000<span class="amber">fbc73ce1c0b43f87cd065f82df24697dec653595</span>   <span class="comment">← caller   (the funder)</span>
+  000000000000000000000000<span class="cyan">2a09b4c474828e6895af273e51ba8c181c91191a</span>   <span class="comment">← expected (FirmQuote)</span>
+
+$ cast 4byte 0xf5e39c1f
+IncorrectSender(address,address)</code></pre>
+      </div>
+
+      <p class="rv" style="margin-top:1.2rem;max-width:70ch">Swap <span class="mono">--from</span> to the
+        contract's own address — <span class="mono cyan">0x2a09b4c4…191a</span> — and the same call returns
+        <span class="mono">0x</span>: the control. The pool <em>would</em> let its owner cancel; the owner
+        just has no way to ask.</p>
+      <p class="sub rv" style="max-width:70ch">Order <span class="mono">…9685</span> rests until its market's
+        expiry (~2026-08-20 08:00 UTC); after that the permissionless expiry sweep may clear it and the live
+        call's answer may change. The four mined transactions below are permanent either way. To replay the
+        whole sequence with your own key: <span class="mono">./gate.sh</span> in the repo runs
+        deploy → rest → refuse end-to-end, and <span class="mono">forge test</span> runs the 42-test suite.</p>
+    </div>
+  </section>
+
+  <!-- ============ 04 · HONEST STATUS ============ -->
+  <section id="status" aria-labelledby="status-h">
+    <div class="wrap">
+      <p class="eyebrow rv">04 · Honest status</p>
+      <h2 id="status-h" class="rv">What is here is real; what is not here is named</h2>
+
+      <div class="statuscols">
+        <div class="card rv d1">
+          <p class="head cyan">Real today</p>
+          <ul>
+            <li><span class="mark ok" aria-hidden="true">✓</span><span><b>FirmQuote.sol</b> — 123 lines, deployed to Shannon at <span class="mono">0x2a09b4c4…191a</span></span></li>
+            <li><span class="mark ok" aria-hidden="true">✓</span><span><b>The on-chain refusal</b> — order <span class="mono">…9685</span> rested with real escrow while its funder's cancel reverted (tx 4 below)</span></li>
+            <li><span class="mark ok" aria-hidden="true">✓</span><span><b>The control</b> — the same call from the contract's address returns <span class="mono">0x</span></span></li>
+            <li><span class="mark ok" aria-hidden="true">✓</span><span><b>42 tests, 0 failures</b> — seven assert the absence of every withdrawal selector</span></li>
+            <li><span class="mark ok" aria-hidden="true">✓</span><span><b>gate.sh</b> — the day-1 go/no-go, run 2026-08-19: <span class="cyan">PASSED</span></span></li>
+            <li><span class="mark ok" aria-hidden="true">✓</span><span><b>DEMO.md</b> — every transaction, the control, and exact reproduce steps</span></li>
+          </ul>
+        </div>
+        <div class="card rv d2">
+          <p class="head dim">Named, not built</p>
+          <ul>
+            <li><span class="mark no" aria-hidden="true">○</span><span><b>Typed-book classifier</b> (FIRM / PULLABLE / UNVERIFIED) and the attested-codehash registry — designed only</span></li>
+            <li><span class="mark no" aria-hidden="true">○</span><span><b>Adversarial corpus</b> proving the classification against forgery — designed only</span></li>
+            <li><span class="mark no" aria-hidden="true">○</span><span><b>Firmness percentage</b> — not computed anywhere; this page claims no number</span></li>
+            <li><span class="mark no" aria-hidden="true">○</span><span><b>Sell-side quoting</b> — deliberately out: it needs an ERC-6909 operator grant, and granting none is what keeps the lock airtight</span></li>
+            <li><span class="mark no" aria-hidden="true">○</span><span><b>Mainnet</b> — testnet only</span></li>
+            <li><span class="mark no" aria-hidden="true">○</span><span><b>Demo video · users</b> — none yet</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 · TRANSACTIONS ============ -->
+  <section id="transactions" aria-labelledby="tx-h">
+    <div class="wrap">
+      <p class="eyebrow rv">05 · The four transactions</p>
+      <h2 id="tx-h" class="rv">The whole story is on the explorer</h2>
+      <p class="sub rv">All on Somnia Shannon (chain 50312), all mined 2026-08-19. Nothing mocked, replayed,
+        or reconstructed.</p>
+
+      <div class="txs">
+        <a class="txrow rv" href="https://shannon-explorer.somnia.network/tx/0xa102e2010b3c3bb5c21c4d76ce05746676c7b332fee36709fcdaf95a34b60081">
+          <span class="n" aria-hidden="true">1</span>
+          <p class="what"><b>tUSDC faucet</b><small>the funder wallet acquires test collateral</small></p>
+          <span class="hash">0xa102e201…0081 ↗</span>
+        </a>
+        <a class="txrow rv" href="https://shannon-explorer.somnia.network/tx/0x35dade18d0e93bbe6b683dd5c687b033e6706ba2ada7f861b5515f455a8192cd">
+          <span class="n" aria-hidden="true">2</span>
+          <p class="what"><b>First order — crossed and filled</b><small class="amber">proves nothing about firmness · kept anyway — see the note below</small></p>
+          <span class="hash">0x35dade18…92cd ↗</span>
+        </a>
+        <a class="txrow rv" href="https://shannon-explorer.somnia.network/tx/0xfb15e947cb9f82a9e770298aef8ee6ef6f84ac7bf018d5d09dbf92b5a034aa69">
+          <span class="n" aria-hidden="true">3</span>
+          <p class="what"><b>The resting order</b><small>bid at 0.01, far below the touch — order <span class="mono">…9685</span>, real escrow locked</small></p>
+          <span class="hash">0xfb15e947…aa69 ↗</span>
+        </a>
+        <a class="txrow hero-tx rv" href="https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb">
+          <span class="n" aria-hidden="true">4</span>
+          <p class="what"><b>The funder tries to cancel — status 0x0, REVERTED</b><small class="cyan">the hero artifact: a failure that cannot be faked, mocked, or staged</small></p>
+          <span class="hash">0x959b4770…6ddb ↗</span>
+        </a>
+      </div>
+
+      <aside class="callout rv" aria-labelledby="honesty-h">
+        <h3 id="honesty-h">Why it was run twice — and why the second run is the honest one</h3>
+        <p>The first order (tx 2) crossed the book and <strong class="amber">filled instantly</strong> — the
+          limit was 0.50 and there were asks below it. Cancelling a <em>filled</em> order proves nothing:
+          it fails for everyone and says nothing about firmness. So the run was repeated at 0.01, far below
+          the touch, where the order genuinely rested:</p>
+        <div class="tscroll">
+          <table class="acct">
+            <caption class="visually-hidden">Escrow accounting proving the second order rested</caption>
+            <thead><tr><th scope="col">check</th><th scope="col">value</th><th scope="col">meaning</th></tr></thead>
+            <tbody>
+              <tr><td>YES balance before / after</td><td>1,000,000 → 1,000,000</td><td class="meaning">no fill — the order rested</td></tr>
+              <tr><td>tUSDC before / after</td><td>4,837,000 → 4,827,000</td><td class="meaning">exactly 10,000 escrowed = 1.0 token × 0.01</td></tr>
+              <tr><td>tUSDC after both cancel attempts</td><td>4,827,000</td><td class="meaning">escrow still locked — nothing was released</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-bottom:0">Order <span class="mono">…9685</span> was resting, with real escrow, when
+          the cancel was refused. That is the claim, tested — and owning the correction is part of the same
+          discipline as publishing a failed transaction on purpose.</p>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <svg class="wordmark" viewBox="-1 -44 251 59" role="img" aria-label="rampart" focusable="false" style="height:16px;width:auto">
+          <use href="#wm-glyphs"></use>
+        </svg>
+        <p style="max-width:38ch">Order-book depth the protocol itself will not let you withdraw.<br>
+          Built for the <strong>Event Contracts Hackathon</strong> — Somnia × DreamDEX, on DoraHacks.</p>
+        <p>MIT license · Solidity · Foundry · Somnia Shannon testnet</p>
+      </div>
+      <div>
+        <ul aria-label="Project links">
+          <li><a href="https://github.com/edycutjong/rampart">Repository — github.com/edycutjong/rampart ↗</a></li>
+          <li><a href="https://github.com/edycutjong/rampart/blob/main/DEMO.md">DEMO.md — the full evidence trail ↗</a></li>
+          <li><a href="https://shannon-explorer.somnia.network/address/0x2a09b4c474828e6895af273e51Ba8C181c91191a">FirmQuote on the explorer ↗</a></li>
+          <li><a href="https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb">The failed transaction ↗</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="foot-fact">FirmQuote 0x2a09b4c474828e6895af273e51Ba8C181c91191a · BinaryPool 0x1b8ed5380a4741df019acf5faa0ce6ecbf6167ee · order 129127208515966879685 · revert 0xf5e39c1f IncorrectSender(caller, expected)</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* reveal on scroll — opacity/transform only, skipped entirely under reduced motion */
+  if (!reduce && "IntersectionObserver" in window) {
+    document.documentElement.classList.add("js-anim");
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+      });
+    }, {rootMargin:"0px 0px -8% 0px", threshold:0.06});
+    Array.prototype.forEach.call(document.querySelectorAll(".rv"), function(el){ io.observe(el); });
+  }
+  /* copy-to-clipboard for the verify command */
+  Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function(btn){
+    btn.addEventListener("click", function(){
+      var src = document.getElementById(btn.getAttribute("data-copy"));
+      if (!src) return;
+      var text = src.textContent;
+      function done(){
+        var old = btn.textContent;
+        btn.textContent = "copied ✓"; btn.classList.add("done");
+        var live = document.getElementById("copy-live");
+        if (live) live.textContent = "Command copied to clipboard";
+        setTimeout(function(){ btn.textContent = old; btn.classList.remove("done"); if (live) live.textContent = ""; }, 1600);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function(){ fallback(); });
+      } else { fallback(); }
+      function fallback(){
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.setAttribute("readonly",""); ta.style.position = "fixed"; ta.style.left = "-9999px";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); done(); } catch(e){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
