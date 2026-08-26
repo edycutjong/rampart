@@ -1,16 +1,26 @@
 <div align="center">
   <img src="site/assets/icon-animated.svg" alt="rampart Icon" width="144">
-  <h1>rampart 🛡️</h1>
+  <h1>rampart 🪞</h1>
   <p><em>Order-book depth the protocol itself will not let you withdraw.</em></p>
   <img src="site/assets/readme-hero-animated.svg" alt="rampart — locks a resting quote into the book so the pool refuses even its own funder's cancel" width="100%">
 
   <p>
-    A resting order whose owner is a contract with no cancel path — so the pool refuses
+    A resting order on <strong>Somnia</strong> Shannon (chain 50312), built on <strong>DreamDEX</strong>'s
+    binary event-contract pools, whose owner is a contract with no cancel path — so the pool refuses
     <strong>the very wallet that paid for it</strong>. The centrepiece is a transaction that
     <strong>failed</strong>, permanently on a public chain:
     <a href="https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb"><code>0x959b4770…6ddb</code></a>
-    (status <code>0x0</code>). Reproduce it with no wallet and no gas — see
-    <a href="#-live-deployment">Live Deployment</a>.
+    (status <code>0x0</code>). <strong>93 tests, 0 failures, <code>src/</code> at 100% coverage.</strong>
+    Reproduce it with no wallet and no gas — see <a href="#-live-deployment">Live Deployment</a>.
+  </p>
+
+  <p>
+    <strong>Judges — start here:</strong>
+    <a href="https://github.com/edycutjong/rampart">Repo</a> ·
+    <a href="https://rampart.edycu.dev/viewer/">Typed-book viewer</a> ·
+    <a href="https://youtu.be/DhxuWFHOsyM">Demo video (2:44)</a> ·
+    <a href="DEMO.md">Evidence trail</a> ·
+    <a href="SDK_FEEDBACK.md">SDK &amp; docs feedback (12 findings)</a>
   </p>
 
   <br/>
