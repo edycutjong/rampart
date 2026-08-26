@@ -64,7 +64,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@eslint/js": "^9.39.5",
+    "@eslint/js": "^10.0.1",
     "@somnia-chain/markets-sdk": "^0.28.1",
     "@types/node": "^22.20.1",
     "eslint": "^9.39.5",
