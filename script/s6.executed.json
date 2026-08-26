@@ -1,0 +1,27 @@
+{
+  "_meta": {
+    "chain": 50312,
+    "rpc": "https://api.infra.testnet.somnia.network",
+    "explorer": "https://shannon-explorer.somnia.network",
+    "note": "SECOND BatchCancel deployment, on a live pool, executing the escape the original S6 (0xb3e609021C6839dF5A407d62D26Add74a2C8af54) never got to run. The original was rested on 2026-08-22 but its tidy() was gas-blocked, and by 2026-08-26 that pool's market had reached status 4 (terminal) and the order was swept — getOrder reverts IncorrectOrder(). Sending tidy() there now would succeed while cancelling nothing, because cancelOrders is best-effort. QuoteBase.pool is immutable, so a fresh deployment on a Trading pool is the only honest way to execute it. The original record is unchanged."
+  },
+  "contract": "BatchCancel",
+  "attack": "cancel via alternate selector cancelOrders(uint128[])",
+  "address": "0xE3202c084f3A0E52804ec5Ae467c533ce0FE0ea8",
+  "pool": "0xf50f7a2d4beaef6c875f6155a88a1348917c7f9f",
+  "market": "0x4AAe0f088f6F11a06A863a0226D79645e071dA29",
+  "collateral": "0x70a86D8842FB63C4Ad2b7cdddF530eBf1BB25d8E",
+  "deployTx": "0xff36d8f8789f5a42059906d2efe6096d57e0a10f96c16ae7be1085bd3c834beb",
+  "fundTx": "0xe0bfa115070be06f1276f67b028f986d54427916762f69d07feaf065e6b75e99",
+  "restTx": "0xc44eb06e18bb1f3f3f70349cfae4e697195b80055787bd2afdec0b9a191bcab7",
+  "escapeTx": "0xb55516e484bbad70ed2a1e2e9bb88c53945cf771d7dc366b6914af802a29bcc7",
+  "orderId": "18446744073709832684",
+  "activeBefore": true,
+  "activeAfter": false,
+  "pulled": true,
+  "orderBeforeEscape": "0x00000000000000000000000000000000000000000000000100000000000449ec0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000e3202c084f3a0e52804ec5ae467c533ce0fe0ea80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000271000000000000000000000000000000000000000000000000000000000000f424000000000000000000000000000000000000000000000000000000000000f424000000000000000000000000000000000000000000000000018cf8071056c0000",
+  "supersedes": {
+    "original": "0xb3e609021C6839dF5A407d62D26Add74a2C8af54",
+    "reason": "pool market terminal (status 4), order swept"
+  }
+}

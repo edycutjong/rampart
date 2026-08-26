@@ -11,7 +11,9 @@
     "note": "Adversarial corpus deployed and executed on Somnia Shannon. Each Sx address is a real contract; each tx hash is a real transaction. S0-S3 and S5 executed cleanly; S4 (operator) and S6 (batch cancel) are documented with their exact on-chain state below. Classification (headline.mjs --live) reads EXTCODEHASH live off-chain and is independent of escape execution."
   },
   "S0": {
-    "name": "FirmQuote", "attack": "none", "expected": "FIRM",
+    "name": "FirmQuote",
+    "attack": "none",
+    "expected": "FIRM",
     "address": "0x8116c3a4DE042D4A215B532B7C4054F36e074B68",
     "orderId": "92233720368547870994",
     "deployTx": "0xa8d5de077c9489f589aea5fc20fa61b11be533b10fa7d17aeae15f2ddcefb5f7",
@@ -22,7 +24,9 @@
     "onchain": "FIRM proof: the funder's cancelOrder REVERTED; the order still rests."
   },
   "S1": {
-    "name": "HiddenCancel", "attack": "hidden cancel path (A1)", "expected": "UNVERIFIED",
+    "name": "HiddenCancel",
+    "attack": "hidden cancel path (A1)",
+    "expected": "UNVERIFIED",
     "address": "0x29c3DFc189Aa7d16fb6CD4eBb87662A49aDe60F9",
     "orderId": "18446744073709664537",
     "deployTx": "0xc12b5eb247287a201b7409ea4cf8356dccc5ebc9beeda8692612edb79e762c1b",
@@ -32,7 +36,9 @@
     "onchain": "ESCAPE EXECUTED: poke() called cancelOrder; the order left the book with no fill."
   },
   "S2": {
-    "name": "Erc1967Proxy", "attack": "EIP-1967 upgradeable proxy (A2)", "expected": "UNVERIFIED",
+    "name": "Erc1967Proxy",
+    "attack": "EIP-1967 upgradeable proxy (A2)",
+    "expected": "UNVERIFIED",
     "address": "0x099ad1d940c84b624a6101eCbF79ee1A83Ef54c7",
     "firmImpl": "0xb79851e666AB8e8D92BA12cEcD7434E8d8B95C8A",
     "evilImpl": "0x7Fc8Db8EcA4D3Ba315D0fb71ff68e56b370F9aFC",
@@ -46,7 +52,9 @@
     "onchain": "ESCAPE EXECUTED: rested under firm logic, upgraded implementation, pull() cancelled the order."
   },
   "S3": {
-    "name": "DelegateEscape", "attack": "DELEGATECALL escape (A3)", "expected": "UNVERIFIED",
+    "name": "DelegateEscape",
+    "attack": "DELEGATECALL escape (A3)",
+    "expected": "UNVERIFIED",
     "address": "0xc8C8e829842CFeDa3c162ccC7e3917B3d375980d",
     "escapeLogic": "0x353aBe8208a3c4fc99D6282E04474f1Cd92353AB",
     "orderId": "18446744073709664557",
@@ -57,7 +65,9 @@
     "onchain": "ESCAPE EXECUTED: escape() delegatecalled attacker logic that cancelled the order in this contract's context."
   },
   "S4": {
-    "name": "OperatorGranter", "attack": "late operator grant (A4)", "expected": "UNVERIFIED",
+    "name": "OperatorGranter",
+    "attack": "late operator grant (A4)",
+    "expected": "UNVERIFIED",
     "address": "0xa13166927BCF78d8E04f125d3ED0E8A076F021F8",
     "orderId": "110680464442257422795",
     "deployTx": "0xf20812bad7508a143241af6b33bdb24fc6a938ff28dbe52dc78f53503b98a166",
@@ -69,7 +79,9 @@
     "onchain": "GRANT EXECUTED + verified in the registry (isApprovedForPool == true). The binary pool then REJECTS cancelOrderFor from any operator with OnlyApprovedContracts (0x3fb0ba2e) even for a valid grant, so the operator route cannot withdraw a buy-side order here. Reproduce: cast call 0x54d90260fe949940a80602e7fda8ebd729c5be00 'cancelOrderFor(address,uint128)' 0xa13166927BCF78d8E04f125d3ED0E8A076F021F8 110680464442257422795. The withdrawal MECHANISM is proven in test/Adversarial.t.sol against a faithful mock. Finding for the SDK feedback report: binary pools' cancelOrderFor operator path is unwired on Shannon."
   },
   "S5": {
-    "name": "QuietReduce", "attack": "quiet reduce, no fill (A5)", "expected": "UNVERIFIED",
+    "name": "QuietReduce",
+    "attack": "quiet reduce, no fill (A5)",
+    "expected": "UNVERIFIED",
     "address": "0x797FE26F8A6a65ea757347b71915119c49c049A7",
     "orderId": "202914184810805181207",
     "deployTx": "0x98df81661b1471e4c843b18a66f25f84ff39e3c12a9377a3fcd00edd0c4a9c04",
@@ -79,10 +91,12 @@
     "remainingBefore": "2000000",
     "remainingAfter": "1000000",
     "shrunk": true,
-    "onchain": "ESCAPE EXECUTED: rested 2,000,000, trim() reduced it to 1,000,000 with no fill — half the advertised depth vanished."
+    "onchain": "ESCAPE EXECUTED: rested 2,000,000, trim() reduced it to 1,000,000 with no fill \u2014 half the advertised depth vanished."
   },
   "S6": {
-    "name": "BatchCancel", "attack": "cancel via alternate selector (cancelOrders)", "expected": "UNVERIFIED",
+    "name": "BatchCancel",
+    "attack": "cancel via alternate selector (cancelOrders)",
+    "expected": "UNVERIFIED",
     "address": "0xb3e609021C6839dF5A407d62D26Add74a2C8af54",
     "orderId": "221360928884514732904",
     "deployTx": "0xbf3e6d2b3e58ae4ac64e48e17e3bdf86345da3ebd344cce0844eb8ad89b03d2a",
@@ -91,6 +105,11 @@
     "escapeTx": null,
     "pulled": false,
     "stillResting": true,
-    "onchain": "DEPLOYED + FUNDED + RESTED on-chain. The tidy() batch-cancel (cancelOrders(uint128[])) SUCCEEDS in simulation (eth_call returns success; pool.cancelOrders([id]) returns cleaned=1) but the live send needs ~3M gas and the funder key ran dry (0.009 SOMI left; native STT is browser-faucet only). Failed low-gas attempt: 0x6e11967ebe040511d45ac043d932a4abf73cb6c0e83189ccdf94996a719656cb. Reproduce with gas when funded: cast send 0xb3e609021C6839dF5A407d62D26Add74a2C8af54 'tidy()' --gas-limit 4000000. The withdrawal MECHANISM is proven in test/Adversarial.t.sol (test_A1b)."
+    "onchain": "DEPLOYED + FUNDED + RESTED on-chain 2026-08-22. This instance's tidy() was never sent: the funder key was down to 0.009 SOMI at the time (native STT is browser-faucet only). Failed low-gas attempt: 0x6e11967ebe040511d45ac043d932a4abf73cb6c0e83189ccdf94996a719656cb. By 2026-08-26 this pool's market had reached status 4 (terminal) and the order was swept - getOrder now reverts IncorrectOrder() - and QuoteBase.pool is immutable, so this instance can never rest again. Sending tidy() here today would SUCCEED while cancelling nothing (cancelOrders is best-effort), so it was deliberately not sent. THE ESCAPE WAS INSTEAD EXECUTED IN FULL on a second deployment against a Trading pool - see script/s6.executed.json: BatchCancel 0xE3202c084f3A0E52804ec5Ae467c533ce0FE0ea8, order cancelled via cancelOrders(uint128[]) with escrow refunded and no fill.",
+    "executedOnSecondDeployment": {
+      "address": "0xE3202c084f3A0E52804ec5Ae467c533ce0FE0ea8",
+      "escapeTx": "0xb55516e484bbad70ed2a1e2e9bb88c53945cf771d7dc366b6914af802a29bcc7",
+      "record": "script/s6.executed.json"
+    }
   }
 }

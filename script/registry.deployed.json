@@ -1,0 +1,45 @@
+{
+  "_meta": {
+    "chain": 50312,
+    "rpc": "https://api.infra.testnet.somnia.network",
+    "explorer": "https://shannon-explorer.somnia.network",
+    "note": "FirmnessRegistry deployed and seeded with the live FirmQuote (S0) code hash. The attester is immutable — there is no setter. The attested record hash commits to analyze()'s full JSON output, so the published reasoning cannot be swapped later. Attestation is a human-reviewed transparency list: a FIRM_CAPABLE verdict is a necessary pre-filter, never a proof of irrevocability (see DEMO.md, Honest limits)."
+  },
+  "registry": "0x04aDbfC40dD10215Ee7b7D14B0aD74074a83f8C1",
+  "attester": "0xFbc73Ce1C0B43f87cD065f82df24697dEc653595",
+  "deployTx": "0xedddeb8f93bafa7136cdf7975478e2cb3ba8a8f63009d809d069ee2f187a9e1d",
+  "attested": {
+    "subject": "S0 FirmQuote",
+    "address": "0x8116c3a4DE042D4A215B532B7C4054F36e074B68",
+    "codehash": "0xc60110e004cce8ade40d4e6d958c873715cac060b839b6b42a4fb762a16358b5",
+    "recordHash": "0xcecd1f5c35fd7b0520636acd0ec67d69a86aa06a34593d15423243de7dc118b0",
+    "attestTx": "0xe5f061f6a36d9e1e1075d8868eed05e8f13fab7d94ba0920c29d292403dbe69b"
+  },
+  "analyzerRecord": {
+    "analyzerVersion": "1.1.0",
+    "codehash": "0xc60110e004cce8ade40d4e6d958c873715cac060b839b6b42a4fb762a16358b5",
+    "codeSize": 2424,
+    "opcodeHistogram": {
+      "DELEGATECALL": 0,
+      "SELFDESTRUCT": 0,
+      "CALL": 3,
+      "STATICCALL": 2,
+      "CREATE": 0,
+      "CREATE2": 0,
+      "CALLCODE": 0
+    },
+    "forbiddenSelectors": [],
+    "proxyIndicators": {
+      "eip1967Impl": false,
+      "eip1967Beacon": false,
+      "minimalProxy": false
+    },
+    "metadata": {
+      "stripped": 53,
+      "suspicious": false
+    },
+    "verdict": "FIRM_CAPABLE",
+    "guarantee": "necessary-not-sufficient: requires human review before attestation",
+    "unboundedCallSurface": true
+  }
+}
