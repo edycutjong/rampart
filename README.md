@@ -47,6 +47,29 @@
 
 ## 📸 See it in Action
 
+<p align="center">
+  <img src="screenshots/01-viewer-hero.png" width="100%"
+       alt="The typed-book viewer: 0.1% of this book cannot be withdrawn, over 11 resting orders — 2 FIRM, 0 PULLABLE, 9 UNVERIFIED">
+</p>
+
+<p align="center">
+  <img src="screenshots/02-viewer-ladder.png" width="100%"
+       alt="The ladder: every level with its class and the REASON for that class — DELEGATECALL present, forbidden selector setOperatorApprovalForPool, attested + locked">
+  <br><em>The <strong>reason</strong> column is the product; the badge is only its summary.</em>
+</p>
+
+<p align="center">
+  <img src="site/assets/loop-classifier.gif" width="100%"
+       alt="node script/headline.mjs running: the adversarial corpus classifies row by row, ending attested 8/8 versus naive EXTCODESIZE 2/8">
+  <br><em>One command, offline and deterministic: the same answer on any machine.</em>
+</p>
+
+<p align="center">
+  <img src="site/assets/loop-refusal.gif" width="100%"
+       alt="A cast call replaying the cancel from the funder's own wallet: the node returns execution reverted 0xf5e39c1f, and the revert data names the funder as caller and the FirmQuote contract as expected owner">
+  <br><em>Anyone can replay the refusal — no wallet, no gas. The pool names both parties in its own revert data.</em>
+</p>
+
 **[rampart.edycu.dev/viewer](https://rampart.edycu.dev/viewer/)** — or open it locally, no server required:
 
 ```bash
@@ -126,6 +149,14 @@ orders are signed messages inside a private matching engine, with no on-chain ow
 
 ## 🏗️ Architecture & Tech Stack
 
+<p align="center">
+  <img src="site/assets/architecture.svg" width="100%"
+       alt="rampart architecture. On-chain: a funder EOA funds FirmQuote, which rests an order on the DreamDEX BinaryPool so Order.owner is the contract; the funder's own cancelOrder reverts IncorrectSender 0xf5e39c1f. Off-chain: a read-only engine reads the book, takes EXTCODEHASH per owner, runs a static policy gated by human review, classifies every level and computes the percent of book that cannot be withdrawn.">
+</p>
+
+<details>
+<summary>Same diagram as mermaid source</summary>
+
 ```mermaid
 flowchart LR
     subgraph CHAIN["Somnia Shannon · chain 50312 · 100 ms blocks"]
@@ -158,6 +189,8 @@ flowchart LR
     style PCT fill:#0b3d3d,stroke:#22d3ee,color:#e6fbff
     style HUMAN fill:#3d2f0b,stroke:#fbbf24,color:#fffbeb
 ```
+
+</details>
 
 The **left half runs on-chain and is what the proof rests on**: the pool refuses the funder because
 `Order.owner` is a contract with no code path to ask. The **right half is off-chain and read-only** —
@@ -294,6 +327,12 @@ cast call 0x1b8ed5380a4741df019acf5faa0ce6ecbf6167ee "cancelOrder(uint128)" \
 > owner was the contract.* The permanent proof is the mined transaction above — transaction history
 > cannot expire — and the pinned call reproduces the same state on demand.
 
+<p align="center">
+  <img src="screenshots/06-firmness-pinned.png" width="100%"
+       alt="node script/firmness.mjs --block 468201000 — 11 resting orders, 2 FIRM, 0 PULLABLE, 9 UNVERIFIED, 0.1% of displayed depth cannot be withdrawn">
+  <br><em><code>firmness.mjs --block 468201000</code> — pinned, so it prints these same numbers forever.</em>
+</p>
+
 ### Verify the registry yourself
 
 The ternary classifier is not only an off-chain script — it is **live on Shannon**, and its answers
@@ -357,6 +396,14 @@ sixth (late operator grant) is rested on-chain with its exact blocked state docu
 | Sponsor-SDK differential | **35/35** (`npm run sdk-verify`) |
 | Full-book retype | **p95 0.13 ms** on a deterministic 2,000-order book, inside a 100 ms block |
 | Escapes executed on-chain | **5 of 6** |
+
+<p align="center">
+  <img src="screenshots/07-forge-test.png" width="49%"
+       alt="forge test — 93 tests passed, 0 failed across the FirmQuote, FirmnessRegistry and adversarial suites">
+  <img src="screenshots/08-sdk-verify.png" width="49%"
+       alt="npm run sdk-verify — 35 of 35 assertions passing against @somnia-chain/markets-sdk">
+  <br><em><code>forge test</code> · <code>npm run sdk-verify</code> — neither number is transcribed by hand.</em>
+</p>
 
 ### What each piece is
 
@@ -472,6 +519,14 @@ alongside.
 | 📖 Typed-book viewer | **[rampart.edycu.dev/viewer](https://rampart.edycu.dev/viewer/)** |
 | 📊 Pitch deck | **[rampart.edycu.dev/pitch](https://rampart.edycu.dev/pitch/)** |
 | 🔍 Full evidence trail | **[DEMO.md](DEMO.md)** |
+
+<p align="center">
+  <img src="screenshots/03-landing-hero.png" width="49%"
+       alt="The rampart landing page: The wallet that paid for this order tried to cancel it. The chain said no.">
+  <img src="screenshots/04-pitch-deck.png" width="49%"
+       alt="The pitch deck opening slide">
+  <br><em><a href="https://rampart.edycu.dev">rampart.edycu.dev</a> · <a href="https://rampart.edycu.dev/pitch/">the deck</a></em>
+</p>
 
 Every command in the video was really run and captured raw; the terminal scenes are frame-stepped
 replays of those captures, **labelled on screen as replays**. Nothing is sped up, and no result is

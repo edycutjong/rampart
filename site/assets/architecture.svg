@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720" role="img"
+     aria-label="rampart architecture — on-chain, the pool refuses the funder's cancel because Order.owner is a contract with no cancel path; off-chain, a read-only engine reads the book, hashes each owner's code, applies a static policy gated by human review, and computes the percent of book that cannot be withdrawn">
+  <title>rampart — architecture</title>
+  <desc>Left: on Somnia Shannon, a funder EOA funds FirmQuote, which rests an order on the DreamDEX BinaryPool so Order.owner is the contract; the funder's own cancelOrder reverts IncorrectSender 0xf5e39c1f. An adversarial corpus of six attacker contracts rests alongside it. Right: an off-chain, read-only engine with zero runtime dependencies reads the resting book, takes EXTCODEHASH per distinct owner, runs a static bytecode policy, gates attestation on human review, classifies every level FIRM/PULLABLE/UNVERIFIED and computes the firmness percentage.</desc>
+
+  <defs>
+    <style>
+      .t   { font-family: ui-sans-serif, -apple-system, "Segoe UI", Inter, system-ui, sans-serif; }
+      .m   { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+      .h   { fill:#E2E8F0; font-weight:700; }
+      .sub { fill:#94A3B8; }
+      .dim { fill:#64748B; }
+    </style>
+    <marker id="a-cy" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#22D3EE"/>
+    </marker>
+    <marker id="a-sl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#64748B"/>
+    </marker>
+    <marker id="a-am" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="a-rd" viewBox="0 0 12 12" refX="6" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M2 2 L10 10 M10 2 L2 10" stroke="#FB7185" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+    </marker>
+  </defs>
+
+  <rect width="1440" height="720" fill="#0B1220"/>
+
+  <!-- ══ PANEL A — on-chain ══════════════════════════════════════════════ -->
+  <rect x="36" y="34" width="640" height="652" rx="18" fill="#0E1729" stroke="rgba(226,232,240,.10)"/>
+  <text class="m h" x="60" y="70" font-size="13" letter-spacing="1.4">ON-CHAIN</text>
+  <text class="m sub" x="60" y="92" font-size="12">Somnia Shannon · chain 50312 · 100 ms blocks</text>
+  <text class="t dim" x="60" y="112" font-size="12">the pool enforces it — not a promise, not a bond</text>
+
+  <!-- Funder EOA -->
+  <rect x="60" y="140" width="216" height="76" rx="12" fill="#131c31" stroke="rgba(226,232,240,.13)"/>
+  <text class="t h" x="80" y="170" font-size="15">Funder EOA</text>
+  <text class="t sub" x="80" y="192" font-size="12.5">pays for the order</text>
+
+  <!-- FirmQuote -->
+  <rect x="60" y="286" width="216" height="112" rx="12" fill="#08312F" stroke="#22D3EE" stroke-width="1.5"/>
+  <text class="m h" x="80" y="316" font-size="15" fill="#67E8F9">FirmQuote</text>
+  <text class="t sub" x="80" y="340" font-size="12.5">no cancel · no reduce</text>
+  <text class="t sub" x="80" y="359" font-size="12.5">never grants an operator</text>
+  <text class="t dim" x="80" y="382" font-size="11.5">the absence IS the product</text>
+  <text class="m" x="60" y="422" font-size="11.5" fill="#67E8F9">→ Order.owner = the contract, not a wallet</text>
+
+  <!-- Adversarial corpus -->
+  <rect x="60" y="468" width="216" height="104" rx="12" fill="#2E1522" stroke="#FB7185" stroke-width="1.2"/>
+  <text class="m h" x="80" y="498" font-size="14" fill="#FDA4AF">Adversarial corpus</text>
+  <text class="t sub" x="80" y="520" font-size="12.5">S1–S6 · each looks firm</text>
+  <text class="t sub" x="80" y="539" font-size="12.5">each has a real escape</text>
+  <text class="t dim" x="80" y="560" font-size="11.5">5 of 6 executed on-chain</text>
+
+  <!-- BinaryPool -->
+  <rect x="392" y="234" width="248" height="216" rx="12" fill="#171634" stroke="#818CF8" stroke-width="1.5"/>
+  <text class="m h" x="414" y="266" font-size="15" fill="#A5B4FC">BinaryPool</text>
+  <text class="t sub" x="414" y="290" font-size="12.5">DreamDEX · holds all escrow</text>
+  <text class="t sub" x="414" y="309" font-size="12.5">enforces Order.owner</text>
+  <line x1="414" y1="328" x2="618" y2="328" stroke="rgba(226,232,240,.12)"/>
+  <text class="m dim" x="414" y="350" font-size="11.5">placeBinaryOrder</text>
+  <text class="m dim" x="414" y="370" font-size="11.5">cancelOrder · reduceOrder</text>
+  <text class="m dim" x="414" y="390" font-size="11.5">cancelOrderFor · cancelOrders</text>
+  <text class="m dim" x="414" y="410" font-size="11.5">getAllOpenOrdersOffChain</text>
+  <text class="m dim" x="414" y="430" font-size="11.5">setOperator* · approveBuilder</text>
+
+  <!-- EOA -> FirmQuote (funds) -->
+  <path d="M168 216 L168 286" stroke="#64748B" stroke-width="1.6" fill="none" marker-end="url(#a-sl)"/>
+  <text class="t dim" x="178" y="258" font-size="11.5">funds it</text>
+
+  <!-- FirmQuote -> Pool -->
+  <path d="M276 330 L392 318" stroke="#22D3EE" stroke-width="1.8" fill="none" marker-end="url(#a-cy)"/>
+  <text class="m sub" x="282" y="308" font-size="10">placeBinaryOrder</text>
+
+  <!-- corpus -> Pool -->
+  <path d="M276 500 C 340 500, 356 460, 392 436" stroke="#FB7185" stroke-width="1.4" fill="none" opacity=".8" marker-end="url(#a-cy)"/>
+
+  <!-- THE REFUSAL: EOA -> Pool, blocked -->
+  <path d="M276 168 C 356 168, 372 200, 392 250" stroke="#FB7185" stroke-width="2" fill="none"
+        stroke-dasharray="7 5" marker-end="url(#a-rd)"/>
+  <rect x="292" y="118" width="330" height="52" rx="9" fill="#2A1520" stroke="#FB7185" stroke-width="1.2"/>
+  <text class="m" x="306" y="140" font-size="12.5" fill="#FDA4AF" font-weight="700">cancelOrder() → REVERTED</text>
+  <text class="m" x="306" y="159" font-size="11.5" fill="#94A3B8">0xf5e39c1f IncorrectSender(caller, expected)</text>
+
+  <!-- footnote -->
+  <text class="t dim" x="60" y="620" font-size="12">Even the wallet that paid for the order cannot take it back. The pool names</text>
+  <text class="t dim" x="60" y="639" font-size="12">both parties in its own revert data — a permanent, failed transaction.</text>
+  <text class="m" x="60" y="664" font-size="11.5" fill="#67E8F9">tx 0x959b4770…6ddb · status 0x0</text>
+
+  <!-- ══ BRIDGE ══════════════════════════════════════════════════════════ -->
+  <path d="M640 342 L764 342" stroke="#22D3EE" stroke-width="2" fill="none" marker-end="url(#a-cy)"/>
+  <text class="m sub" x="652" y="332" font-size="11">read-only</text>
+  <text class="t dim" x="648" y="362" font-size="11">no tx is ever sent</text>
+
+  <!-- ══ PANEL B — off-chain ═════════════════════════════════════════════ -->
+  <rect x="764" y="34" width="640" height="652" rx="18" fill="#0E1729" stroke="rgba(226,232,240,.10)"/>
+  <text class="m h" x="788" y="70" font-size="13" letter-spacing="1.4">OFF-CHAIN</text>
+  <text class="m sub" x="788" y="92" font-size="12">script/ · zero runtime dependencies</text>
+  <text class="t dim" x="788" y="112" font-size="12">anyone can re-derive every classification from public state</text>
+
+  <!-- read book -->
+  <rect x="788" y="140" width="268" height="66" rx="11" fill="#131c31" stroke="rgba(226,232,240,.13)"/>
+  <text class="t h" x="808" y="167" font-size="14">Read the resting book</text>
+  <text class="m dim" x="808" y="189" font-size="11">getAllOpenOrdersOffChain</text>
+
+  <!-- extcodehash -->
+  <rect x="788" y="238" width="268" height="66" rx="11" fill="#131c31" stroke="rgba(226,232,240,.13)"/>
+  <text class="t h" x="808" y="265" font-size="14">EXTCODEHASH per owner</text>
+  <text class="m dim" x="808" y="287" font-size="11">EIP-1052 · memoised, 1 call per owner</text>
+
+  <!-- policy -->
+  <rect x="788" y="336" width="268" height="108" rx="11" fill="#131c31" stroke="rgba(226,232,240,.16)"/>
+  <text class="m h" x="808" y="363" font-size="14">analyze() static policy</text>
+  <text class="t sub" x="808" y="385" font-size="11.5">no DELEGATECALL · no SELFDESTRUCT</text>
+  <text class="t sub" x="808" y="404" font-size="11.5">no forbidden selector · not a proxy</text>
+  <text class="t dim" x="808" y="426" font-size="11">a filter, not a prover</text>
+
+  <!-- human review — the honest seam -->
+  <rect x="788" y="476" width="268" height="76" rx="11" fill="#33270A" stroke="#F59E0B" stroke-width="1.5"/>
+  <text class="t h" x="808" y="503" font-size="14" fill="#FCD34D">Human review</text>
+  <text class="t sub" x="808" y="525" font-size="11.5">attestation is a transparency list,</text>
+  <text class="t sub" x="808" y="543" font-size="11.5">not an automatic consequence</text>
+
+  <!-- classify -->
+  <rect x="1108" y="336" width="272" height="128" rx="11" fill="#08312F" stroke="#22D3EE" stroke-width="1.5"/>
+  <text class="m h" x="1128" y="364" font-size="14" fill="#67E8F9">classify</text>
+  <rect x="1128" y="378" width="62" height="22" rx="6" fill="#0b3d3d" stroke="#22D3EE"/>
+  <text class="m" x="1136" y="393" font-size="10.5" fill="#67E8F9">FIRM</text>
+  <rect x="1198" y="378" width="80" height="22" rx="6" fill="#33270A" stroke="#F59E0B"/>
+  <text class="m" x="1206" y="393" font-size="10.5" fill="#FCD34D">PULLABLE</text>
+  <rect x="1128" y="408" width="96" height="22" rx="6" fill="#1a2338" stroke="#64748B" stroke-dasharray="3 3"/>
+  <text class="m" x="1136" y="423" font-size="10.5" fill="#94A3B8">UNVERIFIED</text>
+  <text class="t dim" x="1128" y="450" font-size="11">every level, with its reason</text>
+
+  <!-- the number -->
+  <rect x="1108" y="500" width="272" height="112" rx="11" fill="#08312F" stroke="#22D3EE" stroke-width="2"/>
+  <text class="t sub" x="1128" y="526" font-size="11.5">% of book that cannot be withdrawn</text>
+  <text class="m" x="1128" y="558" font-size="21" fill="#22D3EE" font-weight="700">Σ firm ÷ Σ displayed</text>
+  <text class="t dim" x="1128" y="582" font-size="11">exists on no off-chain exchange</text>
+
+  <!-- flows in B -->
+  <path d="M922 206 L922 238" stroke="#22D3EE" stroke-width="1.6" fill="none" marker-end="url(#a-cy)"/>
+  <path d="M922 304 L922 336" stroke="#22D3EE" stroke-width="1.6" fill="none" marker-end="url(#a-cy)"/>
+  <path d="M922 444 L922 476" stroke="#F59E0B" stroke-width="1.6" fill="none" marker-end="url(#a-am)"/>
+  <!-- human review -> classify -->
+  <path d="M1056 508 C 1088 508, 1092 460, 1108 420" stroke="#F59E0B" stroke-width="1.6" fill="none" marker-end="url(#a-am)"/>
+  <text class="m dim" x="952" y="466" font-size="10">attested set</text>
+  <!-- extcodehash -> classify (direct) -->
+  <path d="M1056 268 C 1108 268, 1140 300, 1178 336" stroke="#22D3EE" stroke-width="1.6" fill="none" marker-end="url(#a-cy)"/>
+  <!-- classify -> number -->
+  <path d="M1244 464 L1244 500" stroke="#22D3EE" stroke-width="2" fill="none" marker-end="url(#a-cy)"/>
+
+  <!-- legend -->
+  <text class="t dim" x="788" y="640" font-size="12">The amber node is the honest seam: the policy rejects the known</text>
+  <text class="t dim" x="788" y="659" font-size="12">escapes; a human decides what gets attested. A green analyze()</text>
+  <text class="t dim" x="788" y="678" font-size="12">gates that review — it never replaces it.</text>
+</svg>
