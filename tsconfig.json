@@ -1,0 +1,32 @@
+{
+  "// note": [
+    "There is no TypeScript in this project. This config exists so `tsc --noEmit` can",
+    "typecheck the plain .mjs classifier via checkJs — inference plus JSDoc, no build",
+    "step, no emit, no .ts files. It is a static analysis pass, not a compile target.",
+    "The engine keeps ZERO runtime dependencies; typescript and eslint are devDeps only."
+  ],
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023"],
+    "types": ["node"],
+
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+
+    "strict": false,
+    "noImplicitAny": false,
+
+    "strictNullChecks": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": false,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true
+  },
+  "include": ["script/**/*.mjs", ".github/scripts/**/*.mjs"],
+  "exclude": ["node_modules", "out", "cache", "lib", "site", "assets"]
+}

@@ -1,18 +1,73 @@
 {
   "name": "rampart-firm-book",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
-  "description": "Off-chain classifier + firmness metric for Rampart — types a Somnia binary order book FIRM / PULLABLE / UNVERIFIED by attested EXTCODEHASH.",
-  "engines": { "node": ">=20" },
+  "description": "Types a Somnia binary order book FIRM / PULLABLE / UNVERIFIED by attested EXTCODEHASH. Ships a dependency-free keccak-256, an EVM disassembler + static bytecode policy, a zero-auth BinaryPool book reader, and a block-pinned JSON-RPC client — zero runtime dependencies, CI-checked against @somnia-chain/markets-sdk.",
+  "keywords": [
+    "somnia",
+    "shannon",
+    "evm",
+    "bytecode-analysis",
+    "disassembler",
+    "keccak256",
+    "order-book",
+    "prediction-markets",
+    "binary-markets",
+    "erc6909",
+    "static-analysis",
+    "extcodehash"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edycutjong/rampart.git"
+  },
+  "homepage": "https://github.com/edycutjong/rampart#readme",
+  "bugs": {
+    "url": "https://github.com/edycutjong/rampart/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./script/lib/index.mjs",
+  "exports": {
+    ".": "./script/lib/index.mjs",
+    "./analyzer": "./script/lib/analyzer.mjs",
+    "./keccak": "./script/lib/keccak.mjs",
+    "./classify": "./script/lib/classify.mjs",
+    "./book": "./script/lib/book.mjs",
+    "./rpc": "./script/lib/rpc.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "script/lib/",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "node script/test.mjs",
+    "prove": "halmos --match-contract FirmQuoteSymbolicTest",
     "headline": "node script/headline.mjs",
     "headline:live": "node script/headline.mjs --live",
     "firmness": "node script/firmness.mjs",
     "bench": "node script/bench.mjs --n 200 --scale 2000",
     "analyze": "node script/analyze.mjs --corpus",
-    "deploy-corpus": "node script/deploy-corpus.mjs"
+    "snapshot": "node site/viewer/make-snapshot.mjs",
+    "deploy-corpus": "node script/deploy-corpus.mjs",
+    "syntax": "node --check script/*.mjs && node --check script/lib/*.mjs && node --check .github/scripts/*.mjs",
+    "lint": "eslint script .github/scripts",
+    "lint:fix": "eslint script .github/scripts --fix",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "node --test script/**/*.test.mjs",
+    "coverage": "node --test --experimental-test-coverage script/**/*.test.mjs",
+    "links": "node .github/scripts/check-links.mjs site",
+    "sdk-verify": "node script/sdk-verify.mjs",
+    "verify": "npm run syntax && npm run lint && npm run typecheck && npm test && npm run sdk-verify && npm run headline"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@somnia-chain/markets-sdk": "^0.28.1",
+    "@types/node": "^22.20.1",
+    "eslint": "^9.39.5",
+    "typescript": "^5.9.3"
+  }
 }
