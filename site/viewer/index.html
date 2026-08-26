@@ -863,7 +863,9 @@ var CLS = {
 };
 function esc(s){ return String(s).replace(/[&<>"']/g, function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
-function shortAddr(a){ return a.slice(0,6) + "…" + a.slice(-4); }
+// shortAddr is NOT self-escaping on purpose: line ~899 writes it to .textContent,
+// where escaping would render a literal &amp;. Callers that build HTML wrap it in esc().
+function shortAddr(a){ return String(a).slice(0,6) + "…" + String(a).slice(-4); }
 function cents(raw){ return (Number(raw) / 1e6 * 100).toFixed(1) + "¢"; }
 function shares(raw){ var n = Number(raw) / 1e6;
   return n.toLocaleString("en-US", {maximumFractionDigits: 2}); }
@@ -928,14 +930,14 @@ function render(){
     }
     var w = Math.max(1.5, Number(o.quantityRemaining) / maxShares * 100);
     return '<tr class="' + m.row + '">' +
-      '<td><span class="side side-' + o.side + '">' + o.side.toUpperCase() + "</span></td>" +
+      '<td><span class="side side-' + esc(o.side) + '">' + esc(o.side.toUpperCase()) + "</span></td>" +
       '<td><span class="num">' + cents(o.price) + '</span><span class="raw">raw ' + esc(o.price) + "</span></td>" +
       '<td><span class="num">' + shares(o.quantityRemaining) + ' sh</span>' +
         '<span class="raw">raw ' + esc(o.quantityRemaining) + "</span>" +
         '<span class="sizebar ' + m.bar + '" aria-hidden="true"><b style="width:' + w.toFixed(1) + '%"></b></span></td>' +
       "<td>" + badge(o.class) + "</td>" +
       '<td class="owner-cell"><a href="' + esc(S.explorer) + "/address/" + esc(o.owner) +
-        '" aria-label="Owner ' + esc(o.owner) + ' on the Shannon explorer">' + shortAddr(o.owner) + "</a>" + lbl + "</td>" +
+        '" aria-label="Owner ' + esc(o.owner) + ' on the Shannon explorer">' + esc(shortAddr(o.owner)) + "</a>" + lbl + "</td>" +
       '<td><span class="reason">' + esc(o.reason) + '<span class="hz">' + esc(horizon) + "</span></span></td></tr>";
   }
 
@@ -953,8 +955,8 @@ function render(){
   document.getElementById("book-foot").innerHTML =
     "Totals — FIRM " + Number(S.units.firm).toLocaleString("en-US") + " raw units (" + shares(S.units.firm) +
     " shares) of " + Number(S.units.total).toLocaleString("en-US") + " displayed (" + shares(S.units.total) +
-    ' shares) → <strong style="color:var(--held)">' + S.firmPct +
-    "% of the book cannot be withdrawn</strong>. PULLABLE " + S.counts.PULLABLE +
+    ' shares) → <strong style="color:var(--held)">' + esc(S.firmPct) +
+    "% of the book cannot be withdrawn</strong>. PULLABLE " + esc(S.counts.PULLABLE) +
     " · the remaining depth is UNVERIFIED: no firmness claim can honestly be made about it.";
 
   /* owner cards */
@@ -983,7 +985,7 @@ function render(){
       '<p style="margin-top:.5rem">' + who + "</p>" +
       "<dl>" +
       "<dt>orders</dt><dd>" + os.length + " · " + shares(sum.toString()) + " shares</dd>" +
-      "<dt>code</dt><dd>" + o.codeBytes + " bytes</dd>" +
+      "<dt>code</dt><dd>" + esc(o.codeBytes) + " bytes</dd>" +
       "<dt>codehash</dt><dd>" + esc(o.codehash) + "</dd>" +
       (o.unlockAt ? "<dt>unlocks</dt><dd>" + utc(o.unlockAt) + "</dd>" : "") +
       "</dl>" +
@@ -1111,7 +1113,7 @@ document.getElementById("live-btn").addEventListener("click", function(){
   var btn = this, out = document.getElementById("live-out");
   if (!S){ out.innerHTML = '<p class="err">No snapshot metadata — cannot locate the pool.</p>'; return; }
   btn.disabled = true; btn.textContent = "Reading the chain…";
-  out.innerHTML = '<p class="lrow">eth_call → getAllOpenOrdersOffChain on ' + shortAddr(S.pool) + " @ latest…</p>";
+  out.innerHTML = '<p class="lrow">eth_call → getAllOpenOrdersOffChain on ' + esc(shortAddr(S.pool)) + " @ latest…</p>";
   var attested = S.attestedSet[0].codehash.toLowerCase();
   Promise.all([readSide(true), readSide(false), rpc("eth_blockNumber", []),
                rpc("eth_getBlockByNumber", ["latest", false])])
