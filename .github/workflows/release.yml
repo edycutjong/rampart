@@ -93,6 +93,10 @@ jobs:
           LAST: ${{ steps.v.outputs.last }}
         run: |
           set -euo pipefail
+          # An annotated tag needs a committer identity; the runner has none, and
+          # `git tag -a` dies with "empty ident name" rather than falling back.
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if git rev-parse "v$NEXT" >/dev/null 2>&1; then
             echo "v$NEXT already exists — nothing to do"; exit 0
           fi
