@@ -1,4 +1,11 @@
 <p align="center">
+  <img src="site/assets/icon-animated.svg" width="128" height="128"
+       alt="rampart mark — a cancel strikes the resting quote and bounces off it">
+</p>
+
+<h1 align="center">rampart</h1>
+
+<p align="center">
   <img src="site/assets/readme-hero-animated.svg" alt="rampart — locks a resting quote into the book so the pool refuses even its own funder's cancel" width="100%">
 </p>
 

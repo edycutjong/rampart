@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="site/assets/icon-animated.svg" width="96" height="96"
+       alt="rampart mark — a cancel strikes the resting quote and bounces off it">
+</p>
+
 # rampart — on-chain proof
 
 **Somnia Shannon testnet · chain 50312 · 2026-08-19**
