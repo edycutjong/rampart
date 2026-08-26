@@ -71,7 +71,7 @@
 
   <!-- FirmQuote -> Pool -->
   <path d="M276 330 L392 318" stroke="#22D3EE" stroke-width="1.8" fill="none" marker-end="url(#a-cy)"/>
-  <text class="m sub" x="282" y="308" font-size="10">placeBinaryOrder</text>
+  <text class="m sub" x="282" y="308" font-size="10" transform="rotate(-5.91 282 308)">placeBinaryOrder</text>
 
   <!-- corpus -> Pool -->
   <path d="M276 500 C 340 500, 356 460, 392 436" stroke="#FB7185" stroke-width="1.4" fill="none" opacity=".8" marker-end="url(#a-cy)"/>
@@ -79,9 +79,9 @@
   <!-- THE REFUSAL: EOA -> Pool, blocked -->
   <path d="M276 168 C 356 168, 372 200, 392 250" stroke="#FB7185" stroke-width="2" fill="none"
         stroke-dasharray="7 5" marker-end="url(#a-rd)"/>
-  <rect x="292" y="118" width="330" height="52" rx="9" fill="#2A1520" stroke="#FB7185" stroke-width="1.2"/>
-  <text class="m" x="306" y="140" font-size="12.5" fill="#FDA4AF" font-weight="700">cancelOrder() → REVERTED</text>
-  <text class="m" x="306" y="159" font-size="11.5" fill="#94A3B8">0xf5e39c1f IncorrectSender(caller, expected)</text>
+  <rect x="310" y="118" width="330" height="52" rx="9" fill="#2A1520" stroke="#FB7185" stroke-width="1.2"/>
+  <text class="m" x="324" y="140" font-size="12.5" fill="#FDA4AF" font-weight="700">cancelOrder() → REVERTED</text>
+  <text class="m" x="324" y="159" font-size="11.5" fill="#94A3B8">0xf5e39c1f IncorrectSender(caller, expected)</text>
 
   <!-- footnote -->
   <text class="t dim" x="60" y="620" font-size="12">Even the wallet that paid for the order cannot take it back. The pool names</text>
@@ -136,7 +136,7 @@
   <!-- the number -->
   <rect x="1108" y="500" width="272" height="112" rx="11" fill="#08312F" stroke="#22D3EE" stroke-width="2"/>
   <text class="t sub" x="1128" y="526" font-size="11.5">% of book that cannot be withdrawn</text>
-  <text class="m" x="1128" y="558" font-size="21" fill="#22D3EE" font-weight="700">Σ firm ÷ Σ displayed</text>
+  <text class="m" x="1128" y="556" font-size="17" fill="#22D3EE" font-weight="700">Σ firm ÷ Σ displayed</text>
   <text class="t dim" x="1128" y="582" font-size="11">exists on no off-chain exchange</text>
 
   <!-- flows in B -->
