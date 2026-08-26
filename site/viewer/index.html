@@ -869,8 +869,10 @@ function shortAddr(a){ return String(a).slice(0,6) + "…" + String(a).slice(-4)
 function cents(raw){ return (Number(raw) / 1e6 * 100).toFixed(1) + "¢"; }
 function shares(raw){ var n = Number(raw) / 1e6;
   return n.toLocaleString("en-US", {maximumFractionDigits: 2}); }
-function badge(c){ var m = CLS[c];
-  return '<span class="cls ' + m.cls + '" aria-label="' + esc(m.label) + '"><i aria-hidden="true"></i>' + c + "</span>"; }
+// `c` is snapshot-supplied, so it is escaped and the CLS lookup is guarded: an
+// unrecognised class used to throw on `m.cls`, which blanked the whole table.
+function badge(c){ var m = CLS[c] || { cls: "", label: String(c) };
+  return '<span class="cls ' + esc(m.cls) + '" aria-label="' + esc(m.label) + '"><i aria-hidden="true"></i>' + esc(c) + "</span>"; }
 function utc(sec){ var d = new Date(sec * 1000);
   return d.toISOString().replace("T"," ").replace(/\.\d+Z$/," UTC"); }
 function delta(fromSec, toSec){
