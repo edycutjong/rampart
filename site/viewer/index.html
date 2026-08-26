@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0B1220">
+<title>rampart — the typed book</title>
+<meta name="description" content="A real Somnia binary order book with every resting order typed FIRM / PULLABLE / UNVERIFIED by attested EXTCODEHASH — and the percent of the book that cannot be withdrawn. Pinned chain state, reproducible with one command.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="rampart — the typed book">
+<meta property="og:description" content="Every resting order on a real Somnia binary market, typed FIRM / PULLABLE / UNVERIFIED by who owns it — with the reason for every classification and the percent of the book the pool will not release.">
+<meta property="og:url" content="https://rampart.edycu.dev/viewer/">
+<meta property="og:image" content="https://rampart.edycu.dev/assets/og-image.png">
+<meta property="og:site_name" content="rampart">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="rampart — the typed book">
+<meta name="twitter:description" content="A real order book where every level is typed by who owns it. 0.1% of this book cannot be withdrawn — read from pinned Somnia chain state.">
+<meta name="twitter:image" content="https://rampart.edycu.dev/assets/og-image.png">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   rampart · typed-book viewer
+   Same tokens and visual language as ../index.html — one family, one axis:
+   --pull (depth that can vanish) ↔ --held (depth the pool will not release).
+   UNVERIFIED deliberately sits OFF that axis: slate + dashed = no claim made.
+   ══════════════════════════════════════════════════════════════════════════ */
+:root{
+  color-scheme:dark;
+  --plate:#0B1220;
+  --plate-2:#080E19;
+  --panel-hi:#111D33;
+  --panel-lo:#0C1626;
+  --ink:#070C16;
+  --line:#1E2B44;
+  --line-soft:#16223A;
+  --text:#E2E8F0;
+  --text-max:#F8FAFC;
+  --muted:#94A3B8;
+  --dim:#78899E;
+  --pull:#F59E0B;
+  --held:#22D3EE;
+  --held-ink:#0B1220;
+  --sans:'Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --shell:1180px;
+  --r-lg:18px; --r-md:13px; --r-sm:9px; --r-pill:999px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--plate);scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--plate);color:var(--text);
+  font:400 1rem/1.62 var(--sans);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+img,svg{max-width:100%;display:block}
+a{color:var(--held);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--held);outline-offset:3px;border-radius:5px}
+::selection{background:rgba(34,211,238,.26)}
+code,pre,kbd,samp{font-family:var(--mono)}
+h1,h2,h3,h4,p,ul,ol,figure,table{margin:0}
+ul{padding:0;list-style:none}
+
+.bg{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg::before{
+  content:"";position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(148,163,184,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(148,163,184,.045) 1px,transparent 1px);
+  background-size:52px 52px;
+  -webkit-mask-image:radial-gradient(ellipse 120% 70% at 50% 0%,#000 0%,transparent 72%);
+          mask-image:radial-gradient(ellipse 120% 70% at 50% 0%,#000 0%,transparent 72%);
+}
+.bg::after{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 42% at 12% 4%,rgba(245,158,11,.11),transparent 62%),
+    radial-gradient(ellipse 66% 48% at 88% 16%,rgba(34,211,238,.13),transparent 66%);
+}
+
+.shell{max-width:var(--shell);margin:0 auto;padding:0 26px;position:relative;z-index:1}
+.lede{font-size:clamp(1.02rem,.96rem + .42vw,1.2rem);line-height:1.6;color:var(--muted);max-width:58ch}
+.lede strong,p strong{color:var(--text-max);font-weight:600}
+p{color:var(--muted)}
+p + p{margin-top:.8rem}
+.mono{font-family:var(--mono)}
+.amber{color:var(--pull)}
+.cyan{color:var(--held)}
+.slate{color:var(--dim)}
+.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:absolute;left:-9999px;top:0;background:var(--held);color:var(--held-ink);
+  padding:.65rem 1.1rem;border-radius:0 0 10px 0;font-weight:700;z-index:99}
+.skip:focus{left:0}
+
+/* ── header ──────────────────────────────────────────────────────────────── */
+header.site{position:sticky;top:0;z-index:60;
+  background:rgba(9,15,27,.82);border-bottom:1px solid var(--line-soft);
+  -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
+.site .shell{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding-top:.85rem;padding-bottom:.85rem}
+.brand{display:inline-flex;align-items:center;gap:.6rem;border-radius:7px}
+.wordmark{height:19px;width:auto}
+.brand .sub{font:700 .68rem/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dim);border:1px solid var(--line);border-radius:var(--r-pill);padding:.3rem .6rem}
+.nav{display:flex;gap:.15rem;align-items:center}
+.nav a{color:var(--muted);font:600 .82rem/1 var(--sans);padding:.5rem .6rem;border-radius:7px;
+  transition:color .18s var(--ease),background-color .18s var(--ease)}
+.nav a:hover{color:var(--text-max);background:rgba(148,163,184,.09);text-decoration:none}
+.nav a.on{color:var(--held)}
+.gh{margin-left:.5rem;border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:.44rem .95rem !important;color:var(--text) !important;font-size:.82rem;
+  transition:border-color .18s var(--ease),transform .18s var(--ease),box-shadow .18s var(--ease)}
+.gh:hover{border-color:rgba(34,211,238,.6);transform:translateY(-1px);
+  box-shadow:0 6px 20px -10px rgba(34,211,238,.7);background:none !important}
+@media (max-width:1080px){.nav a:not(.gh){display:none}}
+
+/* ── section scaffold ────────────────────────────────────────────────────── */
+section{padding:clamp(56px,7vw,96px) 0;position:relative}
+section + section{border-top:1px solid var(--line-soft)}
+.shead{display:flex;align-items:center;gap:1rem;margin-bottom:clamp(20px,2.6vw,30px)}
+.shead .idx{font:700 .74rem/1 var(--mono);letter-spacing:.14em;color:var(--held);
+  padding:.42rem .6rem;border:1px solid rgba(34,211,238,.28);border-radius:7px;
+  background:rgba(34,211,238,.07);flex:none}
+.shead .rule{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.shead .kicker{font:700 .74rem/1 var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--dim);flex:none}
+.stitle{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);
+  gap:clamp(22px,4vw,58px);align-items:end}
+@media (max-width:880px){.stitle{grid-template-columns:1fr;gap:.9rem;align-items:start}}
+h2{font-size:clamp(1.55rem,1.15rem + 1.6vw,2.3rem);line-height:1.14;letter-spacing:-.022em;
+  font-weight:700;color:var(--text-max);max-width:20ch;text-wrap:balance}
+h3{font-size:1.02rem;line-height:1.35;font-weight:700;color:var(--text-max);letter-spacing:-.008em}
+.sublede{color:var(--muted);max-width:50ch;font-size:1rem;line-height:1.6;padding-bottom:.22rem}
+
+/* ── hero ────────────────────────────────────────────────────────────────── */
+.hero{padding-top:clamp(38px,5vw,64px);padding-bottom:clamp(30px,4vw,48px);border-top:0}
+.rail{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
+.tag{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--line);
+  border-radius:var(--r-pill);padding:.36rem .8rem;background:rgba(148,163,184,.05);
+  font:600 .705rem/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.tag-live{color:var(--held);border-color:rgba(34,211,238,.4);background:rgba(34,211,238,.08)}
+h1{
+  font-size:clamp(2rem,1rem + 4vw,3.5rem);line-height:1.08;letter-spacing:-.03em;
+  font-weight:800;max-width:19ch;
+  background:linear-gradient(178deg,#FFFFFF 8%,#C8D4E4 96%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+h1 .pc{
+  background:linear-gradient(180deg,var(--held) 0%,#0EA5C4 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero .lede{margin-top:1.15rem}
+
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:clamp(30px,3.6vw,46px);
+  border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--line)}
+.metric{background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));padding:1.15rem 1.2rem;
+  transition:background-color .2s var(--ease)}
+.metric:hover{background:linear-gradient(180deg,#16243D,var(--panel-lo))}
+.metric .k{font:700 .66rem/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.metric .v{font:800 clamp(1.5rem,1.1rem + 1.2vw,2.05rem)/1 var(--mono);letter-spacing:-.02em;
+  color:var(--text-max);margin-top:.6rem;font-variant-numeric:tabular-nums}
+.metric .v.hi{color:var(--held)}
+.metric .s{font:400 .78rem/1.45 var(--sans);color:var(--muted);margin-top:.45rem}
+@media (max-width:900px){.metrics{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:430px){.metrics{grid-template-columns:1fr}}
+
+/* ── class badges: colour + SHAPE + text, never colour alone ─────────────── */
+.cls{display:inline-flex;align-items:center;gap:.45rem;font:700 .68rem/1 var(--mono);
+  letter-spacing:.11em;border-radius:var(--r-pill);padding:.32rem .7rem;white-space:nowrap}
+.cls i{flex:none;display:block}
+.cls-firm{color:var(--held);border:1px solid rgba(34,211,238,.5);background:rgba(34,211,238,.09)}
+.cls-firm i{width:8px;height:8px;border-radius:2px;background:var(--held)}          /* filled square */
+.cls-pull{color:var(--pull);border:1px solid rgba(245,158,11,.5);background:rgba(245,158,11,.09)}
+.cls-pull i{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;
+  border-bottom:9px solid var(--pull)}                                              /* filled triangle */
+.cls-unv{color:var(--muted);border:1px dashed rgba(148,163,184,.55);background:transparent}
+.cls-unv i{width:8px;height:8px;border-radius:50%;border:1.5px dashed var(--muted);background:transparent} /* hollow dashed circle */
+
+/* ── legend cards ────────────────────────────────────────────────────────── */
+.card{border:1px solid var(--line);border-radius:var(--r-md);
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));padding:1.15rem 1.25rem;
+  transition:border-color .2s var(--ease),transform .2s var(--ease)}
+.card:hover{border-color:rgba(148,163,184,.34);transform:translateY(-2px)}
+.card > * + *{margin-top:.55rem}
+.card p{font-size:.925rem;line-height:1.58}
+.top-pull{border-top:2px solid var(--pull)}
+.top-held{border-top:2px solid var(--held)}
+.top-slate{border-top:2px dashed var(--dim)}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:820px){.g3{grid-template-columns:1fr}}
+.claim{padding-top:.7rem;border-top:1px dashed var(--line);color:var(--text)}
+.naive-strip{margin-top:1.4rem;border:1px solid rgba(245,158,11,.35);border-radius:var(--r-md);
+  background:linear-gradient(90deg,rgba(245,158,11,.07),transparent 55%);padding:.95rem 1.15rem;
+  font-size:.92rem;line-height:1.6;color:var(--muted)}
+.naive-strip b{color:var(--pull);font-family:var(--mono)}
+
+/* ── the book table ──────────────────────────────────────────────────────── */
+.bookwrap{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;
+  background:linear-gradient(168deg,var(--panel-hi),var(--panel-lo) 62%,var(--ink));
+  box-shadow:0 30px 70px -40px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.045)}
+.bookbar{display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;
+  padding:.7rem 1rem;border-bottom:1px solid var(--line-soft);
+  font:600 .69rem/1.5 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.bookbar .mono{text-transform:none;letter-spacing:.04em}
+.scrollx{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.book{width:100%;border-collapse:collapse;min-width:820px;
+  font-size:.855rem;font-variant-numeric:tabular-nums}
+.book caption{text-align:left;padding:.85rem 1rem .3rem;color:var(--dim);font-size:.8rem}
+.book th{font:700 .66rem/1.4 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--dim);
+  text-align:left;padding:.65rem .85rem;border-bottom:1px solid var(--line);white-space:nowrap}
+.book td{padding:.62rem .85rem;border-bottom:1px solid var(--line-soft);vertical-align:top}
+.book tbody tr{transition:background-color .16s var(--ease)}
+.book tbody tr:hover{background:rgba(148,163,184,.05)}
+.book tbody tr:last-child td{border-bottom:0}
+.book .num{font-family:var(--mono);color:var(--text-max);white-space:nowrap}
+.book .raw{display:block;font:400 .68rem/1.4 var(--mono);color:var(--dim)}
+.book .side{font:700 .68rem/1 var(--mono);letter-spacing:.12em}
+.side-ask{color:#FB7185}
+.side-bid{color:#4ADE80}
+tr.r-firm td:first-child{box-shadow:inset 3px 0 0 var(--held)}
+tr.r-pull td:first-child{box-shadow:inset 3px 0 0 var(--pull)}
+tr.r-unv td:first-child{box-shadow:inset 3px 0 0 rgba(148,163,184,.25)}
+tr.spread td{padding:.5rem .85rem;background:var(--ink);color:var(--dim);
+  font:600 .7rem/1.4 var(--mono);letter-spacing:.09em;text-transform:uppercase;text-align:center}
+.owner-cell{white-space:nowrap}
+.owner-cell a{font-family:var(--mono);font-size:.82rem}
+.chip{display:inline-block;margin-left:.5rem;font:700 .62rem/1 var(--mono);letter-spacing:.08em;
+  color:var(--dim);border:1px solid var(--line);border-radius:var(--r-pill);padding:.22rem .5rem;vertical-align:1px}
+.chip-ours{color:var(--held);border-color:rgba(34,211,238,.35)}
+.chip-adv{color:var(--pull);border-color:rgba(245,158,11,.35)}
+.reason{font-family:var(--mono);font-size:.78rem;line-height:1.5;color:var(--text);max-width:34ch;white-space:normal;overflow-wrap:anywhere}
+.reason .hz{display:block;margin-top:.2rem;font-size:.7rem;color:var(--dim);font-family:var(--sans)}
+.sizebar{position:relative;height:5px;border-radius:99px;background:rgba(148,163,184,.12);
+  margin-top:.4rem;min-width:110px;overflow:hidden}
+.sizebar b{position:absolute;inset:0 auto 0 0;border-radius:99px;display:block}
+.sb-firm b{background:var(--held)}
+.sb-pull b{background:var(--pull)}
+.sb-unv b{background:repeating-linear-gradient(90deg,rgba(148,163,184,.55) 0 4px,transparent 4px 7px)}
+.book tfoot td{padding:.7rem .85rem;color:var(--dim);font-size:.78rem;border-top:1px solid var(--line);border-bottom:0}
+
+/* ── owner cards ─────────────────────────────────────────────────────────── */
+.owners{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media (max-width:880px){.owners{grid-template-columns:1fr}}
+.ocard{border:1px solid var(--line);border-radius:var(--r-md);padding:1.05rem 1.15rem;
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));
+  transition:border-color .2s var(--ease),transform .2s var(--ease)}
+.ocard:hover{border-color:rgba(148,163,184,.34);transform:translateY(-2px)}
+.ocard .ohead{display:flex;justify-content:space-between;gap:.8rem;align-items:flex-start;flex-wrap:wrap}
+.ocard .addr{font-family:var(--mono);font-size:.84rem;color:var(--text-max);word-break:break-all}
+.ocard dl{display:grid;grid-template-columns:auto 1fr;gap:.28rem .9rem;margin:.8rem 0 0}
+.ocard dt{font:700 .64rem/1.6 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.ocard dd{margin:0;font-family:var(--mono);font-size:.78rem;color:var(--text);word-break:break-all}
+.ocard .rsn{margin-top:.7rem;padding-top:.7rem;border-top:1px dashed var(--line);
+  font-size:.85rem;line-height:1.55;color:var(--muted);overflow-wrap:anywhere}
+
+/* ── terminal / provenance ───────────────────────────────────────────────── */
+.term{border:1px solid var(--line);border-radius:var(--r-md);background:var(--ink);overflow:hidden;
+  box-shadow:0 26px 60px -40px rgba(0,0,0,.95)}
+.term-bar{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;
+  padding:.62rem .95rem;border-bottom:1px solid var(--line-soft);
+  font:500 .765rem/1.45 var(--mono);color:var(--dim);background:rgba(148,163,184,.035)}
+.term pre{margin:0;padding:1.1rem 1.15rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  font-size:clamp(.735rem,.68rem + .26vw,.855rem);line-height:1.7;color:var(--text);tab-size:2}
+.term .c{color:var(--dim)}
+.term .note{padding:.85rem 1.15rem;border-top:1px solid var(--line-soft);
+  font:400 .885rem/1.6 var(--sans);color:var(--muted)}
+.term .note strong{color:var(--text-max)}
+.copy{font:600 .72rem/1 var(--mono);letter-spacing:.06em;color:var(--muted);cursor:pointer;
+  border:1px solid var(--line);border-radius:7px;background:transparent;padding:.42rem .7rem;
+  transition:color .18s var(--ease),border-color .18s var(--ease)}
+.copy:hover{color:var(--text-max);border-color:rgba(34,211,238,.55)}
+.copy.done{color:var(--held);border-color:rgba(34,211,238,.55)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:720px){.g2{grid-template-columns:1fr}}
+
+/* ── live panel ──────────────────────────────────────────────────────────── */
+.livebox{border:1px solid var(--line);border-radius:var(--r-md);padding:1.15rem 1.25rem;
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo))}
+.btn{display:inline-flex;align-items:center;gap:.55rem;font:600 .93rem/1 var(--sans);
+  border-radius:11px;padding:.85rem 1.25rem;border:1px solid transparent;cursor:pointer;
+  transition:transform .18s var(--ease),box-shadow .18s var(--ease),border-color .18s var(--ease)}
+.btn-1{background:var(--held);color:var(--held-ink);box-shadow:0 10px 30px -12px rgba(34,211,238,.9)}
+.btn-1:hover{transform:translateY(-2px);box-shadow:0 16px 40px -14px rgba(34,211,238,1);text-decoration:none}
+.btn-1:disabled{opacity:.55;cursor:progress;transform:none;box-shadow:none}
+#live-out{margin-top:1rem}
+#live-out .lrow{font-family:var(--mono);font-size:.85rem;color:var(--text);padding:.3rem 0}
+#live-out .err{color:var(--pull);font-family:var(--sans);font-size:.9rem;line-height:1.6}
+
+/* ── footer ──────────────────────────────────────────────────────────────── */
+footer.site{border-top:1px solid var(--line-soft);padding:3rem 0 3.4rem;background:var(--plate-2)}
+footer p{font-size:.865rem;line-height:1.6}
+.fcols{display:grid;grid-template-columns:1.2fr 1fr;gap:2rem}
+@media (max-width:760px){.fcols{grid-template-columns:1fr}}
+footer .fl{display:grid;gap:.5rem}
+footer .fl a{font-size:.885rem}
+footer .fact{margin-top:2rem;padding-top:1.2rem;border-top:1px dashed var(--line);
+  font:400 .72rem/1.7 var(--mono);color:var(--dim);word-break:break-all}
+
+/* ── reveal on scroll ────────────────────────────────────────────────────── */
+.js .rv{opacity:0;transform:translateY(16px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.js .rv.in{opacity:1;transform:none}
+.js .rv.d1{transition-delay:.07s}.js .rv.d2{transition-delay:.14s}.js .rv.d3{transition-delay:.21s}
+
+/* ── reduced motion ──────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none !important;transition:none !important}
+  .js .rv{opacity:1 !important;transform:none !important}
+}
+/* ── the plate is the design in both schemes — never a white flash ───────── */
+@media (prefers-color-scheme:light){
+  html,body{background:var(--plate);color:var(--text)}
+}
+</style>
+</head>
+<body id="top">
+<div class="bg" aria-hidden="true"></div>
+<a class="skip" href="#book">Skip to the typed book</a>
+
+<header class="site">
+  <div class="shell">
+    <a class="brand" href="../index.html" aria-label="rampart — back to the overview">
+      <svg class="wordmark" viewBox="-1 -44 251 59" role="img" aria-label="rampart" focusable="false">
+        <g id="wm-glyphs">
+          <path fill="#E2E8F0" d="M12.54 0L4.48 0L4.48-31.74L12.42-31.74L12.42-28.16L13.57-28.16Q14.27-30.08 15.90-30.98Q17.54-31.87 19.71-31.87L23.55-31.87L23.55-24.70L19.58-24.70Q16.51-24.70 14.53-23.07Q12.54-21.44 12.54-18.05L12.54 0M38.91 0.90Q35.52 0.90 32.83-0.29Q30.14-1.47 28.58-3.74Q27.01-6.02 27.01-9.28Q27.01-12.54 28.58-14.75Q30.14-16.96 32.93-18.08Q35.71-19.20 39.30-19.20L48-19.20L48-20.99Q48-23.23 46.59-24.67Q45.18-26.11 42.11-26.11Q39.10-26.11 37.63-24.74Q36.16-23.36 35.71-21.18L28.29-23.68Q29.06-26.11 30.75-28.13Q32.45-30.14 35.30-31.39Q38.14-32.64 42.24-32.64Q48.51-32.64 52.16-29.50Q55.81-26.37 55.81-20.42L55.81-8.58Q55.81-6.66 57.60-6.66L60.16-6.66L60.16 0L54.78 0Q52.42 0 50.88-1.15Q49.34-2.30 49.34-4.22L49.34-4.29L48.13-4.29Q47.87-3.52 46.98-2.27Q46.08-1.02 44.16-0.06Q42.24 0.90 38.91 0.90M40.32-5.63Q43.71-5.63 45.86-7.52Q48-9.41 48-12.54L48-13.18L39.87-13.18Q37.63-13.18 36.35-12.22Q35.07-11.26 35.07-9.54Q35.07-7.81 36.42-6.72Q37.76-5.63 40.32-5.63M74.11 0L66.05 0L66.05-31.74L73.98-31.74L73.98-28.29L75.14-28.29Q75.97-29.89 77.89-31.07Q79.81-32.26 82.94-32.26Q86.34-32.26 88.38-30.94Q90.43-29.63 91.52-27.52L92.67-27.52Q93.76-29.57 95.74-30.91Q97.73-32.26 101.38-32.26Q104.32-32.26 106.72-31.01Q109.12-29.76 110.56-27.23Q112-24.70 112-20.86L112 0L103.94 0L103.94-20.29Q103.94-22.91 102.59-24.22Q101.25-25.54 98.82-25.54Q96.06-25.54 94.56-23.78Q93.06-22.02 93.06-18.75L93.06 0L84.99 0L84.99-20.29Q84.99-22.91 83.65-24.22Q82.30-25.54 79.87-25.54Q77.12-25.54 75.62-23.78Q74.11-22.02 74.11-18.75"/>
+          <path fill="#22D3EE" transform="translate(116.22 0)" d="M12.54 12.80L4.48 12.80L4.48-31.74L12.42-31.74L12.42-27.90L13.57-27.90Q14.66-29.76 16.96-31.20Q19.26-32.64 23.55-32.64Q27.39-32.64 30.66-30.75Q33.92-28.86 35.90-25.22Q37.89-21.57 37.89-16.38L37.89-15.36Q37.89-10.18 35.90-6.53Q33.92-2.88 30.66-0.99Q27.39 0.90 23.55 0.90Q20.67 0.90 18.72 0.22Q16.77-0.45 15.58-1.50Q14.40-2.56 13.70-3.65L12.54-3.65L12.54 12.80M21.12-6.14Q24.90-6.14 27.36-8.54Q29.82-10.94 29.82-15.55L29.82-16.19Q29.82-20.80 27.33-23.20Q24.83-25.60 21.12-25.60Q17.41-25.60 14.91-23.20Q12.42-20.80 12.42-16.19L12.42-15.55Q12.42-10.94 14.91-8.54Q17.41-6.14 21.12-6.14M55.17 0.90Q51.78 0.90 49.09-0.29Q46.40-1.47 44.83-3.74Q43.26-6.02 43.26-9.28Q43.26-12.54 44.83-14.75Q46.40-16.96 49.18-18.08Q51.97-19.20 55.55-19.20L64.26-19.20L64.26-20.99Q64.26-23.23 62.85-24.67Q61.44-26.11 58.37-26.11Q55.36-26.11 53.89-24.74Q52.42-23.36 51.97-21.18L44.54-23.68Q45.31-26.11 47.01-28.13Q48.70-30.14 51.55-31.39Q54.40-32.64 58.50-32.64Q64.77-32.64 68.42-29.50Q72.06-26.37 72.06-20.42L72.06-8.58Q72.06-6.66 73.86-6.66L76.42-6.66L76.42 0L71.04 0Q68.67 0 67.14-1.15Q65.60-2.30 65.60-4.22L65.60-4.29L64.38-4.29Q64.13-3.52 63.23-2.27Q62.34-1.02 60.42-0.06Q58.50 0.90 55.17 0.90M56.58-5.63Q59.97-5.63 62.11-7.52Q64.26-9.41 64.26-12.54L64.26-13.18L56.13-13.18Q53.89-13.18 52.61-12.22Q51.33-11.26 51.33-9.54Q51.33-7.81 52.67-6.72Q54.02-5.63 56.58-5.63M90.37 0L82.30 0L82.30-31.74L90.24-31.74L90.24-28.16L91.39-28.16Q92.10-30.08 93.73-30.98Q95.36-31.87 97.54-31.87L101.38-31.87L101.38-24.70L97.41-24.70Q94.34-24.70 92.35-23.07Q90.37-21.44 90.37-18.05L90.37 0M128.77 0L119.81 0Q116.67 0 114.72-1.95Q112.77-3.90 112.77-7.17L112.77-25.09L104.83-25.09L104.83-31.74L112.77-31.74L112.77-41.60L120.83-41.60L120.83-31.74L129.54-31.74L129.54-25.09L120.83-25.09L120.83-8.58Q120.83-6.66 122.62-6.66L128.77-6.66"/>
+        </g>
+      </svg>
+      <span class="sub">typed book</span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#classes">The classes</a>
+      <a href="#book">The book</a>
+      <a href="#owners">The owners</a>
+      <a href="#provenance">Provenance</a>
+      <a href="#live">Live check</a>
+      <a href="../index.html">← Overview</a>
+      <a class="gh" href="https://github.com/edycutjong/rampart">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ══════════════════════ HERO ══════════════════════ -->
+<section class="hero" aria-labelledby="h1">
+  <div class="shell">
+    <ul class="rail">
+      <li class="tag tag-live">block <span id="t-block">468,201,000</span> · pinned · reproducible</li>
+      <li class="tag">Somnia Shannon · chain 50312</li>
+      <li class="tag"><span id="t-when">2026-08-22 10:01:32 UTC</span></li>
+    </ul>
+    <h1 id="h1"><span class="pc" id="t-pct">0.1%</span> of this book cannot be withdrawn. The rest has to say so.</h1>
+    <p class="lede">A real Somnia binary order book, read at a pinned block, with <strong>every resting order
+      typed by who owns it</strong>. FIRM depth is owned by an attested contract with no cancel path.
+      Everything else is labelled exactly as much as can be proven — and no more.</p>
+
+    <div class="metrics" role="group" aria-label="Book summary at the pinned block">
+      <div class="metric">
+        <p class="k">resting orders</p>
+        <p class="v" id="m-orders">11</p>
+        <p class="s" id="m-sides">8 bids · 3 asks · 6 distinct owners</p>
+      </div>
+      <div class="metric">
+        <p class="k">firm — cannot be withdrawn</p>
+        <p class="v hi" id="m-firm">2</p>
+        <p class="s" id="m-firm-s">orders · 2 shares · attested + locked</p>
+      </div>
+      <div class="metric">
+        <p class="k">pullable — can vanish</p>
+        <p class="v" id="m-pull">0</p>
+        <p class="s" id="m-pull-s">orders owned by a plain wallet at this block</p>
+      </div>
+      <div class="metric">
+        <p class="k">unverified — no claim</p>
+        <p class="v" id="m-unv">9</p>
+        <p class="s" id="m-unv-s">orders · 1,983 shares · unattested contracts</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ 01 · THE CLASSES ══════════════════════ -->
+<section id="classes" aria-labelledby="h-classes">
+  <div class="shell">
+    <div class="shead"><span class="idx">01</span><span class="kicker">The classes</span><span class="rule"></span></div>
+    <div class="stitle">
+      <h2 id="h-classes" class="rv">Three labels, and one of them is a refusal to label</h2>
+      <p class="sublede rv"><span class="mono">Order.owner</span> is readable on-chain. The class comes from the
+        owner's <span class="mono">EXTCODEHASH</span> checked against an attested set — never from a promise.</p>
+    </div>
+
+    <div class="g3" style="margin-top:1.7rem">
+      <div class="card top-held rv d1">
+        <h3><span class="cls cls-firm"><i aria-hidden="true"></i>FIRM</span></h3>
+        <p>Owner is a contract whose exact runtime code hash is <strong>attested</strong>, still inside its
+          lock window. It has no cancel path, no reduce path, and grants no operator.</p>
+        <p class="claim"><b>Claim:</b> this depth cannot be withdrawn — until its own expiry, which is shown.</p>
+      </div>
+      <div class="card top-pull rv d2">
+        <h3><span class="cls cls-pull"><i aria-hidden="true"></i>PULLABLE</span></h3>
+        <p>Owner is a plain wallet (<span class="mono">EXTCODEHASH</span> of empty code). One transaction
+          cancels it.</p>
+        <p class="claim"><b>Claim:</b> this depth can vanish in one block.</p>
+      </div>
+      <div class="card top-slate rv d3">
+        <h3><span class="cls cls-unv"><i aria-hidden="true"></i>UNVERIFIED</span></h3>
+        <p>Owner is a contract whose code hash is <strong>not attested</strong>. It is drawn in neutral slate
+          with a dashed outline because it is a <em>no-claim</em> state — not an accusation.</p>
+        <p class="claim"><b>Claim:</b> none. The reason column shows exactly what the static scan found.</p>
+      </div>
+    </div>
+
+    <div class="naive-strip rv" role="note">
+      <b>The check this replaces:</b> a naive <span class="mono">EXTCODESIZE&nbsp;&gt;&nbsp;0</span> test reads
+      this same book as <b id="t-naive">11/11 FIRM</b> — every owner below has code. Nine of those orders carry
+      escape indicators (<span class="mono">DELEGATECALL</span>, forbidden operator-grant and
+      <span class="mono">reduceOrder</span> selectors) that the naive check cannot see.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ 02 · THE BOOK ══════════════════════ -->
+<section id="book" aria-labelledby="h-book">
+  <div class="shell">
+    <div class="shead"><span class="idx">02</span><span class="kicker">The typed book</span><span class="rule"></span></div>
+    <div class="stitle">
+      <h2 id="h-book" class="rv">Every level, every owner, every reason</h2>
+      <p class="sublede rv">Asks on top, bids below, best prices at the spread — a ladder, exactly as a trader
+        reads it. The <strong>reason</strong> column is the product: the badge is only its summary.</p>
+    </div>
+
+    <div class="bookwrap rv" style="margin-top:1.7rem">
+      <div class="bookbar">
+        <span>pool <span class="mono" id="t-pool">0x54d9…be00</span> · YES prices in TestUSDC ¢ per share</span>
+        <span class="mono" id="t-bookmeta">pinned @ 468,201,000</span>
+      </div>
+      <div class="scrollx" tabindex="0" role="region" aria-label="The typed order book — scrolls horizontally on small screens">
+        <table class="book">
+          <caption>Resting orders at block 468,201,000, classified FIRM / PULLABLE / UNVERIFIED.
+            Price is the YES price (raw price ÷ 10⁶ TestUSDC — also the implied probability);
+            size is outcome shares (raw quantity ÷ 10⁶). Nothing in this table is sample data.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Side</th>
+              <th scope="col">Price (YES)</th>
+              <th scope="col">Size</th>
+              <th scope="col">Class</th>
+              <th scope="col">Owner</th>
+              <th scope="col">Reason — why this label</th>
+            </tr>
+          </thead>
+          <tbody id="book-body">
+            <tr><td colspan="6" style="padding:1rem;color:var(--dim)">Rendering the pinned snapshot…
+              if this text persists, JavaScript is disabled — the same data is in
+              <a href="book-468201000.json">book-468201000.json</a> and reproduced by
+              <span class="mono">node script/firmness.mjs --block 468201000</span>.</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="6" id="book-foot">Totals — FIRM 2,000,000 raw units (2 shares) of 1,985,000,000
+              displayed (1,985 shares) → <strong style="color:var(--held)">0.1% of the book cannot be
+              withdrawn</strong>. The remaining 99.9% is UNVERIFIED: depth about which no firmness claim can
+              honestly be made.</td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ 03 · THE OWNERS ══════════════════════ -->
+<section id="owners" aria-labelledby="h-owners">
+  <div class="shell">
+    <div class="shead"><span class="idx">03</span><span class="kicker">The owners</span><span class="rule"></span></div>
+    <div class="stitle">
+      <h2 id="h-owners" class="rv">Six addresses hold this whole book</h2>
+      <p class="sublede rv">Each card is one distinct <span class="mono">Order.owner</span>, its live code hash,
+        and what the static policy found in its bytecode. Labels are attached only where the address matches a
+        recorded rampart deployment — everything else is honestly marked third-party.</p>
+    </div>
+    <div class="owners rv" id="owner-cards" style="margin-top:1.7rem"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════ 04 · PROVENANCE ══════════════════════ -->
+<section id="provenance" aria-labelledby="h-prov">
+  <div class="shell">
+    <div class="shead"><span class="idx">04</span><span class="kicker">Provenance</span><span class="rule"></span></div>
+    <div class="stitle">
+      <h2 id="h-prov" class="rv">Where every number on this page comes from</h2>
+      <p class="sublede rv">This page renders a committed snapshot of <strong>real chain state</strong> at a
+        pinned block on Somnia's archival RPC. Nothing on this page is invented, sampled, or staged.</p>
+    </div>
+
+    <div class="g2" style="margin-top:1.7rem">
+      <div class="term rv d1">
+        <div class="term-bar"><span>reproduce this page's numbers</span>
+          <button class="copy" type="button" data-copy="cmd-repro" aria-label="Copy the reproduce command">copy</button></div>
+        <pre id="cmd-repro"><span class="c"># the same engine, the same block, the same 0.1%:</span>
+node script/firmness.mjs --block 468201000
+
+<span class="c"># regenerate the snapshot this page renders:</span>
+node site/viewer/make-snapshot.mjs --block 468201000</pre>
+        <p class="note"><strong>Why a pinned block?</strong> Shannon testnet pools cycle roughly daily, so
+          <span class="mono">latest</span> rots. Somnia's public RPC is archival: pinning block
+          468,201,000 reproduces this exact book, byte for byte, on demand.</p>
+      </div>
+      <div class="term rv d2">
+        <div class="term-bar"><span>the attested set behind FIRM</span></div>
+        <pre><span class="c"># exactly ONE code hash is attested — FirmQuote's live runtime code,</span>
+<span class="c"># read from S0 at the pinned block, hashed with our own keccak-256:</span>
+0xc60110e004cce8ade40d4e6d958c873715
+  cac060b839b6b42a4fb762a16358b5</pre>
+        <p class="note"><strong>FIRM means attested and inside the lock window</strong> — not "proven
+          irrevocable". The static policy (<span class="mono">analyze()</span>) rejects the known escapes;
+          attestation itself is a human-reviewed list. Depth that merely <em>looks</em> firm mints
+          UNVERIFIED, which makes no claim.</p>
+      </div>
+    </div>
+
+    <p class="rv" style="margin-top:1.2rem;max-width:78ch;color:var(--dim);font-size:.9rem">
+      Machine-readable copy of everything rendered here:
+      <a href="book-468201000.json">book-468201000.json</a> — generated
+      <span class="mono" id="t-generated">2026-08-26</span> by
+      <span class="mono">site/viewer/make-snapshot.mjs</span> against
+      <span class="mono">api.infra.testnet.somnia.network</span>, using the same
+      <span class="mono">script/lib/</span> engine as the CLI and CI.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════ 05 · LIVE CHECK ══════════════════════ -->
+<section id="live" aria-labelledby="h-live">
+  <div class="shell">
+    <div class="shead"><span class="idx">05</span><span class="kicker">Live check</span><span class="rule"></span></div>
+    <div class="stitle">
+      <h2 id="h-live" class="rv">Don't trust the snapshot? Ask the chain now.</h2>
+      <p class="sublede rv">This button re-reads the same pool at <span class="mono">latest</span>, straight
+        from your browser: the resting book, each owner's code, its keccak-256 hash against the attested set,
+        and the lock window. Read-only — no wallet, no funds.</p>
+    </div>
+
+    <div class="livebox rv" style="margin-top:1.7rem">
+      <button class="btn btn-1" type="button" id="live-btn">Re-read the live book</button>
+      <div id="live-out" role="status" aria-live="polite"></div>
+      <p style="margin-top:1rem;font-size:.82rem;color:var(--dim)">Honest caveats: a live read is
+        <em>not</em> the pinned snapshot above — pools cycle, books empty, and an empty book yields a vacuous
+        0% which is reported as vacuous, not as a finding. The in-browser check classifies by code hash and
+        lock window only; for the analyzer's per-bytecode reasons, run
+        <span class="mono">node script/firmness.mjs</span>. If the RPC refuses browser requests (CORS) or you
+        are offline, this fails visibly and the snapshot stands.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="site">
+  <div class="shell">
+    <div class="fcols">
+      <div>
+        <svg class="wordmark" viewBox="-1 -44 251 59" role="img" aria-label="rampart" focusable="false" style="height:17px;width:auto">
+          <use href="#wm-glyphs"></use>
+        </svg>
+        <p style="max-width:42ch;margin-top:.9rem">Order-book depth the protocol itself will not let you
+          withdraw.<br>Built for the <strong style="color:var(--text-max)">Event Contracts Hackathon</strong>
+          — Somnia × DreamDEX, on DoraHacks.</p>
+        <p style="margin-top:.7rem;color:var(--dim)">MIT license · Solidity · Foundry · Somnia Shannon testnet</p>
+      </div>
+      <div>
+        <ul class="fl" aria-label="Project links">
+          <li><a href="../index.html">Overview — the failed cancel, the mechanism</a></li>
+          <li><a href="../pitch/index.html">Pitch deck</a></li>
+          <li><a href="book-468201000.json">book-468201000.json — this page's data</a></li>
+          <li><a href="https://github.com/edycutjong/rampart">Repository — github.com/edycutjong/rampart ↗</a></li>
+          <li><a href="https://shannon-explorer.somnia.network/address/0x54d90260fe949940a80602e7fda8ebd729c5be00">This pool on the explorer ↗</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fact">BinaryPool 0x54d90260fe949940a80602e7fda8ebd729c5be00 · pinned block 468201000 ·
+      attested EXTCODEHASH 0xc60110e004cce8ade40d4e6d958c873715cac060b839b6b42a4fb762a16358b5 ·
+      firmness = Σ firm ÷ Σ displayed = 0.1%</p>
+  </div>
+</footer>
+
+<!-- The pinned snapshot this page renders. Injected verbatim by make-snapshot.mjs
+     from live chain state — do not hand-edit; regenerate instead. -->
+<script id="snapshot" type="application/json">
+{
+  "_provenance": {
+    "generatedAt": "2026-08-26T06:22:29.862Z",
+    "generatedBy": "node site/viewer/make-snapshot.mjs --block 468201000",
+    "reproduce": "node script/firmness.mjs --block 468201000",
+    "rpc": "https://api.infra.testnet.somnia.network",
+    "pinned": true,
+    "note": "Every value below is read or derived from Somnia Shannon chain state at the pinned block. Owner labels are attached only where the on-chain owner address matches a recorded rampart corpus deployment (script/corpus.deployed.json)."
+  },
+  "chainId": 50312,
+  "pool": "0x54d90260fe949940a80602e7fda8ebd729c5be00",
+  "market": "0xf03c5f0648F77A4BF7358DC2c914BDB5e9c3303E",
+  "collateral": "0x70a86D8842FB63C4Ad2b7cdddF530eBf1BB25d8E",
+  "explorer": "https://shannon-explorer.somnia.network",
+  "block": 468201000,
+  "blockTimestamp": 1787392892,
+  "counts": {
+    "orders": 11,
+    "bids": 8,
+    "asks": 3,
+    "distinctOwners": 6,
+    "FIRM": 2,
+    "PULLABLE": 0,
+    "UNVERIFIED": 9
+  },
+  "units": {
+    "firm": "2000000",
+    "pullable": "0",
+    "unverified": "1983000000",
+    "total": "1985000000"
+  },
+  "firmPct": 0.1,
+  "attestedSet": [
+    {
+      "codehash": "0xc60110e004cce8ade40d4e6d958c873715cac060b839b6b42a4fb762a16358b5",
+      "name": "FirmQuote(live)",
+      "source": "S0 0x8116c3a4DE042D4A215B532B7C4054F36e074B68 runtime code, read at the pinned block"
+    }
+  ],
+  "owners": {
+    "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c": {
+      "address": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "codehash": "0x718f029518961be8f76a5a91d56b8f3b9bfd8b47d8bf40648c05c3992c4dd388",
+      "codeBytes": 291,
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM",
+      "analyzerReason": "DELEGATECALL present (1)",
+      "unlockAt": null,
+      "label": null
+    },
+    "0x8116c3a4de042d4a215b532b7c4054f36e074b68": {
+      "address": "0x8116c3a4de042d4a215b532b7c4054f36e074b68",
+      "codehash": "0xc60110e004cce8ade40d4e6d958c873715cac060b839b6b42a4fb762a16358b5",
+      "codeBytes": 2424,
+      "class": "FIRM",
+      "reason": "attested + locked",
+      "naiveClass": "FIRM",
+      "analyzerReason": null,
+      "unlockAt": 1787443200,
+      "label": {
+        "id": "S0",
+        "name": "FirmQuote",
+        "attack": "none"
+      }
+    },
+    "0xc9d977db64c61ad8ff5e0887c22fe897a09efd1f": {
+      "address": "0xc9d977db64c61ad8ff5e0887c22fe897a09efd1f",
+      "codehash": "0xa6ecab4ec0ee48949784f21a75acfc5dd20edc2918b74a9efdde485a0cd8367a",
+      "codeBytes": 2816,
+      "class": "UNVERIFIED",
+      "reason": "forbidden selector setOperatorApprovalForPool(address,address,bytes4[],bool)",
+      "naiveClass": "FIRM",
+      "analyzerReason": "forbidden selector setOperatorApprovalForPool(address,address,bytes4[],bool)",
+      "unlockAt": null,
+      "label": null
+    },
+    "0xa13166927bcf78d8e04f125d3ed0e8a076f021f8": {
+      "address": "0xa13166927bcf78d8e04f125d3ed0e8a076f021f8",
+      "codehash": "0xed1950fe8a01423a91381abcdf0cc6c589ce058aeb258cb1116c92476cd76940",
+      "codeBytes": 2987,
+      "class": "UNVERIFIED",
+      "reason": "forbidden selector setOperatorApprovalForPool(address,address,bytes4[],bool); forbidden selector setOperatorApprovalGlobal(address,bytes4[],bool)",
+      "naiveClass": "FIRM",
+      "analyzerReason": "forbidden selector setOperatorApprovalForPool(address,address,bytes4[],bool); forbidden selector setOperatorApprovalGlobal(address,bytes4[],bool)",
+      "unlockAt": null,
+      "label": {
+        "id": "S4",
+        "name": "OperatorGranter",
+        "attack": "late operator grant (A4)"
+      }
+    },
+    "0xdcec48656c5c6ed78e91d04b2dbf1dcc069a0b4e": {
+      "address": "0xdcec48656c5c6ed78e91d04b2dbf1dcc069a0b4e",
+      "codehash": "0xc60110e004cce8ade40d4e6d958c873715cac060b839b6b42a4fb762a16358b5",
+      "codeBytes": 2424,
+      "class": "FIRM",
+      "reason": "attested + locked",
+      "naiveClass": "FIRM",
+      "analyzerReason": null,
+      "unlockAt": 1787443200,
+      "label": null
+    },
+    "0x797fe26f8a6a65ea757347b71915119c49c049a7": {
+      "address": "0x797fe26f8a6a65ea757347b71915119c49c049a7",
+      "codehash": "0x7a5815d7be4d257622cc9cecf9909f1f0c8e9cf403d66e494a4895124057131e",
+      "codeBytes": 2634,
+      "class": "UNVERIFIED",
+      "reason": "forbidden selector reduceOrder(uint128,uint256)",
+      "naiveClass": "FIRM",
+      "analyzerReason": "forbidden selector reduceOrder(uint128,uint256)",
+      "unlockAt": null,
+      "label": {
+        "id": "S5",
+        "name": "QuietReduce",
+        "attack": "quiet reduce, no fill (A5)"
+      }
+    }
+  },
+  "orders": [
+    {
+      "orderId": "36893488147419216676",
+      "side": "bid",
+      "owner": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "price": "24000",
+      "fullQuantity": "200000000",
+      "quantityRemaining": "200000000",
+      "expireTimestampNs": "1787392922000000000",
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "166020696663386077984",
+      "side": "bid",
+      "owner": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "price": "17000",
+      "fullQuantity": "330000000",
+      "quantityRemaining": "330000000",
+      "expireTimestampNs": "1787392914000000000",
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "92233720368547870994",
+      "side": "bid",
+      "owner": "0x8116c3a4de042d4a215b532b7c4054f36e074b68",
+      "price": "10000",
+      "fullQuantity": "1000000",
+      "quantityRemaining": "1000000",
+      "expireTimestampNs": "1787443200000000000",
+      "class": "FIRM",
+      "reason": "attested + locked",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "18446744073709664558",
+      "side": "bid",
+      "owner": "0xc9d977db64c61ad8ff5e0887c22fe897a09efd1f",
+      "price": "10000",
+      "fullQuantity": "1000000",
+      "quantityRemaining": "1000000",
+      "expireTimestampNs": "1787443200000000000",
+      "class": "UNVERIFIED",
+      "reason": "forbidden selector setOperatorApprovalForPool(address,address,bytes4[],bool)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "110680464442257422795",
+      "side": "bid",
+      "owner": "0xa13166927bcf78d8e04f125d3ed0e8a076f021f8",
+      "price": "10000",
+      "fullQuantity": "1000000",
+      "quantityRemaining": "1000000",
+      "expireTimestampNs": "1787443200000000000",
+      "class": "UNVERIFIED",
+      "reason": "forbidden selector setOperatorApprovalForPool(address,address,bytes4[],bool); forbidden selector setOperatorApprovalGlobal(address,bytes4[],bool)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "184467440737095629365",
+      "side": "bid",
+      "owner": "0xdcec48656c5c6ed78e91d04b2dbf1dcc069a0b4e",
+      "price": "10000",
+      "fullQuantity": "1000000",
+      "quantityRemaining": "1000000",
+      "expireTimestampNs": "1787443200000000000",
+      "class": "FIRM",
+      "reason": "attested + locked",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "202914184810805181207",
+      "side": "bid",
+      "owner": "0x797fe26f8a6a65ea757347b71915119c49c049a7",
+      "price": "10000",
+      "fullQuantity": "1000000",
+      "quantityRemaining": "1000000",
+      "expireTimestampNs": "1787443200000000000",
+      "class": "UNVERIFIED",
+      "reason": "forbidden selector reduceOrder(uint128,uint256)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "129127208515966974754",
+      "side": "bid",
+      "owner": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "price": "10000",
+      "fullQuantity": "460000000",
+      "quantityRemaining": "460000000",
+      "expireTimestampNs": "1787392914000000000",
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "147573952589676526373",
+      "side": "ask",
+      "owner": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "price": "45000",
+      "fullQuantity": "200000000",
+      "quantityRemaining": "200000000",
+      "expireTimestampNs": "1787392922000000000",
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "55340232221128768289",
+      "side": "ask",
+      "owner": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "price": "53000",
+      "fullQuantity": "330000000",
+      "quantityRemaining": "330000000",
+      "expireTimestampNs": "1787392914000000000",
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "73786976294838319907",
+      "side": "ask",
+      "owner": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "price": "61000",
+      "fullQuantity": "460000000",
+      "quantityRemaining": "460000000",
+      "expireTimestampNs": "1787392914000000000",
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM"
+    }
+  ]
+}
+</script><!-- /snapshot -->
+
+<script>
+(function(){
+"use strict";
+
+/* ── snapshot rendering ──────────────────────────────────────────────────── */
+var S;
+try { S = JSON.parse(document.getElementById("snapshot").textContent); }
+catch (e) { S = null; }
+
+var CLS = {
+  FIRM:       { cls:"cls-firm", row:"r-firm", bar:"sb-firm", label:"FIRM — attested and inside its lock window" },
+  PULLABLE:   { cls:"cls-pull", row:"r-pull", bar:"sb-pull", label:"PULLABLE — owned by a plain wallet, can vanish in one block" },
+  UNVERIFIED: { cls:"cls-unv",  row:"r-unv",  bar:"sb-unv",  label:"UNVERIFIED — no claim is made about this depth" }
+};
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function shortAddr(a){ return a.slice(0,6) + "…" + a.slice(-4); }
+function cents(raw){ return (Number(raw) / 1e6 * 100).toFixed(1) + "¢"; }
+function shares(raw){ var n = Number(raw) / 1e6;
+  return n.toLocaleString("en-US", {maximumFractionDigits: 2}); }
+function badge(c){ var m = CLS[c];
+  return '<span class="cls ' + m.cls + '" aria-label="' + esc(m.label) + '"><i aria-hidden="true"></i>' + c + "</span>"; }
+function utc(sec){ var d = new Date(sec * 1000);
+  return d.toISOString().replace("T"," ").replace(/\.\d+Z$/," UTC"); }
+function delta(fromSec, toSec){
+  var s = toSec - fromSec, sign = s < 0 ? "−" : "+"; s = Math.abs(s);
+  if (s < 90) return sign + s + "s";
+  if (s < 5400) return sign + Math.round(s/60) + "m";
+  return sign + Math.floor(s/3600) + "h" + Math.round((s%3600)/60) + "m";
+}
+
+function render(){
+  if (!S || !S.orders) return; // static fallback text stays
+  var ts = S.blockTimestamp;
+
+  /* hero + strips from the same JSON the file ships with */
+  document.getElementById("t-block").textContent = S.block.toLocaleString("en-US");
+  document.getElementById("t-when").textContent = utc(ts);
+  document.getElementById("t-pct").textContent = S.firmPct + "%";
+  document.getElementById("m-orders").textContent = S.counts.orders;
+  document.getElementById("m-sides").textContent =
+    S.counts.bids + " bids · " + S.counts.asks + " asks · " + S.counts.distinctOwners + " distinct owners";
+  document.getElementById("m-firm").textContent = S.counts.FIRM;
+  document.getElementById("m-firm-s").textContent = "orders · " + shares(S.units.firm) + " shares · attested + locked";
+  document.getElementById("m-pull").textContent = S.counts.PULLABLE;
+  document.getElementById("m-unv").textContent = S.counts.UNVERIFIED;
+  document.getElementById("m-unv-s").textContent = "orders · " + shares(S.units.unverified) + " shares · unattested contracts";
+  var naiveFirm = S.orders.filter(function(o){ return o.naiveClass === "FIRM"; }).length;
+  document.getElementById("t-naive").textContent = naiveFirm + "/" + S.counts.orders + " FIRM";
+  document.getElementById("t-pool").textContent = shortAddr(S.pool);
+  document.getElementById("t-bookmeta").textContent = "pinned @ " + S.block.toLocaleString("en-US");
+  document.getElementById("t-generated").textContent = S._provenance.generatedAt.slice(0,10);
+
+  /* ladder: asks high→low, spread, bids high→low */
+  var asks = S.orders.filter(function(o){ return o.side === "ask"; })
+    .sort(function(a,b){ return Number(b.price) - Number(a.price); });
+  var bids = S.orders.filter(function(o){ return o.side === "bid"; })
+    .sort(function(a,b){ return Number(b.price) - Number(a.price); });
+  var maxShares = 0;
+  S.orders.forEach(function(o){ maxShares = Math.max(maxShares, Number(o.quantityRemaining)); });
+
+  function row(o){
+    var m = CLS[o.class], own = S.owners[o.owner.toLowerCase()] || {};
+    var lbl = "";
+    if (own.label) {
+      var ours = own.label.attack === "none";
+      lbl = '<span class="chip ' + (ours ? "chip-ours" : "chip-adv") + '">' +
+        esc(own.label.id + " " + own.label.name) + "</span>";
+    } else if (o.class !== "PULLABLE") {
+      lbl = '<span class="chip">third party</span>';
+    }
+    var horizon;
+    var expSec = Number(BigInt(o.expireTimestampNs) / 1000000000n);
+    if (o.class === "FIRM") {
+      var until = Math.min(own.unlockAt || expSec, expSec);
+      horizon = "firm until " + utc(until) + " (" + delta(S.blockTimestamp, until) + " after this block; lock = expiry)";
+    } else {
+      horizon = "order expires " + delta(S.blockTimestamp, expSec) + " after this block";
+    }
+    var w = Math.max(1.5, Number(o.quantityRemaining) / maxShares * 100);
+    return '<tr class="' + m.row + '">' +
+      '<td><span class="side side-' + o.side + '">' + o.side.toUpperCase() + "</span></td>" +
+      '<td><span class="num">' + cents(o.price) + '</span><span class="raw">raw ' + esc(o.price) + "</span></td>" +
+      '<td><span class="num">' + shares(o.quantityRemaining) + ' sh</span>' +
+        '<span class="raw">raw ' + esc(o.quantityRemaining) + "</span>" +
+        '<span class="sizebar ' + m.bar + '" aria-hidden="true"><b style="width:' + w.toFixed(1) + '%"></b></span></td>' +
+      "<td>" + badge(o.class) + "</td>" +
+      '<td class="owner-cell"><a href="' + esc(S.explorer) + "/address/" + esc(o.owner) +
+        '" aria-label="Owner ' + esc(o.owner) + ' on the Shannon explorer">' + shortAddr(o.owner) + "</a>" + lbl + "</td>" +
+      '<td><span class="reason">' + esc(o.reason) + '<span class="hz">' + esc(horizon) + "</span></span></td></tr>";
+  }
+
+  var bestAsk = asks.length ? Number(asks[asks.length-1].price) : null;
+  var bestBid = bids.length ? Number(bids[0].price) : null;
+  var spread = "";
+  if (bestAsk != null && bestBid != null) {
+    spread = '<tr class="spread"><td colspan="6">spread ' +
+      ((bestAsk - bestBid) / 1e6 * 100).toFixed(1) + "¢ — best ask " + cents(bestAsk) +
+      " / best bid " + cents(bestBid) + "</td></tr>";
+  }
+  document.getElementById("book-body").innerHTML =
+    asks.map(row).join("") + spread + bids.map(row).join("");
+
+  document.getElementById("book-foot").innerHTML =
+    "Totals — FIRM " + Number(S.units.firm).toLocaleString("en-US") + " raw units (" + shares(S.units.firm) +
+    " shares) of " + Number(S.units.total).toLocaleString("en-US") + " displayed (" + shares(S.units.total) +
+    ' shares) → <strong style="color:var(--held)">' + S.firmPct +
+    "% of the book cannot be withdrawn</strong>. PULLABLE " + S.counts.PULLABLE +
+    " · the remaining depth is UNVERIFIED: no firmness claim can honestly be made about it.";
+
+  /* owner cards */
+  var keys = Object.keys(S.owners).sort(function(a,b){
+    var order = { FIRM:0, PULLABLE:1, UNVERIFIED:2 };
+    return order[S.owners[a].class] - order[S.owners[b].class] || a.localeCompare(b);
+  });
+  document.getElementById("owner-cards").innerHTML = keys.map(function(k){
+    var o = S.owners[k];
+    var os = S.orders.filter(function(x){ return x.owner.toLowerCase() === k; });
+    var sum = 0n; os.forEach(function(x){ sum += BigInt(x.quantityRemaining); });
+    var who;
+    if (o.label && o.label.attack === "none") {
+      who = '<span class="chip chip-ours">' + esc(o.label.id + " " + o.label.name) + " — ours</span>";
+    } else if (o.label) {
+      who = '<span class="chip chip-adv">' + esc(o.label.id + " " + o.label.name) +
+        " — our adversarial corpus: " + esc(o.label.attack) + "</span>";
+    } else if (o.codehash.toLowerCase() === S.attestedSet[0].codehash.toLowerCase()) {
+      who = '<span class="chip chip-ours">code hash matches the attested FirmQuote build</span>';
+    } else {
+      who = '<span class="chip">unknown third party — not ours</span>';
+    }
+    return '<div class="ocard"><div class="ohead">' +
+      '<a class="addr" href="' + esc(S.explorer) + "/address/" + esc(o.address) + '">' + esc(o.address) + "</a>" +
+      badge(o.class) + "</div>" +
+      '<p style="margin-top:.5rem">' + who + "</p>" +
+      "<dl>" +
+      "<dt>orders</dt><dd>" + os.length + " · " + shares(sum.toString()) + " shares</dd>" +
+      "<dt>code</dt><dd>" + o.codeBytes + " bytes</dd>" +
+      "<dt>codehash</dt><dd>" + esc(o.codehash) + "</dd>" +
+      (o.unlockAt ? "<dt>unlocks</dt><dd>" + utc(o.unlockAt) + "</dd>" : "") +
+      "</dl>" +
+      '<p class="rsn"><strong style="color:var(--text)">why:</strong> ' + esc(o.reason) + "</p></div>";
+  }).join("");
+}
+render();
+
+/* ── shared page behaviour (same as ../index.html) ───────────────────────── */
+var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (!reduce && "IntersectionObserver" in window) {
+  document.documentElement.classList.add("js");
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    });
+  }, {rootMargin:"0px 0px -6% 0px", threshold:0.05});
+  Array.prototype.forEach.call(document.querySelectorAll(".rv"), function(el){ io.observe(el); });
+}
+var links = Array.prototype.slice.call(document.querySelectorAll(".nav a[href^='#']"));
+var targets = links.map(function(a){ return document.querySelector(a.getAttribute("href")); });
+var ticking = false;
+function paint(){
+  ticking = false;
+  var probe = window.scrollY + window.innerHeight * 0.28, cur = -1;
+  for (var i = 0; i < targets.length; i++) {
+    if (targets[i] && targets[i].offsetTop <= probe) cur = i;
+  }
+  links.forEach(function(a, i){ a.classList.toggle("on", i === cur); });
+}
+window.addEventListener("scroll", function(){
+  if (!ticking) { ticking = true; window.requestAnimationFrame(paint); }
+}, {passive:true});
+paint();
+Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function(btn){
+  btn.addEventListener("click", function(){
+    var src = document.getElementById(btn.getAttribute("data-copy"));
+    if (!src || !navigator.clipboard) return;
+    navigator.clipboard.writeText(src.textContent).then(function(){
+      var old = btn.textContent;
+      btn.textContent = "copied ✓"; btn.classList.add("done");
+      setTimeout(function(){ btn.textContent = old; btn.classList.remove("done"); }, 1600);
+    });
+  });
+});
+
+/* ── live check: keccak-256 + raw JSON-RPC, all in this file ─────────────── */
+/* Same keccak as script/lib/keccak.mjs (verified against `cast keccak`). */
+var RC64 = [0x1n,0x8082n,0x800000000000808an,0x8000000080008000n,0x808bn,0x80000001n,
+  0x8000000080008081n,0x8000000000008009n,0x8an,0x88n,0x80008009n,0x8000000an,
+  0x8000808bn,0x800000000000008bn,0x8000000000008089n,0x8000000000008003n,
+  0x8000000000008002n,0x8000000000000080n,0x800an,0x800000008000000an,
+  0x8000000080008081n,0x8000000000008080n,0x80000001n,0x8000000080008008n];
+var RR = [[0n,36n,3n,41n,18n],[1n,44n,10n,45n,2n],[62n,6n,43n,15n,61n],
+  [28n,55n,25n,21n,56n],[27n,20n,39n,8n,14n]];
+var MASK = (1n << 64n) - 1n;
+function rotl(x,n){ return ((x << n) | (x >> (64n - n))) & MASK; }
+function keccakF(s){
+  for (var r = 0; r < 24; r++){
+    var C = [], D = [], x, y;
+    for (x = 0; x < 5; x++) C[x] = s[x][0]^s[x][1]^s[x][2]^s[x][3]^s[x][4];
+    for (x = 0; x < 5; x++){
+      D[x] = C[(x+4)%5] ^ rotl(C[(x+1)%5], 1n);
+      for (y = 0; y < 5; y++) s[x][y] = (s[x][y] ^ D[x]) & MASK;
+    }
+    var B = [[],[],[],[],[]];
+    for (x = 0; x < 5; x++) for (y = 0; y < 5; y++)
+      B[y][(2*x+3*y)%5] = rotl(s[x][y], RR[x][y]);
+    for (x = 0; x < 5; x++) for (y = 0; y < 5; y++)
+      s[x][y] = (B[x][y] ^ ((~B[(x+1)%5][y]) & MASK & B[(x+2)%5][y])) & MASK;
+    s[0][0] = (s[0][0] ^ RC64[r]) & MASK;
+  }
+}
+function keccak256(bytes){
+  var RATE = 136, padded = new Uint8Array(Math.ceil((bytes.length+1)/RATE)*RATE);
+  padded.set(bytes); padded[bytes.length] |= 0x01; padded[padded.length-1] |= 0x80;
+  var s = [];
+  for (var x = 0; x < 5; x++){ s[x] = []; for (var y = 0; y < 5; y++) s[x][y] = 0n; }
+  for (var off = 0; off < padded.length; off += RATE){
+    for (var i = 0; i < RATE/8; i++){
+      var lane = 0n;
+      for (var b = 7; b >= 0; b--) lane = (lane << 8n) | BigInt(padded[off+i*8+b]);
+      s[i%5][(i/5)|0] ^= lane;
+    }
+    keccakF(s);
+  }
+  var out = "0x";
+  for (i = 0; i < 4; i++){
+    var v = s[i%5][(i/5)|0];
+    for (b = 0; b < 8; b++) out += Number((v >> BigInt(8*b)) & 0xffn).toString(16).padStart(2,"0");
+  }
+  return out;
+}
+function keccakHex(hex){
+  var h = hex.replace(/^0x/,""), u = new Uint8Array(h.length/2);
+  for (var i = 0; i < u.length; i++) u[i] = parseInt(h.substr(i*2,2),16);
+  return keccak256(u);
+}
+var rpcId = 0;
+function rpc(method, params){
+  return fetch(S._provenance.rpc, {
+    method:"POST", headers:{"content-type":"application/json"},
+    body: JSON.stringify({jsonrpc:"2.0", id:++rpcId, method:method, params:params})
+  }).then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(function(j){ if (j.error) throw new Error(j.error.message); return j.result; });
+}
+function words(hex){ var h = hex.replace(/^0x/,""), out = [];
+  for (var i = 0; i < h.length; i += 64) out.push(h.slice(i, i+64)); return out; }
+var EMPTY_HASH = "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470";
+var GET_ALL_OPEN = "0x4f2694cf", UNLOCK_AT = "0xaa5dec6f";
+function readSide(isBid){
+  var data = GET_ALL_OPEN + (isBid?"1":"0").padStart(64,"0") +
+    (200).toString(16).padStart(64,"0") + "".padStart(64,"0");
+  return rpc("eth_call", [{to: S.pool, data: data}, "latest"]).then(function(ret){
+    var w = words(ret), off = Number(BigInt("0x"+w[0]))/32;
+    var len = Number(BigInt("0x"+w[off])), orders = [];
+    for (var i = 0; i < len; i++){
+      var base = off + 1 + i*8;
+      orders.push({ owner: "0x"+w[base+2].slice(24), qty: BigInt("0x"+w[base+6]) });
+    }
+    return orders;
+  });
+}
+document.getElementById("live-btn").addEventListener("click", function(){
+  var btn = this, out = document.getElementById("live-out");
+  if (!S){ out.innerHTML = '<p class="err">No snapshot metadata — cannot locate the pool.</p>'; return; }
+  btn.disabled = true; btn.textContent = "Reading the chain…";
+  out.innerHTML = '<p class="lrow">eth_call → getAllOpenOrdersOffChain on ' + shortAddr(S.pool) + " @ latest…</p>";
+  var attested = S.attestedSet[0].codehash.toLowerCase();
+  Promise.all([readSide(true), readSide(false), rpc("eth_blockNumber", []),
+               rpc("eth_getBlockByNumber", ["latest", false])])
+  .then(function(res){
+    var bids = res[0], asks = res[1], blockN = parseInt(res[2],16),
+        ts = parseInt(res[3].timestamp,16), all = bids.concat(asks);
+    if (all.length === 0){
+      out.innerHTML = '<p class="lrow">block ' + blockN.toLocaleString("en-US") + " · 0 resting orders.</p>" +
+        '<p class="err">The book is empty right now — Shannon pools cycle roughly daily. An empty book yields ' +
+        "a vacuous 0% for any market, so no firmness number is reported. The pinned snapshot above remains the " +
+        "reproducible reference.</p>";
+      return;
+    }
+    var owners = {}; all.forEach(function(o){ owners[o.owner.toLowerCase()] = true; });
+    var keys = Object.keys(owners);
+    return Promise.all(keys.map(function(a){ return rpc("eth_getCode",[a,"latest"]); }))
+    .then(function(codes){
+      var hash = {}, isAttested = {};
+      keys.forEach(function(a,i){ hash[a] = keccakHex(codes[i] || "0x").toLowerCase();
+        isAttested[a] = hash[a] === attested; });
+      return Promise.all(keys.map(function(a){
+        if (!isAttested[a]) return Promise.resolve(null);
+        return rpc("eth_call",[{to:a,data:UNLOCK_AT},"latest"])
+          .then(function(r){ return r && r !== "0x" ? parseInt(r,16) : 0; })
+          .catch(function(){ return 0; });
+      })).then(function(unlocks){
+        var lockOk = {};
+        keys.forEach(function(a,i){ lockOk[a] = unlocks[i] !== null && unlocks[i] > ts; });
+        var total = 0n, firm = 0n, counts = {FIRM:0, PULLABLE:0, UNVERIFIED:0};
+        all.forEach(function(o){
+          var a = o.owner.toLowerCase(), c;
+          if (hash[a] === EMPTY_HASH) c = "PULLABLE";
+          else if (isAttested[a] && lockOk[a]) c = "FIRM";
+          else c = "UNVERIFIED";
+          counts[c]++; total += o.qty; if (c === "FIRM") firm += o.qty;
+        });
+        var pct = total === 0n ? 0 : Number(firm * 10000n / total) / 100;
+        out.innerHTML =
+          '<p class="lrow">block ' + blockN.toLocaleString("en-US") + " (live, unpinned) · " +
+            all.length + " orders (" + bids.length + " bid / " + asks.length + " ask) · " +
+            keys.length + " distinct owners</p>" +
+          '<p class="lrow">' + badge("FIRM") + " " + counts.FIRM + " &nbsp; " +
+            badge("PULLABLE") + " " + counts.PULLABLE + " &nbsp; " +
+            badge("UNVERIFIED") + " " + counts.UNVERIFIED + "</p>" +
+          '<p class="lrow" style="color:var(--held);font-weight:700">' + pct +
+            "% of the live book cannot be withdrawn</p>" +
+          '<p style="font-size:.8rem;color:var(--dim);margin-top:.4rem">Classified in your browser: ' +
+            "keccak-256 of each owner's live code vs the attested hash, plus the lock window vs the live " +
+            "block timestamp. Bytecode-level reasons need the offline analyzer: " +
+            '<span class="mono">node script/firmness.mjs</span>.</p>';
+      });
+    });
+  })
+  .catch(function(e){
+    out.innerHTML = '<p class="err">Live read failed: ' + esc(e.message || e) +
+      ". Either the RPC refuses browser requests (CORS) or you are offline. The pinned snapshot above is " +
+      'unaffected — reproduce it with <span class="mono">node script/firmness.mjs --block 468201000</span>.</p>';
+  })
+  .finally(function(){ btn.disabled = false; btn.textContent = "Re-read the live book"; });
+});
+})();
+</script>
+</body>
+</html>

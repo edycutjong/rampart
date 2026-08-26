@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0B1220">
+<title>rampart — pitch deck · the cancel the chain refused</title>
+<meta name="description" content="12-slide pitch deck for rampart: order-book depth the protocol itself will not let you withdraw. Contract-owned resting orders on Somnia, attested EXTCODEHASH book typing, 8/8 vs 2/8 against six deployed attacker contracts.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="rampart — pitch deck · the cancel the chain refused">
+<meta property="og:description" content="The wallet that paid for a resting order tried to cancel it and the chain said no: IncorrectSender, status 0x0, mined and permanent on Somnia Shannon. 12 slides, arrow keys, no CDN.">
+<meta property="og:url" content="https://rampart.edycu.dev/pitch/">
+<meta property="og:image" content="https://rampart.edycu.dev/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="rampart — pitch deck · the cancel the chain refused">
+<meta name="twitter:description" content="Order-book depth the protocol itself will not let you withdraw. Somnia × DreamDEX Event Contracts.">
+<meta name="twitter:image" content="https://rampart.edycu.dev/assets/og-image.png">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+
+<!--
+  ══════════════════════════════════════════════════════════════════════════
+  rampart — pitch deck · single self-contained file · no CDN, no web fonts
+  ══════════════════════════════════════════════════════════════════════════
+  NAVIGATION
+    →  ␣  PgDn  ·  next slide          ←  PgUp  ·  previous slide
+    Home / End  ·  first / last        mouse wheel / swipe · advance
+    ESC         ·  slide overview grid (click a card to jump)
+    P           ·  presenter mode — speaker-notes panel
+    C           ·  contrast debug — outlines every text run (projector check)
+
+  PRINT TO PDF
+    Cmd/Ctrl+P → Save as PDF → landscape → 12 pages, one slide each.
+    Chrome: enable "Background graphics".
+
+  ASSETS
+    Relative to site/pitch/ — the deck ships under /rampart/pitch/ on Pages.
+    ../assets/icon-animated.svg   the mark (cover)
+    ../assets/icon.svg            favicon
+    Nothing else is loaded. The deck works from file:// with no network.
+  ══════════════════════════════════════════════════════════════════════════
+-->
+
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   TOKENS — inlined from assets/_tokens.css (frozen, contrast-measured palette).
+   --pull / --held are semantic STATE tokens at opposite ends of one axis:
+   amber is liquid and flows away, cyan is frozen and stays put.
+   Ratios measured on the #0B1220 plate: text 15.19:1 · muted 7.30:1
+   · pull 8.72:1 · held 10.36:1. Do not re-decide.
+   Rebrand surface: change the eight vars below and the deck follows.
+   ══════════════════════════════════════════════════════════════════════════ */
+:root{
+  color-scheme:dark;
+  --plate:#0B1220;      /* the mandatory dark ground — cyan is 1.81:1 on white */
+  --panel-hi:#101B30;   /* raised card, top of gradient */
+  --panel-lo:#0D1728;   /* raised card, bottom of gradient */
+  --ink-bg:#0A101D;     /* terminal / code ground */
+  --line:#1E2B44;       /* hairline borders */
+  --line-soft:#16223A;  /* section separators */
+  --text:#E2E8F0;       /* wordmark base */
+  --muted:#94A3B8;      /* secondary text; also the UNVERIFIED state */
+  --dim:#78899E;        /* column heads, footnotes — 5.23:1 */
+  --pull:#F59E0B;       /* state: depth that can vanish in one block — wallet owner */
+  --held:#22D3EE;       /* state: depth the pool will not release */
+  --held-ink:#0B1220;   /* text on a solid cyan fill */
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --r-card:14px; --r-code:12px; --r-pill:999px;
+
+  --W:1920px; --H:1080px;      /* the stage */
+  --padX:112px; --padT:80px;   /* slide gutters */
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#05090F;overflow:hidden}
+body{
+  font:400 24px/1.55 var(--sans);color:var(--text);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+img,svg{display:block;max-width:100%}
+a{color:var(--held);text-decoration:none}
+::selection{background:rgba(34,211,238,.28)}
+
+/* ── stage: fixed 16:9, scaled to fit. Letterbox the BROWSER, not the slide. ── */
+#stage{
+  position:absolute;top:50%;left:50%;width:var(--W);height:var(--H);
+  transform:translate(-50%,-50%) scale(var(--s,1));transform-origin:center center;
+  background:var(--plate);overflow:hidden;
+  box-shadow:0 0 0 1px var(--line-soft),0 40px 120px -30px rgba(0,0,0,.9);
+}
+
+/* faint instrument grid — the landing page carries the same texture */
+#stage::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(148,163,184,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(148,163,184,.045) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+
+.slide{
+  position:absolute;inset:0;z-index:1;
+  padding:var(--padT) var(--padX) 118px;
+  display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .34s ease;
+}
+.slide.active{opacity:1;visibility:visible;pointer-events:auto}
+@media (prefers-reduced-motion:reduce){
+  .slide{transition:none}
+  #stage,.slide,*{animation-duration:.001ms !important;animation-iteration-count:1 !important}
+}
+
+/* ── shared type ─────────────────────────────────────────────────────────── */
+.eyebrow{
+  font:700 20px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;
+  color:var(--held);margin:0 0 26px;display:flex;align-items:center;gap:14px;
+}
+.eyebrow .num{color:var(--dim);letter-spacing:.1em}
+.eyebrow .bar{width:44px;height:2px;background:var(--held);opacity:.55;flex:none}
+h1{
+  font-size:88px;line-height:1.04;letter-spacing:-.028em;font-weight:700;
+  margin:0 0 22px;max-width:20ch;
+}
+h1.tight{font-size:76px;max-width:24ch}
+.lede{font-size:31px;line-height:1.5;color:var(--muted);max-width:58ch;margin:0}
+.lede strong,.kick strong{color:var(--text);font-weight:600}
+.kick{
+  font-size:25px;line-height:1.5;color:var(--muted);margin:0;
+  border-left:3px solid var(--held);padding-left:22px;max-width:80ch;
+}
+.kick.amber{border-left-color:var(--pull)}
+.mono{font-family:var(--mono)}
+.c-held{color:var(--held)}.c-pull{color:var(--pull)}.c-muted{color:var(--muted)}
+.c-dim{color:var(--dim)}.c-text{color:var(--text)}
+.row{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.grow{flex:1;min-height:0}
+.spacer{flex:1}
+
+/* chips — same construction as the landing page */
+.chips{display:flex;flex-wrap:wrap;gap:11px;margin:0;padding:0;list-style:none}
+.chip{
+  display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);
+  border-radius:var(--r-pill);padding:9px 18px;background:rgba(148,163,184,.05);
+  font:600 17px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  white-space:nowrap;
+}
+.chip-held{color:var(--held);border-color:rgba(34,211,238,.38);background:rgba(34,211,238,.08)}
+.chip-pull{color:var(--pull);border-color:rgba(245,158,11,.38);background:rgba(245,158,11,.08)}
+.dot{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none}
+.dot-pulse{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.35)}}
+
+/* cards */
+.card{
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));
+  border:1px solid var(--line);border-radius:var(--r-card);padding:26px 28px;
+}
+.card h3{
+  font:700 18px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;
+  margin:0 0 14px;color:var(--dim);
+}
+.card p{margin:0;font-size:22px;line-height:1.48;color:var(--muted)}
+.card p strong{color:var(--text);font-weight:600}
+
+/* terminal frame — DEV_TOOL surface */
+.term{
+  border:1px solid var(--line);border-radius:var(--r-code);background:var(--ink-bg);
+  overflow:hidden;box-shadow:0 24px 60px -28px rgba(0,0,0,.9);
+}
+.term-bar{
+  display:flex;align-items:center;gap:12px;padding:13px 20px;
+  border-bottom:1px solid var(--line-soft);
+  font:500 17px/1 var(--mono);color:var(--dim);letter-spacing:.04em;
+}
+.tl{display:flex;gap:8px;margin-right:8px}
+.tl i{width:11px;height:11px;border-radius:50%;background:#2A3A55;display:block}
+.tl i:first-child{background:#3A2530}
+.term pre{
+  margin:0;padding:22px 26px;font:400 21px/1.62 var(--mono);color:var(--text);
+  white-space:pre;overflow:hidden;
+}
+.term pre .cmt{color:var(--dim)}
+.term pre .sel{color:var(--held);font-weight:700}
+.term pre .warn{color:var(--pull);font-weight:700}
+.term pre .ok{color:#22C55E}
+.term-foot{
+  padding:14px 20px;border-top:1px solid var(--line-soft);
+  font:500 18px/1.4 var(--mono);color:var(--dim);
+}
+
+/* numbered callout circles */
+.cal{
+  display:inline-flex;align-items:center;justify-content:center;flex:none;
+  width:34px;height:34px;border-radius:50%;background:var(--held);color:var(--held-ink);
+  font:700 18px/1 var(--mono);
+}
+.cal-list{display:flex;flex-direction:column;gap:26px;margin:0;padding:0;list-style:none}
+.cal-list li{display:flex;gap:16px;align-items:flex-start;font-size:22px;line-height:1.46;color:var(--muted)}
+.cal-list li strong{color:var(--text);font-weight:600}
+
+/* ── S1 cover ────────────────────────────────────────────────────────────── */
+#s1{padding-top:96px}
+.cover{display:grid;grid-template-columns:1fr 430px;gap:72px;align-items:center;flex:1}
+.wordmark{
+  font-size:168px;line-height:.92;letter-spacing:-.05em;font-weight:700;margin:0 0 20px;
+  background:linear-gradient(100deg,var(--text) 0%,var(--text) 42%,var(--held) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.cover .tag{font-size:37px;line-height:1.34;color:var(--muted);max-width:27ch;margin:0 0 38px}
+.cover .tag b{color:var(--text);font-weight:600}
+.hero-metric{
+  display:inline-flex;align-items:center;gap:16px;margin:0 0 30px;
+  border:1px solid rgba(34,211,238,.38);background:rgba(34,211,238,.07);
+  border-radius:var(--r-pill);padding:12px 24px;
+}
+.hero-metric b{font:700 28px/1 var(--mono);color:var(--held);letter-spacing:.02em}
+.hero-metric span{font-size:19px;color:var(--muted)}
+.cover-mark{position:relative;display:flex;flex-direction:column;align-items:center;gap:26px}
+.cover-mark .plate{
+  border:1px solid var(--line);border-radius:30px;padding:14px;
+  background:radial-gradient(120% 100% at 50% 0%,rgba(245,158,11,.07),transparent 55%),
+             radial-gradient(120% 100% at 50% 100%,rgba(34,211,238,.09),transparent 55%),
+             var(--plate);
+  box-shadow:0 30px 90px -34px rgba(0,0,0,.9);
+}
+.cover-mark img{width:372px;height:372px;border-radius:20px}
+.cover-mark .cap{
+  display:flex;flex-direction:column;gap:8px;margin:0;text-align:center;
+  font:600 16px/1.4 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--dim);
+}
+.cover-mark .cap b{color:var(--pull);font-weight:700}
+.cover-mark .cap i{color:var(--held);font-style:normal;font-weight:700}
+
+/* ── S2 hook ─────────────────────────────────────────────────────────────── */
+#s2{justify-content:center}
+.hook-h{
+  font-size:112px;line-height:1.01;letter-spacing:-.034em;font-weight:700;
+  margin:0 0 38px;max-width:17ch;
+}
+.selector-slab{
+  display:flex;align-items:center;gap:44px;flex-wrap:wrap;
+  border-top:1px solid var(--line);padding-top:44px;margin-top:64px;
+}
+.selector-slab .big{
+  font:700 120px/1 var(--mono);letter-spacing:-.02em;color:var(--held);
+  text-shadow:0 0 70px rgba(34,211,238,.3);
+}
+.selector-slab .cap{font-size:24px;color:var(--muted);line-height:1.5;max-width:36ch}
+.selector-slab .cap b{color:var(--text);font-weight:600;display:block;font-size:30px;margin-bottom:8px}
+
+/* ── S3 problem: the two-state motif (pull fragments / held stays) ───────── */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.state-card{
+  border:1px solid var(--line);border-radius:var(--r-card);padding:46px 44px;
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));position:relative;overflow:hidden;
+}
+.state-card.pull{border-color:rgba(245,158,11,.32)}
+.state-card.held{border-color:rgba(34,211,238,.34)}
+.state-card .lbl{
+  font:700 18px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;margin:0 0 20px;
+}
+.state-card.pull .lbl{color:var(--pull)}
+.state-card.held .lbl{color:var(--held)}
+.state-card .big{font-size:33px;line-height:1.32;color:var(--text);font-weight:600;margin:0 0 18px;max-width:22ch}
+.state-card .sm{font-size:23px;line-height:1.58;color:var(--muted);margin:0}
+/* the depth bar: amber breaks into fragments, cyan stays solid */
+.bar{display:flex;gap:6px;height:38px;margin:0 0 30px}
+.bar i{display:block;height:100%;border-radius:3px}
+.bar.pull i{background:var(--pull)}
+.bar.pull i:nth-child(1){flex:6;opacity:.95}
+.bar.pull i:nth-child(2){flex:4;opacity:.62}
+.bar.pull i:nth-child(3){flex:2;opacity:.4}
+.bar.pull i:nth-child(4){flex:1.4;opacity:.26}
+.bar.pull i:nth-child(5){flex:1;opacity:.14}
+.bar.held i{background:var(--held);flex:1;box-shadow:0 0 26px rgba(34,211,238,.35)}
+
+/* ── S4 closed paths table ───────────────────────────────────────────────── */
+.paths{display:flex;flex-direction:column;gap:16px}
+.path{
+  display:grid;grid-template-columns:445px 1fr 168px;align-items:center;gap:28px;
+  border:1px solid var(--line);border-radius:12px;padding:32px 30px;background:rgba(16,27,48,.55);
+}
+/* the column is sized so the longest signature stays on ONE line */
+.path .sig{font:700 23px/1.3 var(--mono);color:var(--text);white-space:nowrap}
+.path .who{font-size:22px;line-height:1.42;color:var(--muted)}
+.path .who b{color:var(--text);font-weight:600}
+.path .st{
+  justify-self:end;font:700 17px/1 var(--mono);letter-spacing:.14em;
+  border:1px solid rgba(34,211,238,.4);color:var(--held);background:rgba(34,211,238,.09);
+  border-radius:var(--r-pill);padding:10px 18px;white-space:nowrap;
+}
+
+/* ── S6 three classes ────────────────────────────────────────────────────── */
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.cls{
+  border:1px solid var(--line);border-radius:var(--r-card);padding:38px 34px;min-height:392px;
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));
+  display:flex;flex-direction:column;gap:18px;
+}
+.cls .name{font:700 36px/1 var(--mono);letter-spacing:.02em}
+.cls.firm{border-color:rgba(34,211,238,.42);box-shadow:inset 0 0 0 1px rgba(34,211,238,.06)}
+.cls.firm .name{color:var(--held)}
+.cls.pullable .name{color:var(--pull)}
+.cls.pullable{border-color:rgba(245,158,11,.34)}
+.cls.unver .name{color:var(--muted)}
+.cls .cond{font:500 21px/1.5 var(--mono);color:var(--dim)}
+.cls .claim{font-size:26px;line-height:1.4;color:var(--text);margin-top:auto;
+  border-top:1px solid var(--line-soft);padding-top:20px}
+/* each class carries the same depth motif as slide 3 — one axis, three readings */
+.cls .motif{display:flex;gap:5px;height:22px}
+.cls .motif i{display:block;height:100%;border-radius:3px;flex:1}
+.cls.firm .motif i{background:var(--held);box-shadow:0 0 22px rgba(34,211,238,.35)}
+.cls.pullable .motif i{background:var(--pull)}
+.cls.pullable .motif i:nth-child(2){opacity:.55}
+.cls.pullable .motif i:nth-child(3){opacity:.28}
+.cls.pullable .motif i:nth-child(4){opacity:.12}
+.cls.unver .motif i{background:rgba(148,163,184,.22);border:1px dashed rgba(148,163,184,.42)}
+
+/* ── S7 the number ───────────────────────────────────────────────────────── */
+.score{display:grid;grid-template-columns:1fr 1fr;gap:26px 44px;align-items:start}
+.scorebar{margin:0 0 30px}
+.scorebar .head{
+  display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:0 0 12px;
+}
+.scorebar .who{font:700 20px/1 var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.scorebar .val{font:700 46px/1 var(--mono);letter-spacing:-.02em}
+.scorebar.good .val{color:var(--held)}
+.scorebar.bad .val{color:var(--pull)}
+.seg{display:flex;gap:7px;height:38px}
+.seg i{flex:1;border-radius:4px;border:1px solid transparent;display:block}
+.seg i.hit{background:var(--held);border-color:var(--held);box-shadow:0 0 20px rgba(34,211,238,.32)}
+.seg i.miss{background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.5)}
+.atk{display:flex;flex-direction:column;gap:9px}
+.atk li{
+  display:grid;grid-template-columns:34px 1fr auto;gap:14px;align-items:center;
+  font:500 19px/1.3 var(--mono);color:var(--muted);
+  border-bottom:1px solid var(--line-soft);padding-bottom:9px;
+}
+.atk li:last-child{border-bottom:0}
+.atk li .id{color:var(--dim);font-weight:700}
+.atk li .nm{color:var(--text)}
+.atk li .vd{font-size:17px;letter-spacing:.1em;color:var(--muted)}
+.atk li .vd.x{color:var(--pull)}
+.atk-title{font:700 18px/1 var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin:0 0 18px}
+
+/* ── S8 architecture ─────────────────────────────────────────────────────── */
+.archwrap{flex:1;display:flex;flex-direction:column;justify-content:center;gap:72px;padding-top:14px}
+.bench{display:grid;grid-template-columns:320px 1fr;gap:40px;align-items:center}
+.bench .n{font:700 76px/1 var(--mono);color:var(--held);letter-spacing:-.02em;text-shadow:0 0 60px rgba(34,211,238,.25)}
+.bench .n small{display:block;font:600 19px/1.3 var(--mono);color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin-top:14px}
+.budget{
+  position:relative;height:56px;border:1px solid var(--line);border-radius:8px;
+  background:repeating-linear-gradient(90deg,rgba(148,163,184,.11) 0 1px,transparent 1px 10%) ,rgba(10,16,29,.8);
+}
+.budget .fill{
+  position:absolute;top:-1px;bottom:-1px;left:-1px;width:9px;border-radius:8px 2px 2px 8px;
+  background:var(--held);box-shadow:0 0 30px 4px rgba(34,211,238,.65);
+}
+.budget .lab{position:absolute;right:18px;top:50%;transform:translateY(-50%);font:600 19px/1 var(--mono);color:var(--dim);letter-spacing:.08em}
+.budget .lab2{position:absolute;left:26px;top:50%;transform:translateY(-50%);font:700 19px/1 var(--mono);color:var(--held);white-space:nowrap}
+
+/* ── S9 findings ─────────────────────────────────────────────────────────── */
+.finds{display:flex;flex-direction:column;gap:18px}
+.find{
+  display:grid;grid-template-columns:70px 1fr;gap:26px;align-items:start;
+  border:1px solid var(--line);border-radius:12px;padding:30px 32px;background:rgba(16,27,48,.5);
+}
+.find .n{font:700 34px/1.1 var(--mono);color:var(--held);opacity:.8}
+.find p{margin:0;font-size:24px;line-height:1.48;color:var(--muted)}
+.find p strong{color:var(--text);font-weight:600}
+.find code{font-family:var(--mono);color:var(--held);font-size:.94em}
+
+/* ── S11 limits ──────────────────────────────────────────────────────────── */
+.limits{display:flex;flex-direction:column;gap:16px}
+.limit{
+  display:grid;grid-template-columns:230px 1fr;gap:30px;align-items:baseline;
+  border-left:3px solid var(--pull);padding:20px 0 20px 26px;
+}
+.limit .k{font:700 20px/1.35 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--pull)}
+.limit .v{font-size:24px;line-height:1.46;color:var(--muted)}
+.limit .v strong{color:var(--text);font-weight:600}
+
+/* ── S12 the ask ─────────────────────────────────────────────────────────── */
+.ask{display:grid;grid-template-columns:1.12fr .88fr;gap:56px;align-items:stretch;flex:1}
+.ask>div{display:flex;flex-direction:column}
+.links{display:flex;flex-direction:column;gap:14px;margin:0;padding:0;list-style:none}
+.links li{
+  display:flex;align-items:baseline;gap:18px;border-bottom:1px solid var(--line-soft);padding-bottom:14px;
+  font:500 21px/1.42 var(--mono);
+}
+.links li .k{color:var(--dim);width:124px;flex:none;letter-spacing:.1em;text-transform:uppercase;font-size:16px;font-weight:700}
+.links li .v{color:var(--held);word-break:break-all}
+/* `>` matters: .n and .l are divs too, and would otherwise inherit the card border */
+.ledger{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:auto;padding-top:32px}
+.ledger>div{border:1px solid var(--line);border-radius:10px;padding:20px 22px;background:rgba(16,27,48,.5)}
+.ledger .n{font:700 38px/1 var(--mono);color:var(--text)}
+.ledger .l{font:600 15px/1.3 var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--dim);margin-top:10px}
+.closer{
+  margin:auto 0 0;font-size:34px;line-height:1.36;color:var(--text);font-weight:600;max-width:33ch;
+  border-top:1px solid var(--line);padding-top:32px;
+}
+.closer em{color:var(--held);font-style:normal}
+
+/* ── chrome: rail, counter, brand ────────────────────────────────────────── */
+#chrome{
+  position:absolute;left:var(--padX);right:var(--padX);bottom:42px;height:44px;z-index:5;
+  display:flex;align-items:center;justify-content:space-between;gap:32px;pointer-events:none;
+}
+#rail{display:flex;gap:7px;pointer-events:auto}
+#rail button{
+  width:34px;height:5px;border:0;border-radius:3px;background:var(--line);cursor:pointer;padding:0;
+  transition:background .2s ease,transform .2s ease;
+}
+#rail button:hover{background:var(--dim)}
+#rail button[aria-current="true"]{background:var(--held);transform:scaleY(1.8)}
+#rail button:focus-visible{outline:2px solid var(--held);outline-offset:4px}
+#brandmark{
+  display:flex;align-items:center;gap:12px;font:700 17px/1 var(--mono);
+  letter-spacing:.16em;text-transform:uppercase;color:var(--dim);
+}
+#brandmark .sq{width:11px;height:11px;border-radius:3px;background:var(--held);flex:none}
+#counter{font:700 22px/1 var(--mono);letter-spacing:.12em;color:var(--muted)}
+#counter b{color:var(--held)}
+
+/* keyboard hint, fades after first interaction */
+#hint{
+  position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:40;
+  font:600 13px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);
+  background:rgba(11,18,32,.9);border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:9px 18px;transition:opacity .4s ease;pointer-events:none;
+}
+body.moved #hint{opacity:0}
+
+/* ── presenter mode ──────────────────────────────────────────────────────── */
+.speaker-notes{display:none}
+#notes{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;
+  background:rgba(6,11,20,.97);border-top:2px solid var(--held);
+  padding:20px 30px 22px;color:var(--text);
+  font:400 17px/1.6 var(--sans);
+}
+#notes .t{
+  font:700 12px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--held);margin:0 0 9px;
+}
+#notes p{margin:0;max-width:150ch;color:var(--muted)}
+body.presenting #notes{display:block}
+body.presenting #stage{box-shadow:none}
+body.presenting.idle{cursor:none}
+
+/* ── overview grid (ESC) ─────────────────────────────────────────────────── */
+#grid{
+  position:fixed;inset:0;z-index:70;display:none;background:#05090F;
+  padding:44px 52px;overflow:auto;
+}
+body.gridding #grid{display:block}
+#grid h2{
+  font:700 13px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--held);
+  margin:0 0 22px;
+}
+#grid .g{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+#grid .g button{
+  text-align:left;background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));
+  border:1px solid var(--line);border-radius:12px;padding:18px 20px;cursor:pointer;color:var(--text);
+  font-family:var(--sans);transition:border-color .18s ease,transform .18s ease;min-height:104px;
+  display:flex;flex-direction:column;gap:8px;
+}
+#grid .g button:hover{border-color:rgba(34,211,238,.6);transform:translateY(-2px)}
+#grid .g button:focus-visible{outline:2px solid var(--held);outline-offset:3px}
+#grid .g button[aria-current="true"]{border-color:var(--held)}
+#grid .g .n{font:700 12px/1 var(--mono);letter-spacing:.16em;color:var(--dim)}
+#grid .g .t{font-size:17px;line-height:1.32;font-weight:600}
+#grid .g .s{font:500 13px/1.35 var(--mono);color:var(--muted)}
+#grid .esc{margin-top:24px;font:600 12px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+/* ── contrast debug (press C) — projector legibility check ───────────────── */
+/* Press C to toggle contrast debug mode */
+body.debug-contrast h1,body.debug-contrast .lede,body.debug-contrast p,
+body.debug-contrast li,body.debug-contrast .eyebrow,body.debug-contrast pre,
+body.debug-contrast .hook-h,body.debug-contrast .wordmark,body.debug-contrast .name,
+body.debug-contrast .val,body.debug-contrast .big,body.debug-contrast .n{
+  outline:1px solid rgba(255,0,128,.6);outline-offset:2px;
+}
+
+/* ── print → PDF: one slide per page, 16:9 landscape ─────────────────────── */
+@page{size:16in 9in landscape;margin:0}
+@media print{
+  html,body{height:auto;overflow:visible;background:#fff}
+  html,body,#stage,.slide{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #stage{position:static;transform:none;width:1920px;height:auto;box-shadow:none;zoom:.8}
+  #stage::before{display:none}
+  .slide{
+    position:relative;inset:auto;width:1920px;height:1080px;
+    opacity:1 !important;visibility:visible !important;
+    page-break-after:always;break-after:page;
+    page-break-inside:avoid;break-inside:avoid;
+    background:var(--plate);
+  }
+  .slide:last-of-type{page-break-after:auto;break-after:auto}
+  #chrome,#hint,#notes,#grid{display:none !important}
+  .dot-pulse{animation:none}
+}
+</style>
+</head>
+<body>
+
+<div id="stage" aria-live="polite">
+
+<!-- ══ 01 · COVER ══════════════════════════════════════════════════════════ -->
+<section class="slide" id="s1" data-title="rampart" data-sub="Cover">
+  <div class="cover">
+    <div>
+      <p class="eyebrow"><span class="bar"></span>Somnia × DreamDEX · Event Contracts · DoraHacks 2026</p>
+      <h1 class="wordmark">rampart</h1>
+      <p class="tag">Order-book depth <b>the protocol itself will not let you withdraw.</b></p>
+      <div class="hero-metric">
+        <span class="dot dot-pulse c-held"></span>
+        <b>0xf5e39c1f</b>
+        <span>the revert that proves it</span>
+      </div>
+      <ul class="chips">
+        <li class="chip">Solidity</li>
+        <li class="chip chip-held">Somnia Shannon · 50312</li>
+        <li class="chip">@somnia-chain/markets-sdk</li>
+        <li class="chip">Foundry</li>
+        <li class="chip">viem</li>
+      </ul>
+    </div>
+    <div class="cover-mark">
+      <!-- The approved mark: a two-rung depth ladder under identical pressure.
+           Animated SVG, self-hosted, honours prefers-reduced-motion internally. -->
+      <div class="plate">
+        <img src="../assets/icon-animated.svg" width="372" height="372"
+             alt="rampart mark — a two-rung order-book depth ladder: the upper amber rung, owned by a wallet, fragments and drifts away; the lower cyan rung holds and the strike that hits it bounces back.">
+      </div>
+      <p class="cap">
+        <span>two rungs · one cancel · one axis</span>
+        <span><b>PULLABLE</b> dissolves &nbsp;·&nbsp; <i>FIRM</i> repels</span>
+      </p>
+    </div>
+  </div>
+  <aside class="speaker-notes">Rampart is one sentence: a resting quote the pool itself refuses to release. Everything in this deck traces back to a single failed transaction on Somnia Shannon. I will put that transaction on screen in ninety seconds.</aside>
+</section>
+
+<!-- ══ 02 · HOOK ═══════════════════════════════════════════════════════════ -->
+<section class="slide" id="s2" data-title="He could not take his own order back" data-sub="The hero moment">
+  <p class="eyebrow"><span class="num">02</span><span class="bar"></span>The hero moment</p>
+  <h1 class="hook-h">He could not take his own&nbsp;order&nbsp;back.</h1>
+  <p class="lede">The wallet that <strong>paid for</strong> the resting order called <span class="mono c-text">cancelOrder</span>. The pool refused it and named both parties in its own revert data.</p>
+  <div class="selector-slab">
+    <div class="big mono">0xf5e39c1f</div>
+    <div class="cap">
+      <b>IncorrectSender(address,address)</b>
+      Transaction <span class="mono c-held">0x959b4770…6ddb</span> · status <span class="mono c-pull">0x0</span> · mined and permanent on Somnia Shannon. A failed transaction cannot be mocked, staged, or replayed.
+    </div>
+  </div>
+  <aside class="speaker-notes">This is the whole pitch in one artifact. Not a passing test — a failing transaction, on a public chain, that anyone can re-run with no wallet and no gas. The demo is a thing that did not work, on purpose.</aside>
+</section>
+
+<!-- ══ 03 · PROBLEM ════════════════════════════════════════════════════════ -->
+<section class="slide" id="s3" data-title="Displayed depth is only a promise" data-sub="The problem">
+  <p class="eyebrow"><span class="num">03</span><span class="bar"></span>The problem</p>
+  <h1 class="tight">Displayed depth is only a promise.</h1>
+  <p class="lede" style="margin-bottom:38px">On every order book that exists, the size at a level is size the maker can cancel in one block. Takers price that uncertainty in, and no venue can tell them which depth is real.</p>
+  <div class="two">
+    <div class="state-card pull">
+      <p class="lbl">Wallet-owned depth</p>
+      <div class="bar pull"><i></i><i></i><i></i><i></i><i></i></div>
+      <p class="big">Can vanish in one block.</p>
+      <p class="sm">One <span class="mono">cancelOrder</span> from the owner and the level is gone — after you decided to trade against it.</p>
+    </div>
+    <div class="state-card held">
+      <p class="lbl">Contract-owned depth</p>
+      <div class="bar held"><i></i></div>
+      <p class="big">Stays until filled or expired.</p>
+      <p class="sm">Only a taker fill or the mandatory <span class="mono">expireTimestampNs</span> removes it. There is no third path.</p>
+    </div>
+  </div>
+  <p class="kick" style="margin-top:46px">Polymarket, Kalshi and every CEX show you the first bar. <strong>Nobody has ever shown you the second.</strong></p>
+  <aside class="speaker-notes">Every trader already knows this problem and has simply accepted it. Depth is an intention, not a commitment. The question nobody could answer before an on-chain book: which part of this screen is actually going to be there.</aside>
+</section>
+
+<!-- ══ 04 · MECHANISM ══════════════════════════════════════════════════════ -->
+<section class="slide" id="s4" data-title="Make the contract the owner" data-sub="The mechanism">
+  <p class="eyebrow"><span class="num">04</span><span class="bar"></span>The mechanism</p>
+  <h1 class="tight">Make the contract the owner.</h1>
+  <p class="lede" style="margin-bottom:34px"><span class="mono c-text">FirmQuote</span> holds the collateral, approves the Somnia <span class="mono c-text">BinaryPool</span>, and calls <span class="mono c-text">placeBinaryOrder</span> — so <strong>Order.owner is the contract, not a wallet.</strong> It exposes no cancel path, no reduce path, and grants no operator. Every withdrawal route is therefore closed by the pool's own rules.</p>
+  <div class="paths">
+    <div class="path">
+      <div class="sig">cancelOrder(uint128)</div>
+      <div class="who">owner <b>only</b> — and the owner is bytecode with no code path to ask</div>
+      <div class="st">CLOSED</div>
+    </div>
+    <div class="path">
+      <div class="sig">cancelOrderFor(owner, id)</div>
+      <div class="who">an operator the owner approved — <b>the contract never grants one</b></div>
+      <div class="st">CLOSED</div>
+    </div>
+    <div class="path">
+      <div class="sig">reduceOrderFor(owner, id, qty)</div>
+      <div class="who">per-user approval only, no system allowlist — <b>never granted</b></div>
+      <div class="st">CLOSED</div>
+    </div>
+  </div>
+  <p class="kick" style="margin-top:32px">Deployed at <span class="mono c-held">0x2a09b4c474828e6895af273e51Ba8C181c91191a</span> on Somnia Shannon, chain 50312.</p>
+  <aside class="speaker-notes">The trick is that we add nothing to the protocol. The pool already enforces owner-only cancellation. We just make the owner an address that is physically incapable of calling it. No new trust, no new contract for the taker to believe in.</aside>
+</section>
+
+<!-- ══ 05 · PROOF / LIVE DEMO ══════════════════════════════════════════════ -->
+<section class="slide" id="s5" data-title="The chain refuses its own funder" data-sub="Proof on Shannon">
+  <p class="eyebrow"><span class="num">05</span><span class="bar"></span>Proof on Shannon · 2026-08-19</p>
+  <h1 class="tight" style="font-size:64px;margin-bottom:26px">The chain refuses its own funder.</h1>
+  <div class="two" style="grid-template-columns:1.42fr .58fr;gap:34px;align-items:start">
+    <div class="term">
+      <div class="term-bar"><span class="tl"><i></i><i></i><i></i></span>cast — Somnia Shannon · no wallet, no funds, no gas</div>
+<pre>$ cast call 0x1b8ed538…67ee "cancelOrder(uint128)" \
+    129127208515966879685 --from 0xFbc73Ce1…3595
+
+execution reverted, data:
+  <span class="warn">0xf5e39c1f</span>
+  …fbc73ce1c0b43f87cd065f82df24697dec653595   <span class="cmt">← caller</span>
+  …2a09b4c474828e6895af273e51ba8c181c91191a   <span class="cmt">← expected</span>
+
+$ cast 4byte 0xf5e39c1f
+<span class="sel">IncorrectSender(address,address)</span>
+
+<span class="cmt"># control — the same call, from the contract itself:</span>
+$ cast call … --from 0x2a09b4c4…191a
+<span class="ok">0x</span>                                <span class="cmt">← no revert. It WOULD succeed.</span></pre>
+      <div class="term-foot">shannon-explorer.somnia.network/tx/0x959b4770…6ddb · status <span class="c-pull">0x0</span></div>
+    </div>
+    <div>
+      <ul class="cal-list">
+        <li><span class="cal">1</span><span>The <strong>caller</strong> is the wallet that funded and paid for the order.</span></li>
+        <li><span class="cal">2</span><span>The <strong>expected</strong> address is <span class="mono">FirmQuote</span>. The pool names both parties itself.</span></li>
+        <li><span class="cal">3</span><span>The control makes it rigorous: the order is <strong>not</strong> uncancellable in general. The pool would let its owner cancel — the owner just has no way to ask.</span></li>
+      </ul>
+      <p class="kick" style="margin-top:42px;font-size:22px">Escrow verified still locked across both attempts: tUSDC 4,827,000 before and after, YES balance unchanged — the order <strong>rested</strong>, it did not fill.</p>
+    </div>
+  </div>
+  <aside class="speaker-notes">Read the revert data out loud — the pool is naming the funder and naming the contract. Then the control line: this is not a broken order, it is an order whose owner cannot speak. Judges can paste that cast call and watch it fail themselves.</aside>
+</section>
+
+<!-- ══ 06 · THE PRODUCT: TYPED BOOK ════════════════════════════════════════ -->
+<section class="slide" id="s6" data-title="Three classes, not two" data-sub="The product">
+  <p class="eyebrow"><span class="num">06</span><span class="bar"></span>The product</p>
+  <h1 class="tight">Three classes, not two.</h1>
+  <p class="lede" style="margin-bottom:34px"><span class="mono c-text">Order.owner</span> is readable on-chain, so every price level can be <strong>typed</strong>. The third class is the one that makes the metric honest.</p>
+  <div class="three">
+    <div class="cls firm">
+      <div class="motif"><i></i><i></i><i></i><i></i></div>
+      <div class="name">FIRM</div>
+      <div class="cond">owner is a contract whose EXTCODEHASH is attested, and it is still inside its lock window</div>
+      <div class="claim">This depth <strong>cannot be withdrawn.</strong></div>
+    </div>
+    <div class="cls pullable">
+      <div class="motif"><i></i><i></i><i></i><i></i></div>
+      <div class="name">PULLABLE</div>
+      <div class="cond">owner is a wallet — the empty code hash, keccak256("")</div>
+      <div class="claim">This depth <strong>can vanish in one block.</strong></div>
+    </div>
+    <div class="cls unver">
+      <div class="motif"><i></i><i></i><i></i><i></i></div>
+      <div class="name">UNVERIFIED</div>
+      <div class="cond">owner is a contract whose code hash we have not attested</div>
+      <div class="claim"><strong>No claim is made.</strong></div>
+    </div>
+  </div>
+  <p class="kick" style="margin-top:46px"><strong>UNVERIFIED is load-bearing.</strong> Every escape in our corpus mints UNVERIFIED depth, not FIRM — the book renders it as exactly what it is. The metric errs low by construction.</p>
+  <aside class="speaker-notes">A binary firm-or-not classifier would be worse than no signal, because it launders unreliable liquidity through our own metric. The third class is where the engineering judgement is: we would rather report a small honest number than a large forgeable one. Say the limit out loud if asked: FIRM means attested and locked, and attestation is a human-reviewed transparency list. Our static filter rejects the six known escapes and any literal withdrawal selector, but it cannot see a selector computed arithmetically at runtime — no static scan over a language with arbitrary CALL can. So a green analyze() gates human review, it does not replace it. We ship that caveat in the analyzer output itself.</aside>
+</section>
+
+<!-- ══ 07 · THE NUMBER ═════════════════════════════════════════════════════ -->
+<section class="slide" id="s7" data-title="8/8 attested · 2/8 naive" data-sub="The headline number">
+  <p class="eyebrow"><span class="num">07</span><span class="bar"></span>The headline number</p>
+  <h1 class="tight" style="font-size:64px;margin-bottom:14px">A naive check is fooled six times out of six.</h1>
+  <p class="lede" style="margin-bottom:32px;max-width:74ch">Typing a level FIRM on <span class="mono c-text">EXTCODESIZE&nbsp;&gt;&nbsp;0</span> is forgeable. Rampart attests <strong>EXTCODEHASH</strong> under a static bytecode policy instead.</p>
+  <div class="score">
+    <div>
+      <div class="scorebar good">
+        <div class="head"><span class="who">Attested EXTCODEHASH</span><span class="val">8 / 8</span></div>
+        <div class="seg"><i class="hit"></i><i class="hit"></i><i class="hit"></i><i class="hit"></i><i class="hit"></i><i class="hit"></i><i class="hit"></i><i class="hit"></i></div>
+      </div>
+      <div class="scorebar bad">
+        <div class="head"><span class="who">Naive EXTCODESIZE</span><span class="val">2 / 8</span></div>
+        <div class="seg"><i class="hit"></i><i class="miss"></i><i class="miss"></i><i class="miss"></i><i class="miss"></i><i class="miss"></i><i class="miss"></i><i class="hit"></i></div>
+      </div>
+      <p class="kick" style="font-size:21px">Corpus: the real <span class="mono">FirmQuote</span>, six attacker contracts that each look firm to a naive check, and a plain wallet. All eight are <strong>deployed on Shannon</strong>; <strong>five of the six escapes executed on-chain</strong> as real withdrawals.</p>
+      <div class="term" style="margin-top:22px">
+        <div class="term-bar"><span class="tl"><i></i><i></i><i></i></span>one command, deterministic</div>
+<pre>$ node script/headline.mjs --live
+<span class="sel">attested 8/8</span>   ·   <span class="warn">naive 2/8</span></pre>
+      </div>
+    </div>
+    <div>
+      <p class="atk-title">Six escapes, six distinct policy catches</p>
+      <ul class="atk" style="list-style:none;margin:0;padding:0">
+        <li><span class="id">S1</span><span class="nm">HiddenCancel</span><span class="vd x">hidden cancelOrder</span></li>
+        <li><span class="id">S2</span><span class="nm">Erc1967Proxy</span><span class="vd x">upgrade after resting</span></li>
+        <li><span class="id">S3</span><span class="nm">DelegateEscape</span><span class="vd x">DELEGATECALL out</span></li>
+        <li><span class="id">S4</span><span class="nm">OperatorGranter</span><span class="vd x">late operator grant</span></li>
+        <li><span class="id">S5</span><span class="nm">QuietReduce</span><span class="vd x">reduceOrder shrink</span></li>
+        <li><span class="id">S6</span><span class="nm">BatchCancel</span><span class="vd x">alternate selector</span></li>
+      </ul>
+      <p class="kick amber" style="margin-top:26px;font-size:21px">Every one of these reads <strong class="c-pull">FIRM</strong> to an <span class="mono">EXTCODESIZE</span> check. Every one is typed <strong>UNVERIFIED</strong> by the attested classifier, each caught by a different check in the policy.</p>
+    </div>
+  </div>
+  <aside class="speaker-notes">The naive column is computed in the same table by the same script, so the comparison is not rhetorical. We built the attacks against ourselves first, deployed them, and ran four of them for real. That is why the number is a claim and not a hope.</aside>
+</section>
+
+<!-- ══ 08 · ARCHITECTURE ═══════════════════════════════════════════════════ -->
+<section class="slide" id="s8" data-title="One read path, block-budget headroom" data-sub="Architecture">
+  <p class="eyebrow"><span class="num">08</span><span class="bar"></span>Architecture</p>
+  <h1 class="tight" style="font-size:60px;margin-bottom:16px">Owner in, typed book out.</h1>
+  <p class="lede" style="max-width:78ch">The pool is the source of truth for who owns each resting order. Everything Rampart adds is a <strong>read</strong> — no indexer to trust, no off-chain state to keep in sync, nothing a maker can influence.</p>
+  <div class="archwrap">
+    <svg viewBox="0 0 1600 232" width="100%" role="img" aria-label="Data flow: FirmQuote escrows collateral and calls placeBinaryOrder on the Somnia BinaryPool; the resting book is read back through the markets SDK; each distinct owner's EXTCODEHASH is checked against the attested set under a static bytecode policy; the output is a book typed FIRM, PULLABLE or UNVERIFIED.">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0 0 L10 5 L0 10 z" fill="#78899E"/>
+        </marker>
+        <marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0 0 L10 5 L0 10 z" fill="#22D3EE"/>
+        </marker>
+        <linearGradient id="pan" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#101B30"/><stop offset="1" stop-color="#0D1728"/>
+        </linearGradient>
+      </defs>
+
+      <!-- 1 · FirmQuote -->
+      <rect x="0" y="52" width="272" height="122" rx="12" fill="url(#pan)" stroke="#1E2B44"/>
+      <text x="24" y="92" fill="#E2E8F0" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="21" font-weight="700">FirmQuote.sol</text>
+      <text x="24" y="122" fill="#94A3B8" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="17">holds collateral</text>
+      <text x="24" y="147" fill="#F59E0B" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="17">no cancel · no reduce</text>
+
+      <!-- 2 · BinaryPool -->
+      <rect x="332" y="52" width="272" height="122" rx="12" fill="url(#pan)" stroke="#1E2B44"/>
+      <text x="356" y="92" fill="#E2E8F0" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="21" font-weight="700">Somnia BinaryPool</text>
+      <text x="356" y="122" fill="#94A3B8" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="17">placeBinaryOrder()</text>
+      <text x="356" y="147" fill="#22D3EE" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="17">Order.owner = contract</text>
+
+      <!-- 3 · book -->
+      <rect x="664" y="52" width="272" height="122" rx="12" fill="url(#pan)" stroke="#1E2B44"/>
+      <text x="688" y="92" fill="#E2E8F0" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="21" font-weight="700">resting book</text>
+      <text x="688" y="122" fill="#94A3B8" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="17">getAllOpenOrders</text>
+      <text x="688" y="147" fill="#94A3B8" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="17">OffChain()</text>
+
+      <!-- 4 · policy -->
+      <rect x="996" y="52" width="272" height="122" rx="12" fill="url(#pan)" stroke="#1E2B44"/>
+      <text x="1020" y="92" fill="#E2E8F0" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="21" font-weight="700">EXTCODEHASH</text>
+      <text x="1020" y="122" fill="#94A3B8" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="17">attested set +</text>
+      <text x="1020" y="147" fill="#94A3B8" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="17">static bytecode policy</text>
+
+      <!-- 5 · output -->
+      <rect x="1328" y="52" width="272" height="122" rx="12" fill="rgba(34,211,238,.07)" stroke="#22D3EE" stroke-opacity=".45"/>
+      <text x="1352" y="92" fill="#22D3EE" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="21" font-weight="700">typed book</text>
+      <text x="1352" y="122" fill="#E2E8F0" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="17">FIRM / PULLABLE /</text>
+      <text x="1352" y="147" fill="#E2E8F0" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="17">UNVERIFIED</text>
+
+      <!-- arrows + labels -->
+      <line x1="280" y1="113" x2="322" y2="113" stroke="#78899E" stroke-width="2" marker-end="url(#ah)"/>
+      <text x="301" y="34" text-anchor="middle" fill="#78899E" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" letter-spacing="1.4">ESCROW</text>
+      <line x1="612" y1="113" x2="654" y2="113" stroke="#78899E" stroke-width="2" marker-end="url(#ah)"/>
+      <text x="633" y="34" text-anchor="middle" fill="#78899E" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" letter-spacing="1.4">RESTS</text>
+      <line x1="944" y1="113" x2="986" y2="113" stroke="#78899E" stroke-width="2" marker-end="url(#ah)"/>
+      <text x="965" y="34" text-anchor="middle" fill="#78899E" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" letter-spacing="1.4">OWNERS</text>
+      <line x1="1276" y1="113" x2="1318" y2="113" stroke="#22D3EE" stroke-width="2" marker-end="url(#ahc)"/>
+      <text x="1297" y="34" text-anchor="middle" fill="#22D3EE" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" letter-spacing="1.4">CLASSIFY</text>
+
+      <!-- sponsor SDK bracket under stages 2–3 -->
+      <path d="M332 200 L332 210 L936 210 L936 200" fill="none" stroke="#22D3EE" stroke-opacity=".4" stroke-width="1.5"/>
+      <text x="634" y="230" text-anchor="middle" fill="#22D3EE" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" letter-spacing="1.6">@somnia-chain/markets-sdk + viem</text>
+    </svg>
+
+    <div class="bench">
+      <div class="n">0.13&thinsp;ms<small>full-book retype · p95</small></div>
+      <div>
+        <div class="budget">
+          <div class="fill"></div>
+          <div class="lab2">0.13 ms</div>
+          <div class="lab">100 ms block budget</div>
+        </div>
+        <p class="kick" style="margin-top:16px;font-size:20px;border-left-color:var(--held)">Re-typing the entire book and re-aggregating the percentage fits inside one Somnia block with <strong>three orders of magnitude to spare</strong> — so the metric can be live, not batch. Measured over a deterministic 2,000-order book by <span class="mono">script/bench.mjs</span> — fixed owners, fixed seed, so the number reproduces on any machine.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="speaker-notes">Point at the bracket: stages two and three are pure sponsor SDK. The classifier is ours. The bench matters because a liquidity metric that lags the book is a lie — this one re-derives inside a single block.</aside>
+</section>
+
+<!-- ══ 09 · SPONSOR DEPTH ══════════════════════════════════════════════════ -->
+<section class="slide" id="s9" data-title="Three findings the docs do not have" data-sub="Sponsor SDK">
+  <p class="eyebrow"><span class="num">09</span><span class="bar"></span>Sponsor SDK — the engine, not the decoration</p>
+  <h1 class="tight" style="font-size:62px;margin-bottom:16px">Three findings the docs do not have.</h1>
+  <p class="lede" style="margin-bottom:30px;max-width:76ch">Rampart is built on <strong class="mono">@somnia-chain/markets-sdk</strong> and viem against a live Somnia binary pool. Integrating it turned up three things that are not written down anywhere.</p>
+  <div class="finds">
+    <div class="find">
+      <div class="n">01</div>
+      <p>The generic <code>placeOrder</code> <strong>reverts <code>UseBinaryPlacement</code></strong> on a binary pool. Binary markets need <code>placeBinaryOrder</code>, with the YES/NO side as an explicit <code>kind</code> param — read out of <code>markets-sdk/src/tradeAbi.ts</code>, not the documentation.</p>
+    </div>
+    <div class="find">
+      <div class="n">02</div>
+      <p>The prose docs document <strong><code>SpotPool</code></strong>. <code>BinaryPool</code> differs, and the difference is fatal if missed — including <code>builderFeeBpsTimes1k</code>, which must be <code>uint96</code> or the selector changes and the call reverts with nothing decodable.</p>
+    </div>
+    <div class="find">
+      <div class="n">03</div>
+      <p>The pool rejects <code>cancelOrderFor</code> from <strong>any</strong> operator with <code>OnlyApprovedContracts</code> — <strong>even for a valid grant.</strong> We found this by deploying an attacker whose whole escape was a late operator grant, and watching the pool block it anyway.</p>
+    </div>
+  </div>
+  <p class="kick" style="margin-top:30px">Written up as a <strong>261-line feedback report</strong> — a required deliverable for this event, produced from the build rather than from a read-through. Rampart's entire mechanism is the pool's own ownership rule; there is no version of this project on another chain.</p>
+  <aside class="speaker-notes">These are not complaints, they are the receipts that we actually integrated. Each one cost real hours and each one is reproducible with a single cast call. Finding three is the interesting one — it is a live gap in the binary pool's operator path.</aside>
+</section>
+
+<!-- ══ 10 · ECOSYSTEM IMPACT ═══════════════════════════════════════════════ -->
+<section class="slide" id="s10" data-title="An observable no off-chain book can produce" data-sub="Ecosystem impact">
+  <p class="eyebrow"><span class="num">10</span><span class="bar"></span>Ecosystem impact</p>
+  <h1 class="tight" style="font-size:62px">An observable no off-chain book can produce.</h1>
+  <p class="lede" style="margin-bottom:34px;max-width:70ch"><strong>“Percent of book that cannot be withdrawn”</strong> needs an on-chain <span class="mono c-text">Order.owner</span> to inspect. That requirement is the whole argument.</p>
+  <div class="two">
+    <div class="state-card pull">
+      <p class="lbl">Off-chain book</p>
+      <p class="big">Polymarket · Kalshi · every CEX</p>
+      <p class="sm">Resting orders are signed messages inside a private matching engine. There is <strong style="color:#E2E8F0">no on-chain owner to inspect</strong>, so the metric is not hard to build — it is impossible to build. Even the venue itself cannot prove it without being believed.</p>
+    </div>
+    <div class="state-card held">
+      <p class="lbl">On-chain order book</p>
+      <p class="big">Somnia · DreamDEX</p>
+      <p class="sm">The owner is an address, its code is a public hash, and both are a free read. Liquidity quality stops being a marketing claim and becomes <strong style="color:#E2E8F0">a number anyone can re-derive</strong> from chain state alone.</p>
+    </div>
+  </div>
+  <p class="kick" style="margin-top:46px">Firm depth is what a maker can charge for and a taker can price. This is a reason to put an order book on-chain that has nothing to do with decentralisation — <strong>it is a product capability that only exists here.</strong></p>
+  <aside class="speaker-notes">This is the ecosystem answer. Most on-chain order books argue on latency or cost, where they are competing with incumbents who are better at it. This is a capability the incumbents structurally cannot ship at any budget.</aside>
+</section>
+
+<!-- ══ 11 · HONEST LIMITS ══════════════════════════════════════════════════ -->
+<section class="slide" id="s11" data-title="The limits, stated up front" data-sub="What this is not">
+  <p class="eyebrow"><span class="num">11</span><span class="bar"></span>What this is not</p>
+  <h1 class="tight" style="font-size:62px;margin-bottom:26px">The limits, stated up front.</h1>
+  <div class="limits">
+    <div class="limit"><div class="k">Testnet only</div><div class="v">Somnia Shannon, chain 50312. <strong>Nothing is deployed to mainnet and nothing has been audited.</strong></div></div>
+    <div class="limit"><div class="k">Buy side only</div><div class="v">Selling firm needs an ERC-6909 operator grant — and granting no operator is exactly what keeps the lock airtight. v1 quotes the buy side and says so.</div></div>
+    <div class="limit"><div class="k">Sound, not complete</div><div class="v">The static analyzer is sound for the <strong>six known escape classes</strong>. It is not a general proof of irrevocability, and we do not present it as one.</div></div>
+    <div class="limit"><div class="k">List, not oracle</div><div class="v">The attestation registry is a <strong>transparency list anyone can re-derive</strong> from the same bytes. It is not a trustless oracle, and it never will be without governance.</div></div>
+    <div class="limit"><div class="k">No traction</div><div class="v">No users, no volume, no adoption to report. <strong>A live firmness read returns 0% right now</strong> — the deployed lock window has lapsed, and we would rather show you that than a stale screenshot.</div></div>
+  </div>
+  <p class="kick amber" style="margin-top:30px">Each of these is in <span class="mono">DEMO.md</span> under <em>Honest limits</em>, with the exact reproduce command for the two escapes that did <strong>not</strong> complete on-chain.</p>
+  <aside class="speaker-notes">Say this slide plainly and do not rush it. Two of the six escapes did not complete on chain — one is a pool limitation we documented as a finding, the other ran out of faucet gas. Neither is faked, and the eight-of-eight number does not depend on either.</aside>
+</section>
+
+<!-- ══ 12 · THE ASK ════════════════════════════════════════════════════════ -->
+<section class="slide" id="s12" data-title="Run one command. Watch the chain refuse." data-sub="The ask">
+  <p class="eyebrow"><span class="num">12</span><span class="bar"></span>The ask</p>
+  <h1 class="tight" style="font-size:62px;margin-bottom:26px">Don't take our word. Take the chain's.</h1>
+  <div class="ask">
+    <div>
+      <div class="term">
+        <div class="term-bar"><span class="tl"><i></i><i></i><i></i></span>no wallet · no funds · no gas · ~4 seconds</div>
+<pre>cast call 0x1b8ed5380a4741df019acf5faa0ce6ecbf6167ee \
+  "cancelOrder(uint128)" 129127208515966879685 \
+  --from 0xFbc73Ce1C0B43f87cD065f82df24697dEc653595 \
+  --rpc-url https://api.infra.testnet.somnia.network
+
+<span class="cmt">→</span> <span class="warn">execution reverted: 0xf5e39c1f</span>
+<span class="cmt">→</span> <span class="sel">IncorrectSender(caller, expected)</span></pre>
+      </div>
+      <div class="ledger">
+        <div><div class="n">70 / 0</div><div class="l">forge tests · failures</div></div>
+        <div><div class="n">87.97%</div><div class="l">line coverage</div></div>
+        <div><div class="n">6</div><div class="l">attacker contracts deployed</div></div>
+        <div><div class="n">261</div><div class="l">line SDK feedback report</div></div>
+      </div>
+    </div>
+    <div>
+      <ul class="links">
+        <li><span class="k">Repo</span><span class="v">github.com/edycutjong/rampart</span></li>
+        <li><span class="k">Proof</span><span class="v">DEMO.md — every tx, every limit</span></li>
+        <li><span class="k">The tx</span><span class="v">shannon-explorer.somnia.network<br>/tx/0x959b4770…6ddb</span></li>
+        <li><span class="k">Contract</span><span class="v">0x2a09b4c4…191a</span></li>
+        <li><span class="k">Deck</span><span class="v">rampart.edycu.dev/pitch/</span></li>
+      </ul>
+      <p class="closer">Every other order book asks you to <em>trust the maker.</em> This one doesn't have to.</p>
+    </div>
+  </div>
+  <aside class="speaker-notes">The ask is simple: run the cast call before you score us. It takes four seconds, needs nothing, and it is the only demo in this event that proves itself by failing. Then read DEMO.md — the limits are in there too.</aside>
+</section>
+
+<!-- ══ chrome ══════════════════════════════════════════════════════════════ -->
+<div id="chrome">
+  <div id="brandmark"><span class="sq"></span>rampart · somnia × dreamdex</div>
+  <nav id="rail" aria-label="Slide navigation"></nav>
+  <div id="counter"><b id="cnum">01</b> / 12</div>
+</div>
+
+</div><!-- /#stage -->
+
+<div id="hint">← → navigate · esc overview · p notes</div>
+
+<div id="notes" role="region" aria-label="Speaker notes">
+  <p class="t">Speaker notes — slide <span id="ncur">1</span></p>
+  <p id="ntext"></p>
+</div>
+
+<div id="grid" role="dialog" aria-modal="true" aria-label="Slide overview">
+  <h2>rampart — 12 slides</h2>
+  <div class="g" id="gcards"></div>
+  <p class="esc">esc or click a card to return</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var slides  = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total   = slides.length;
+  var rail    = document.getElementById('rail');
+  var cnum    = document.getElementById('cnum');
+  var counter = document.getElementById('counter');
+  var ntext   = document.getElementById('ntext');
+  var ncur    = document.getElementById('ncur');
+  var gcards  = document.getElementById('gcards');
+  var body    = document.body;
+  var i       = 0;
+
+  counter.innerHTML = '<b id="cnum">01</b> / ' + (total < 10 ? '0' : '') + total;
+  cnum = document.getElementById('cnum');
+
+  /* ── build the rail + the overview grid from slide metadata ────────────── */
+  slides.forEach(function (s, n) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('aria-label', 'Slide ' + (n + 1) + ': ' + s.dataset.title);
+    b.addEventListener('click', function () { go(n); });
+    rail.appendChild(b);
+
+    var c = document.createElement('button');
+    c.type = 'button';
+    c.innerHTML = '<span class="n">' + pad(n + 1) + '</span>' +
+                  '<span class="t"></span><span class="s"></span>';
+    c.querySelector('.t').textContent = s.dataset.title;
+    c.querySelector('.s').textContent = s.dataset.sub;
+    c.addEventListener('click', function () { body.classList.remove('gridding'); go(n); });
+    gcards.appendChild(c);
+  });
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  /* ── scale the fixed 1920×1080 stage to fit the viewport ───────────────── */
+  function fit() {
+    var pad = body.classList.contains('presenting') ? 132 : 0;
+    var s = Math.min(window.innerWidth / 1920, (window.innerHeight - pad) / 1080);
+    document.documentElement.style.setProperty('--s', s);
+    document.getElementById('stage').style.marginTop = pad ? (-pad / 2) + 'px' : '';
+  }
+
+  function go(n) {
+    i = (n + total) % total;
+    slides.forEach(function (s, k) { s.classList.toggle('active', k === i); });
+    Array.prototype.forEach.call(rail.children, function (b, k) {
+      b.setAttribute('aria-current', k === i ? 'true' : 'false');
+    });
+    Array.prototype.forEach.call(gcards.children, function (b, k) {
+      b.setAttribute('aria-current', k === i ? 'true' : 'false');
+    });
+    cnum.textContent = pad(i + 1);
+    var note = slides[i].querySelector('.speaker-notes');
+    ntext.textContent = note ? note.textContent.trim() : '';
+    ncur.textContent = i + 1;
+    if (location.hash !== '#' + (i + 1)) {
+      history.replaceState(null, '', '#' + (i + 1));
+    }
+  }
+
+  function next() { moved(); go(i + 1); }
+  function prev() { moved(); go(i - 1); }
+  function moved() { body.classList.add('moved'); }
+
+  /* ── keyboard ──────────────────────────────────────────────────────────── */
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === ' ' || k === 'Spacebar') {
+      e.preventDefault(); next();
+    } else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || k === 'Backspace') {
+      e.preventDefault(); prev();
+    } else if (k === 'Home') {
+      e.preventDefault(); moved(); go(0);
+    } else if (k === 'End') {
+      e.preventDefault(); moved(); go(total - 1);
+    } else if (k === 'Escape') {
+      e.preventDefault(); body.classList.toggle('gridding'); moved();
+    } else if (k === 'p' || k === 'P') {
+      body.classList.toggle('presenting'); fit(); moved();
+    } else if (k === 'c' || k === 'C') {
+      body.classList.toggle('debug-contrast');
+    } else if (k >= '1' && k <= '9') {
+      moved(); go(parseInt(k, 10) - 1);
+    }
+  });
+
+  /* ── wheel / swipe — a judge scrolling on a laptop still advances ──────── */
+  var wlock = 0;
+  window.addEventListener('wheel', function (e) {
+    if (body.classList.contains('gridding')) return;
+    var now = Date.now();
+    if (now - wlock < 620) return;
+    if (Math.abs(e.deltaY) < 14) return;
+    wlock = now;
+    if (e.deltaY > 0) next(); else prev();
+  }, { passive: true });
+
+  var tx = 0, ty = 0;
+  window.addEventListener('touchstart', function (e) {
+    tx = e.changedTouches[0].clientX; ty = e.changedTouches[0].clientY;
+  }, { passive: true });
+  window.addEventListener('touchend', function (e) {
+    var dx = e.changedTouches[0].clientX - tx;
+    var dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 46 && Math.abs(dx) > Math.abs(dy)) { dx < 0 ? next() : prev(); }
+    else if (Math.abs(dy) > 46) { dy < 0 ? next() : prev(); }
+  }, { passive: true });
+
+  /* click the right/left third of the stage to advance (presenter habit) */
+  document.getElementById('stage').addEventListener('click', function (e) {
+    if (e.target.closest('#rail') || e.target.closest('a')) return;
+    var r = this.getBoundingClientRect();
+    var x = (e.clientX - r.left) / r.width;
+    if (x > 0.66) next(); else if (x < 0.2) prev();
+  });
+
+  /* ── hide the cursor after 2s idle while presenting ────────────────────── */
+  var idle;
+  document.addEventListener('mousemove', function () {
+    body.classList.remove('idle');
+    clearTimeout(idle);
+    idle = setTimeout(function () {
+      if (body.classList.contains('presenting')) body.classList.add('idle');
+    }, 2000);
+  });
+
+  window.addEventListener('resize', fit);
+  window.addEventListener('hashchange', function () {
+    var n = parseInt(location.hash.slice(1), 10);
+    if (n >= 1 && n <= total && n - 1 !== i) go(n - 1);
+  });
+
+  /* deep link: /pitch/#7 opens on slide 7 */
+  var start = parseInt(location.hash.slice(1), 10);
+  fit();
+  go(start >= 1 && start <= total ? start - 1 : 0);
+  setTimeout(moved, 9000);
+})();
+</script>
+</body>
+</html>

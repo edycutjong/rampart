@@ -2,8 +2,8 @@
 <!-- STORYBOARD (dur 6s — must equal this file's single master dur)
   0-10%   steady state: the full mark — opaque plate, broken amber rung, solid cyan rung, white bounce-V with arrowhead, resting flash and sparks (poster rule: identical to icon.svg)
   10-25%  trigger:      rewind — the V retracts, the broken amber knits back as both rungs draw themselves in; the cancel begins its descent   data-story="beat-2"
-  25-55%  mechanism:    A cancel strikes the resting quote and bounces; pullable amber hardens into held cyan and never returns.   data-story="beat-3"
-  55-80%  resolution:   the held rung stays solid and cyan; the reflected V rests; the held glow swells; from 48% the broken-amber residue re-emerges as a 22% ghost — evidence of what happened to the other rung, so the two-rung comparison never leaves the frame (hard rule 7)   data-story="beat-4"
+  25-55%  mechanism:    A cancel strikes the resting quote and bounces; the pullable rung is SWEPT away at full colour (never dimmed — a fading amber over this plate reads as brown mud); pullable amber hardens into held cyan and never returns.   data-story="beat-3"
+  55-80%  resolution:   the held rung stays solid and cyan; the reflected V rests; the held glow swells; from 37.5% the broken-amber residue re-emerges as a 30% ghost — evidence of what happened to the other rung, so the two-rung comparison never leaves the frame (hard rule 7; measured floor 1.7% amber at 40%, verified by _amber.cjs)   data-story="beat-4"
   80-100% breathe + seam fade — the amber ghost deepens back to the full broken-amber residue so the last frame equals frame 0
 -->
   <title>rampart — the strike that bounces</title>
@@ -40,12 +40,24 @@
     </ellipse>
 
     <!-- Broken-amber residue (poster state, from icon.svg) — hides while the
-         intact rung carries the story, then re-emerges as a 22% ghost the moment
-         the debris clears (ramp 48-56%, right as the arrowhead relights) so the
-         amber-vs-cyan comparison stays on screen through the resolution with no
-         amber-free dwell; deepens to full at the seam so the loop closes -->
+         intact rung carries the story, then re-emerges as a 30% ghost as the rung is
+         swept away (ramp 37.5-45%) so the amber-vs-cyan comparison stays on screen
+         through the resolution with no amber-free dwell; deepens to full at the seam
+         so the loop closes. 30% not 22%: at 22% the blend over this plate lands near
+         rgb(62,49,27), which reads as dark brown rather than as dim amber. -->
     <g fill="#F59E0B" opacity="1">
-      <animate attributeName="opacity" values="1;1;0;0;0.22;0.22;1;1" keyTimes="0;0.10;0.16;0.48;0.56;0.86;0.97;1" dur="6s" repeatCount="indefinite"/>
+      <!-- Holds FULL opacity until the intact rung has drawn across it (20%), then
+           clears. Both are #F59E0B and the rung paints later in document order, so
+           while they overlap they merge as one solid shape — no seam is possible.
+           The earlier build cross-faded them instead: residue dimming to brown while
+           the rung drew in at full brightness produced a hard two-tone edge that
+           tracked the draw front across the bar. Fading only AFTER coverage also
+           keeps amber continuously on screen, which a clean hand-off could not do —
+           a draw-in has almost no ink in its first frames. Returns at 37.5%, while
+           the rung is still mid-sweep, closing the gap at the other end
+           (hard rule 7: the amber-vs-cyan comparison never leaves the frame). -->
+      <animate attributeName="opacity" values="1;1;0;0;0.30;0.30;1;1" keyTimes="0;0.20;0.24;0.375;0.45;0.86;0.97;1"
+               calcMode="spline" keySplines="0 0 1 1;0.4 0 0.2 1;0 0 1 1;0.4 0 0.2 1;0 0 1 1;0.4 0 0.2 1;0 0 1 1" dur="6s" repeatCount="indefinite"/>
       <rect x="84" y="140" width="64" height="56" rx="14"/>
       <rect x="218" y="142" width="78" height="52" rx="13" opacity="0.9"/>
       <rect x="372" y="124" width="34" height="42" rx="11" opacity="0.68" transform="rotate(-9 389 145)"/>
@@ -54,20 +66,29 @@
       <circle cx="456" cy="84" r="4" opacity="0.25"/>
     </g>
 
-    <!-- UPPER RUNG intact (story: the wallet's resting quote) — draws itself in,
-         then dissolves into dashes and blows away under the strike -->
+    <!-- UPPER RUNG intact (story: the wallet's resting quote) — draws itself in over
+         the residue, then is SWEPT away under the strike.
+         ONE dash of pathLength 100 inside a 200-long cycle, moved by dashoffset:
+           100 -> hidden   ·   0 -> fully drawn   ·   -100 -> wiped out again
+         so a single attribute performs both the draw-in (10-22%) and the sweep-out
+         (34-42%), and the bar is at FULL colour every frame it is on screen.
+         It never dims while visible: an opacity ramp on #F59E0B over the #0B1220
+         plate passes through brown, and the previous dasharray dissolve spent ~5% of
+         the timeline as a muddy speckled band because of exactly that. The opacity
+         fade below runs 43-46%, after the wipe has already emptied the stroke, so it
+         is applied to something already invisible. -->
     <line x1="112" y1="168" x2="400" y2="168" stroke="#F59E0B" stroke-width="56" stroke-linecap="round" pathLength="100" stroke-dasharray="100 100" stroke-dashoffset="100" opacity="0" data-story="beat-2">
-      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.095;0.13;0.36;0.46;1" dur="6s" repeatCount="indefinite"/>
-      <animate attributeName="stroke-dashoffset" values="100;100;0;0" keyTimes="0;0.10;0.20;1" dur="6s" repeatCount="indefinite"/>
-      <animate attributeName="stroke-dasharray" values="100 100;100 100;12 7;12 7" keyTimes="0;0.30;0.42;1" dur="6s" repeatCount="indefinite"/>
-      <animateTransform attributeName="transform" type="translate" values="0 0;0 0;0 0;26 -34;40 -52;0 0;0 0" keyTimes="0;0.10;0.36;0.46;0.525;0.53;1" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.10;0.125;0.43;0.46;1"
+               calcMode="spline" keySplines="0 0 1 1;0.4 0 0.2 1;0 0 1 1;0 0 1 1;0 0 1 1" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-dashoffset" values="100;100;0;0;-100;-100" keyTimes="0;0.10;0.22;0.34;0.42;1"
+               calcMode="spline" keySplines="0 0 1 1;0.25 0.1 0.25 1;0 0 1 1;0.45 0 0.25 1;0 0 1 1" dur="6s" repeatCount="indefinite"/>
     </line>
 
     <!-- Pullable chips torn loose at the strike — lift up-right and vanish.
          Dead by 46%, before the arrowhead relights at 45-48.5%: no drifting
          amber ever crosses the white head (QA: muddy-smear finding). -->
     <g fill="#F59E0B" opacity="0" data-story="beat-3">
-      <animate attributeName="opacity" values="0;0;0;0.9;0.35;0;0" keyTimes="0;0.10;0.36;0.42;0.44;0.46;1" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0;0;0.95;0.95;0;0" keyTimes="0;0.10;0.33;0.37;0.42;0.445;1" dur="6s" repeatCount="indefinite"/>
       <animateTransform attributeName="transform" type="translate" values="0 0;0 0;0 0;22 -26;44 -56;44 -56" keyTimes="0;0.10;0.36;0.45;0.56;1" dur="6s" repeatCount="indefinite"/>
       <rect x="300" y="150" width="26" height="20" rx="6"/>
       <rect x="336" y="142" width="18" height="16" rx="5"/>

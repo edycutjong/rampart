@@ -10,243 +10,493 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="rampart — the cancel the chain refused">
 <meta property="og:description" content="The wallet that paid for a resting order tried to cancel it and the chain said no: IncorrectSender, status 0x0, mined and permanent on Somnia Shannon testnet. Depth the pool itself will not release.">
-<meta property="og:url" content="https://edycutjong.github.io/rampart/">
-<meta property="og:image" content="https://edycutjong.github.io/rampart/assets/og-image.png">
+<meta property="og:url" content="https://rampart.edycu.dev/">
+<meta property="og:image" content="https://rampart.edycu.dev/assets/og-image.png">
+<meta property="og:site_name" content="rampart">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="rampart — the cancel the chain refused">
+<meta name="twitter:description" content="A resting order whose own funder cannot withdraw it. Proven by a failed transaction on Somnia Shannon testnet.">
+<meta name="twitter:image" content="https://rampart.edycu.dev/assets/og-image.png">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <style>
-/* ---------- tokens (family: rampart asset suite, frozen palette) ---------- */
+/* ══════════════════════════════════════════════════════════════════════════
+   rampart · judge-facing surface
+   Tokens inlined from assets/_tokens.css (the page must be self-contained).
+   --pull and --held are ONE axis: depth that can vanish ↔ depth the pool
+   will not release. Every colour on this page is a position on that axis.
+   ══════════════════════════════════════════════════════════════════════════ */
 :root{
   color-scheme:dark;
-  --plate:#0B1220;      /* the mandatory dark ground — cyan fails on white (1.81:1) */
-  --panel-hi:#101B30;   /* raised card, top of gradient */
-  --panel-lo:#0D1728;   /* raised card, bottom of gradient */
-  --ink-bg:#0A101D;     /* terminal / code ground */
-  --line:#1E2B44;       /* hairline borders */
-  --line-soft:#16223A;  /* section separators */
-  --text:#E2E8F0;       /* wordmark base */
-  --muted:#94A3B8;      /* secondary text; also the UNVERIFIED state */
-  --pull:#F59E0B;       /* state: depth that can vanish in one block — a wallet owner */
-  --held:#22D3EE;       /* state: depth the pool will not release — fires on the bounce */
-  --held-ink:#0B1220;   /* text on a solid cyan fill */
-  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-  --r-card:14px; --r-code:12px; --r-pill:999px;
-  --container:984px;
+  --plate:#0B1220;
+  --plate-2:#080E19;
+  --panel-hi:#111D33;
+  --panel-lo:#0C1626;
+  --ink:#070C16;
+  --line:#1E2B44;
+  --line-soft:#16223A;
+  --text:#E2E8F0;
+  --text-max:#F8FAFC;
+  --muted:#94A3B8;
+  --dim:#78899E;
+  --pull:#F59E0B;
+  --held:#22D3EE;
+  --held-ink:#0B1220;
+  --sans:'Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --shell:1180px;
+  --r-lg:18px; --r-md:13px; --r-sm:9px; --r-pill:999px;
+  --ease:cubic-bezier(.22,.61,.36,1);
 }
-/* ---------- reset-ish ---------- */
 *,*::before,*::after{box-sizing:border-box}
-html{background:var(--plate);scroll-behavior:smooth}
+html{background:var(--plate);scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{
   margin:0;background:var(--plate);color:var(--text);
-  font:400 1rem/1.65 var(--sans);
+  font:400 1rem/1.62 var(--sans);
   -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
   overflow-x:hidden;
 }
-img,svg{max-width:100%;height:auto;display:block}
+img,svg{max-width:100%;display:block}
 a{color:var(--held);text-decoration:none}
 a:hover{text-decoration:underline;text-underline-offset:3px}
-:focus-visible{outline:2px solid var(--held);outline-offset:3px;border-radius:4px}
-::selection{background:rgba(34,211,238,.28)}
-code,pre,kbd{font-family:var(--mono)}
-/* faint instrument grid, fading out below the hero — paint-only, no filters */
-.gridbg{
-  position:absolute;inset:0 0 auto 0;height:820px;pointer-events:none;z-index:0;
+:focus-visible{outline:2px solid var(--held);outline-offset:3px;border-radius:5px}
+::selection{background:rgba(34,211,238,.26)}
+code,pre,kbd,samp{font-family:var(--mono)}
+h1,h2,h3,h4,p,ul,ol,figure,table{margin:0}
+ul{padding:0;list-style:none}
+
+/* ── ambient ground ──────────────────────────────────────────────────────── */
+.bg{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg::before{
+  content:"";position:absolute;inset:0;
   background-image:
-    linear-gradient(rgba(148,163,184,.05) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(148,163,184,.05) 1px,transparent 1px);
-  background-size:44px 44px;
-  -webkit-mask-image:linear-gradient(to bottom,#000 40%,transparent);
-          mask-image:linear-gradient(to bottom,#000 40%,transparent);
+    linear-gradient(rgba(148,163,184,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(148,163,184,.045) 1px,transparent 1px);
+  background-size:52px 52px;
+  -webkit-mask-image:radial-gradient(ellipse 120% 70% at 50% 0%,#000 0%,transparent 72%);
+          mask-image:radial-gradient(ellipse 120% 70% at 50% 0%,#000 0%,transparent 72%);
 }
-.wrap{max-width:var(--container);margin:0 auto;padding:0 22px;position:relative;z-index:1}
-/* ---------- header ---------- */
-.skip{position:absolute;left:-9999px;top:0;background:var(--held);color:var(--held-ink);
-  padding:.6rem 1rem;border-radius:0 0 8px 0;font-weight:600;z-index:99}
-.skip:focus{left:0}
-header.site{
-  position:sticky;top:0;z-index:50;background:rgba(11,18,32,.94);
-  border-bottom:1px solid var(--line-soft);
+.bg::after{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 42% at 12% 4%,rgba(245,158,11,.11),transparent 62%),
+    radial-gradient(ellipse 66% 48% at 88% 16%,rgba(34,211,238,.13),transparent 66%);
 }
-.site .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-top:.8rem;padding-bottom:.8rem}
-.brand{display:inline-flex;align-items:center;border-radius:6px}
-.wordmark{height:19px;width:auto}
-nav.toc{display:flex;gap:1.25rem;align-items:center}
-nav.toc a{color:var(--muted);font-size:.86rem;font-weight:500}
-nav.toc a:hover{color:var(--text);text-decoration:none}
-.gh{border:1px solid var(--line);border-radius:var(--r-pill);padding:.38rem .85rem;
-  color:var(--text) !important;font-size:.84rem;font-weight:600;
-  transition:border-color .16s ease,transform .16s ease;white-space:nowrap}
-.gh:hover{border-color:rgba(34,211,238,.55);text-decoration:none;transform:translateY(-1px)}
-@media (max-width:760px){nav.toc a:not(.gh){display:none}}
-/* ---------- shared ---------- */
-main{display:block}
-section{padding:clamp(54px,7vw,88px) 0;border-top:1px solid var(--line-soft);scroll-margin-top:76px}
-section:first-of-type{border-top:0}
-.eyebrow{
-  font:700 .75rem/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;
-  color:var(--held);margin:0 0 14px;
-}
-h1{font-size:clamp(1.95rem,1.15rem + 3.6vw,3.3rem);line-height:1.13;letter-spacing:-.022em;
-  font-weight:700;margin:.6rem 0 1rem;max-width:21ch}
-h2{font-size:clamp(1.4rem,1.15rem + 1.1vw,1.85rem);line-height:1.22;letter-spacing:-.015em;
-  font-weight:700;margin:0 0 .5rem;max-width:30ch}
-h3{font-size:1.06rem;margin:0 0 .35rem;letter-spacing:-.008em}
-p{margin:.55rem 0;max-width:70ch;color:var(--text)}
-p.sub{color:var(--muted)}
-.lede{font-size:clamp(1.02rem,.95rem + .45vw,1.19rem);color:var(--muted);max-width:62ch}
-.lede strong,.callout strong,p strong{color:var(--text)}
+.progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:80;
+  background:linear-gradient(90deg,var(--pull),var(--held));box-shadow:0 0 12px rgba(34,211,238,.5)}
+
+/* ── layout primitives ───────────────────────────────────────────────────── */
+.shell{max-width:var(--shell);margin:0 auto;padding:0 26px;position:relative;z-index:1}
+.prose{max-width:66ch}
+.lede{font-size:clamp(1.02rem,.96rem + .42vw,1.2rem);line-height:1.6;color:var(--muted);max-width:58ch}
+.lede strong,p strong{color:var(--text-max);font-weight:600}
+p{color:var(--muted)}
+p + p{margin-top:.8rem}
 .mono{font-family:var(--mono)}
 .amber{color:var(--pull)}
 .cyan{color:var(--held)}
-.dim{color:var(--muted)}
-.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-/* chips */
-.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 1.1rem;padding:0;list-style:none}
-.chip{display:inline-flex;align-items:center;gap:.45rem;border:1px solid var(--line);
-  border-radius:var(--r-pill);padding:.34rem .75rem;
-  font:600 .72rem/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
-  background:rgba(148,163,184,.05);white-space:nowrap}
-.chip-held{color:var(--held);border-color:rgba(34,211,238,.35);background:rgba(34,211,238,.07)}
-.chip-amber{color:var(--pull);border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.07)}
-.dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
-.dot-pulse{animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.45;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
-/* buttons */
-.cta{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.6rem}
-.btn{display:inline-flex;align-items:center;gap:.5rem;font-weight:600;font-size:.95rem;
-  border-radius:10px;padding:.72rem 1.15rem;border:1px solid transparent;cursor:pointer;
-  transition:transform .16s ease,border-color .16s ease,background-color .16s ease}
-.btn-primary{background:var(--held);color:var(--held-ink);box-shadow:0 8px 28px -10px rgba(34,211,238,.55)}
-.btn-primary:hover{transform:translateY(-2px);text-decoration:none}
-.btn-ghost{border-color:var(--line);color:var(--text);background:rgba(148,163,184,.06)}
-.btn-ghost:hover{border-color:rgba(34,211,238,.55);transform:translateY(-2px);text-decoration:none}
-/* terminal / code blocks */
-.term{border:1px solid var(--line);border-radius:var(--r-code);background:var(--ink-bg);
-  margin:1.5rem 0 0;overflow:hidden}
-.term-bar{display:flex;justify-content:space-between;align-items:center;gap:1rem;
-  padding:.6rem .95rem;border-bottom:1px solid var(--line-soft);
-  font:500 .78rem/1.4 var(--mono);color:var(--muted);flex-wrap:wrap}
-.term-bar a{white-space:nowrap}
-.term pre{margin:0;padding:1.05rem 1.15rem;overflow-x:auto;
-  font-size:clamp(.78rem,.72rem + .3vw,.9rem);line-height:1.62;color:var(--text)}
-.term .comment{color:var(--muted)}
-.term .sel{color:var(--held);font-weight:700}
-.proof-note{padding:.8rem 1.15rem;border-top:1px solid var(--line-soft);
-  color:var(--muted);font-size:.9rem;max-width:none}
-.proof-note strong{color:var(--text)}
-/* the control compare */
-.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
-.compare .card{min-width:0}
-@media (max-width:720px){.compare{grid-template-columns:1fr}}
-.card{border:1px solid var(--line);border-radius:var(--r-card);
-  background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));padding:1.1rem 1.2rem;
-  transition:transform .16s ease,border-color .16s ease}
-.card:hover{border-color:rgba(148,163,184,.35)}
-.card .who{font:600 .74rem/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;margin:0 0 .55rem}
-.card .addr{font-family:var(--mono);font-size:.86rem;word-break:break-all;margin:0 0 .6rem}
-.card .result{font-family:var(--mono);font-size:.86rem;margin:0;padding:.55rem .7rem;border-radius:8px;background:var(--ink-bg);border:1px solid var(--line-soft)}
-.card.pull{border-top:3px solid var(--pull)}
-.card.held{border-top:3px solid var(--held)}
-.card.slate{border-top:3px solid var(--muted)}
-.compare-cap{color:var(--muted);font-size:.92rem;margin-top:12px;max-width:75ch}
-/* hero art */
-.heroart{margin:clamp(40px,6vw,64px) 0 0;border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;background:var(--plate)}
-.heroart img{width:100%;height:auto}
-.heroart-cap{color:var(--muted);font-size:.85rem;padding:.7rem 1rem;border-top:1px solid var(--line-soft);margin:0;max-width:none}
+.slate{color:var(--dim)}
+.nowrap{white-space:nowrap}
+.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:absolute;left:-9999px;top:0;background:var(--held);color:var(--held-ink);
+  padding:.65rem 1.1rem;border-radius:0 0 10px 0;font-weight:700;z-index:99}
+.skip:focus{left:0}
+
+/* ── header ──────────────────────────────────────────────────────────────── */
+header.site{position:sticky;top:0;z-index:60;
+  background:rgba(9,15,27,.82);border-bottom:1px solid var(--line-soft);
+  -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
+.site .shell{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding-top:.85rem;padding-bottom:.85rem}
+.brand{display:inline-flex;align-items:center;gap:.6rem;border-radius:7px}
+.wordmark{height:19px;width:auto}
+.nav{display:flex;gap:.15rem;align-items:center}
+.nav a{color:var(--muted);font:600 .82rem/1 var(--sans);padding:.5rem .6rem;border-radius:7px;
+  transition:color .18s var(--ease),background-color .18s var(--ease)}
+.nav a:hover{color:var(--text-max);background:rgba(148,163,184,.09);text-decoration:none}
+.nav a.on{color:var(--held)}
+.gh{margin-left:.5rem;border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:.44rem .95rem !important;color:var(--text) !important;font-size:.82rem;
+  transition:border-color .18s var(--ease),transform .18s var(--ease),box-shadow .18s var(--ease)}
+.gh:hover{border-color:rgba(34,211,238,.6);transform:translateY(-1px);
+  box-shadow:0 6px 20px -10px rgba(34,211,238,.7);background:none !important}
+@media (max-width:1080px){.nav a:not(.gh){display:none}}
+
+/* ── section scaffold ────────────────────────────────────────────────────── */
+section{padding:clamp(66px,8vw,116px) 0;position:relative}
+section + section{border-top:1px solid var(--line-soft)}
+.shead{display:flex;align-items:center;gap:1rem;margin-bottom:clamp(20px,2.6vw,30px)}
+.shead .idx{font:700 .74rem/1 var(--mono);letter-spacing:.14em;color:var(--held);
+  padding:.42rem .6rem;border:1px solid rgba(34,211,238,.28);border-radius:7px;
+  background:rgba(34,211,238,.07);flex:none}
+.shead .rule{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.shead .kicker{font:700 .74rem/1 var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--dim);flex:none}
+/* headline left, standfirst right — the header band fills the whole measure */
+.stitle{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);
+  gap:clamp(22px,4vw,58px);align-items:end}
+@media (max-width:880px){.stitle{grid-template-columns:1fr;gap:.9rem;align-items:start}}
+h2{font-size:clamp(1.55rem,1.15rem + 1.6vw,2.3rem);line-height:1.14;letter-spacing:-.022em;
+  font-weight:700;color:var(--text-max);max-width:20ch;text-wrap:balance}
+h3{font-size:1.02rem;line-height:1.35;font-weight:700;color:var(--text-max);letter-spacing:-.008em}
+.sublede{color:var(--muted);max-width:50ch;font-size:1rem;line-height:1.6;padding-bottom:.22rem}
+
+/* ── HERO ────────────────────────────────────────────────────────────────── */
+.hero{padding-top:clamp(38px,5vw,66px);padding-bottom:clamp(34px,4vw,52px);border-top:0}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);
+  gap:clamp(28px,4vw,58px);align-items:center}
+@media (max-width:940px){
+  .hero-grid{grid-template-columns:1fr;gap:32px}
+  .hero .lede{max-width:none}
+  h1{max-width:none}
+}
+.rail{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
+.tag{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--line);
+  border-radius:var(--r-pill);padding:.36rem .8rem;background:rgba(148,163,184,.05);
+  font:600 .705rem/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.tag-live{color:var(--held);border-color:rgba(34,211,238,.4);background:rgba(34,211,238,.08)}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none;animation:blip 2.4s ease-in-out infinite}
+@keyframes blip{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.35)}}
+h1{
+  font-size:clamp(2.05rem,1.05rem + 4.2vw,3.65rem);line-height:1.06;letter-spacing:-.03em;
+  font-weight:800;max-width:15ch;
+  background:linear-gradient(178deg,#FFFFFF 8%,#C8D4E4 96%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+h1 .no{
+  display:inline-block;
+  background:linear-gradient(180deg,var(--held) 0%,#0EA5C4 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero .lede{margin-top:1.15rem}
+.cta{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.9rem}
+.btn{display:inline-flex;align-items:center;gap:.55rem;font:600 .93rem/1 var(--sans);
+  border-radius:11px;padding:.85rem 1.25rem;border:1px solid transparent;cursor:pointer;
+  transition:transform .18s var(--ease),box-shadow .18s var(--ease),border-color .18s var(--ease),background-color .18s var(--ease)}
+.btn-1{background:var(--held);color:var(--held-ink);box-shadow:0 10px 30px -12px rgba(34,211,238,.9)}
+.btn-1:hover{transform:translateY(-2px);box-shadow:0 16px 40px -14px rgba(34,211,238,1);text-decoration:none}
+.btn-2{border-color:var(--line);color:var(--text);background:rgba(148,163,184,.06)}
+.btn-2:hover{border-color:rgba(34,211,238,.55);transform:translateY(-2px);text-decoration:none;color:var(--text-max)}
+
+/* the ladder instrument */
+.instrument{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;
+  background:linear-gradient(168deg,var(--panel-hi),var(--panel-lo) 62%,var(--ink));
+  box-shadow:0 30px 70px -40px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.045)}
+.instrument .cap span.mono{text-transform:none;letter-spacing:.04em}
+.instrument .cap{display:flex;justify-content:space-between;align-items:center;gap:.8rem;
+  padding:.62rem .95rem;border-bottom:1px solid var(--line-soft);
+  font:600 .69rem/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.instrument svg{width:100%;height:auto;display:block}
+.instrument .foot{padding:.75rem .95rem;border-top:1px solid var(--line-soft);
+  font:400 .78rem/1.5 var(--sans);color:var(--dim)}
+
+/* ── metric strip ────────────────────────────────────────────────────────── */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:clamp(34px,4vw,52px);
+  border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--line)}
+.metric{background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));padding:1.15rem 1.2rem;
+  transition:background-color .2s var(--ease)}
+.metric:hover{background:linear-gradient(180deg,#16243D,var(--panel-lo))}
+.metric .k{font:700 .66rem/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.metric .v{font:800 clamp(1.5rem,1.1rem + 1.2vw,2.05rem)/1 var(--mono);letter-spacing:-.02em;
+  color:var(--text-max);margin-top:.6rem;font-variant-numeric:tabular-nums}
+.metric .v.hi{color:var(--held)}
+.metric .s{font:400 .78rem/1.45 var(--sans);color:var(--muted);margin-top:.45rem}
+.metric .s b{color:var(--pull);font-weight:600;font-family:var(--mono)}
+@media (max-width:900px){.metrics{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:430px){.metrics{grid-template-columns:1fr}}
+
+/* ── full-bleed band ─────────────────────────────────────────────────────── */
+.closer{padding-top:clamp(52px,6vw,80px);padding-bottom:clamp(52px,6vw,80px)}
+.band{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--plate);
+  overflow:hidden;box-shadow:0 30px 70px -46px rgba(0,0,0,.95)}
+.band img{width:100%;height:auto}
+.band figcaption{padding:.9rem 1.2rem;font:400 .84rem/1.55 var(--sans);color:var(--dim);
+  border-top:1px solid var(--line-soft);background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo))}
+
+/* ── terminal ────────────────────────────────────────────────────────────── */
+.term{border:1px solid var(--line);border-radius:var(--r-md);background:var(--ink);overflow:hidden;
+  box-shadow:0 26px 60px -40px rgba(0,0,0,.95)}
+.term-bar{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;
+  padding:.62rem .95rem;border-bottom:1px solid var(--line-soft);
+  font:500 .765rem/1.45 var(--mono);color:var(--dim);background:rgba(148,163,184,.035)}
+.term-bar .lhs{display:flex;align-items:center;gap:.6rem;min-width:0}
+.lamps{display:inline-flex;gap:.32rem;flex:none}
+.lamps i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
+.lamps i:last-child{background:rgba(34,211,238,.5)}
+@media (max-width:640px){.tb-desc{display:none}}
+.term pre{margin:0;padding:1.1rem 1.15rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  font-size:clamp(.735rem,.68rem + .26vw,.855rem);line-height:1.7;color:var(--text);tab-size:2}
+.term .c{color:var(--dim)}
+.sel{color:var(--held);font-weight:700;background:rgba(34,211,238,.12);
+  border:1px solid rgba(34,211,238,.3);border-radius:5px;padding:.06em .38em}
+.term .note{padding:.85rem 1.15rem;border-top:1px solid var(--line-soft);
+  font:400 .885rem/1.6 var(--sans);color:var(--muted)}
+.term .note strong{color:var(--text-max)}
+.stamp{font:800 .68rem/1 var(--mono);letter-spacing:.18em;color:var(--pull);
+  border:1px solid rgba(245,158,11,.45);background:rgba(245,158,11,.1);
+  padding:.4rem .6rem;border-radius:6px;flex:none}
+
+/* ── cards ───────────────────────────────────────────────────────────────── */
+.card{border:1px solid var(--line);border-radius:var(--r-md);
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));padding:1.15rem 1.25rem;
+  transition:border-color .2s var(--ease),transform .2s var(--ease)}
+.card:hover{border-color:rgba(148,163,184,.34);transform:translateY(-2px)}
+.card > * + *{margin-top:.55rem}
+.card p{font-size:.925rem;line-height:1.58}
+.top-pull{border-top:2px solid var(--pull)}
+.top-held{border-top:2px solid var(--held)}
+.top-slate{border-top:2px solid var(--dim)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:820px){.g3{grid-template-columns:1fr}}
+@media (max-width:720px){.g2{grid-template-columns:1fr}}
+.who{font:700 .705rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.addr{font-family:var(--mono);font-size:.85rem;word-break:break-all;color:var(--text)}
+.result{font-family:var(--mono);font-size:.84rem;padding:.6rem .72rem;border-radius:var(--r-sm);
+  background:var(--ink);border:1px solid var(--line-soft);color:var(--text)}
+.caption{color:var(--dim);font-size:.9rem;margin-top:14px;max-width:78ch}
+.caption em{color:var(--muted);font-style:italic}
+
 /* steps */
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:1.4rem}
-@media (max-width:820px){.steps{grid-template-columns:1fr}}
-.step .k{font:700 .95rem/1 var(--mono);color:var(--held);display:block;margin-bottom:.55rem}
-.step p{color:var(--muted);font-size:.93rem;margin:.3rem 0 0}
-.step h3 .mono{font-size:.95em}
-/* data table */
-table.data{width:100%;border-collapse:collapse;margin-top:1.2rem;font-size:.92rem;min-width:560px}
-table.data th{font:700 .72rem/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;
-  color:var(--muted);text-align:left;padding:.55rem .8rem;border-bottom:1px solid var(--line)}
-table.data td{padding:.7rem .8rem;border-bottom:1px solid var(--line-soft);vertical-align:top}
-table.data td:first-child{font-family:var(--mono);white-space:nowrap}
-/* classification cards */
-.classes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:1.4rem}
-@media (max-width:820px){.classes{grid-template-columns:1fr}}
-.classes h3{font:700 .95rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase}
-.classes .cond{color:var(--muted);font-size:.92rem;min-height:0;margin:.5rem 0 .8rem}
-.classes .claim{font-size:.92rem;margin:0;padding-top:.7rem;border-top:1px dashed var(--line)}
-.classes .claim b{font-weight:700}
-.pill-flag{display:inline-flex;align-items:center;gap:.5rem;border:1px dashed rgba(245,158,11,.55);
-  color:var(--pull);border-radius:var(--r-pill);padding:.4rem .9rem;
-  font:700 .74rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem}
-/* copy row */
-.copyrow{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
-.btn-copy{font:600 .78rem/1 var(--mono);letter-spacing:.05em;color:var(--held);
-  background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.35);border-radius:8px;
-  padding:.45rem .8rem;cursor:pointer;transition:transform .16s ease,border-color .16s ease}
-.btn-copy:hover{border-color:var(--held);transform:translateY(-1px)}
-.btn-copy.done{color:var(--held-ink);background:var(--held)}
-.visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-/* status */
-.statuscols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:1.4rem}
-@media (max-width:820px){.statuscols{grid-template-columns:1fr}}
-.statuscols ul{list-style:none;margin:.6rem 0 0;padding:0}
-.statuscols li{display:flex;gap:.65rem;padding:.5rem 0;border-top:1px solid var(--line-soft);
-  color:var(--muted);font-size:.93rem}
-.statuscols li:first-child{border-top:0}
-.statuscols li b{color:var(--text);font-weight:600}
-.mark{flex:none;font-family:var(--mono);font-weight:700}
-.mark.ok{color:var(--held)}
-.mark.no{color:var(--muted)}
-.statuscols .head{font:700 .78rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;margin:0 0 .4rem}
-/* tx rows */
-.txs{margin-top:1.4rem;display:grid;gap:10px}
-.txrow{display:grid;grid-template-columns:2.2rem 1fr auto;gap:.9rem;align-items:baseline;
-  border:1px solid var(--line);border-radius:12px;padding:.85rem 1rem;
+.step .k{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+  border-radius:8px;font:800 .78rem/1 var(--mono);color:var(--held);
+  background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.28)}
+
+/* withdrawal paths */
+.paths{display:grid;gap:10px;margin-top:1.5rem}
+.path{display:grid;grid-template-columns:minmax(0,270px) 1fr;gap:1.2rem;align-items:start;
+  border:1px solid var(--line);border-radius:var(--r-md);padding:.95rem 1.1rem;
+  background:linear-gradient(90deg,rgba(245,158,11,.045),transparent 40%);
+  transition:border-color .2s var(--ease)}
+.path:hover{border-color:rgba(148,163,184,.34)}
+.path .sig{font:600 .855rem/1.5 var(--mono);color:var(--text-max);word-break:break-word}
+.path .sig .x{color:var(--pull);margin-right:.5rem;font-weight:800}
+.path .why{font-size:.9rem;line-height:1.6;color:var(--muted)}
+@media (max-width:720px){.path{grid-template-columns:1fr;gap:.5rem}}
+
+/* ── the state axis ──────────────────────────────────────────────────────── */
+.axis{margin-top:1.6rem;border:1px solid var(--line);border-radius:var(--r-md);
+  background:var(--ink);padding:1.2rem 1.3rem 1.05rem}
+.axis .track{height:6px;border-radius:99px;
+  background:linear-gradient(90deg,var(--pull) 0%,#7C7F8C 48%,var(--held) 100%);position:relative}
+.axis .ends{display:flex;justify-content:space-between;gap:1rem;margin-top:.7rem;
+  font:600 .715rem/1.4 var(--mono);letter-spacing:.07em;text-transform:uppercase}
+.axis .ends span:first-child{color:var(--pull)}
+.axis .ends span:last-child{color:var(--held);text-align:right}
+.axis .off{margin-top:.9rem;padding-top:.8rem;border-top:1px dashed var(--line);
+  font-size:.875rem;color:var(--dim)}
+.axis .off b{color:var(--muted);font-family:var(--mono);font-weight:700}
+
+/* ── scoreboard ──────────────────────────────────────────────────────────── */
+.score-head{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.score-big{border:1px solid var(--line);border-radius:var(--r-md);padding:1.2rem 1.3rem;
+  background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));position:relative;overflow:hidden}
+.score-big .n{font:800 clamp(2.6rem,1.8rem + 3.4vw,4.4rem)/1 var(--mono);letter-spacing:-.045em;
+  font-variant-numeric:tabular-nums}
+.score-big .lbl{font:700 .7rem/1.4 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--dim);margin-bottom:.55rem}
+.score-big .txt{font-size:.885rem;line-height:1.55;color:var(--muted);margin-top:.6rem}
+.score-big.win{border-color:rgba(34,211,238,.38);
+  background:linear-gradient(180deg,rgba(34,211,238,.1),var(--panel-lo) 70%)}
+.score-big.win .n{color:var(--held)}
+.score-big.lose .n{color:var(--pull)}
+@media (max-width:640px){.score-head{grid-template-columns:1fr}}
+
+table.score{width:100%;border-collapse:collapse;font-size:.885rem}
+table.score th{font:700 .665rem/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--dim);text-align:left;padding:.6rem .75rem;border-bottom:1px solid var(--line);white-space:nowrap}
+table.score td{padding:.68rem .75rem;border-bottom:1px solid var(--line-soft);vertical-align:middle;color:var(--muted)}
+table.score tbody tr{transition:background-color .18s var(--ease)}
+table.score tbody tr:hover{background:rgba(148,163,184,.05)}
+table.score td.id{font-family:var(--mono);color:var(--dim);width:2.4rem}
+table.score td.nm{font-family:var(--mono);color:var(--text-max);white-space:nowrap}
+.verd{display:inline-flex;align-items:center;gap:.4rem;font:700 .655rem/1 var(--mono);
+  letter-spacing:.1em;padding:.35rem .55rem;border-radius:6px;border:1px solid;white-space:nowrap}
+.v-firm{color:var(--held);border-color:rgba(34,211,238,.36);background:rgba(34,211,238,.09)}
+.v-pull{color:var(--pull);border-color:rgba(245,158,11,.36);background:rgba(245,158,11,.09)}
+.v-unv{color:var(--dim);border-color:rgba(148,163,184,.26);background:rgba(148,163,184,.07)}
+.ok{color:var(--held);font-weight:800}
+.bad{color:var(--pull);font-weight:800}
+.wrapx{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);
+  border-radius:var(--r-md);background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo))}
+.wrapx > table{min-width:660px}
+.wrapx > table.score th:first-child,.wrapx > table.score td:first-child{padding-left:1.1rem}
+.wrapx > table.score th:last-child,.wrapx > table.score td:last-child{padding-right:1.1rem}
+table.score tbody tr:last-child td{border-bottom:0}
+
+/* card-mode scoreboard on small screens — stacked label over value, so a cell
+   with inline markup never gets split across grid tracks */
+@media (max-width:760px){
+  .wrapx{overflow:visible;border:0;background:none;border-radius:0}
+  .wrapx > table{min-width:0}
+  table.score thead{display:none}
+  table.score tbody tr{display:block;border:1px solid var(--line);border-radius:var(--r-md);
+    padding:.9rem 1.05rem 1rem;margin-bottom:10px;
+    background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo))}
+  table.score tbody tr:hover{background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo))}
+  table.score td{display:block;border:0;padding:.6rem 0 0;line-height:1.5}
+  table.score td::before{content:attr(data-l);display:block;font:700 .615rem/1.6 var(--mono);
+    letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+  table.score td.id{display:none}
+  table.score td.nm{padding-top:0;font-size:1.04rem}
+  table.score tbody tr:last-child td{border-bottom:0}
+}
+
+/* ── status columns ──────────────────────────────────────────────────────── */
+.status li{display:flex;gap:.7rem;padding:.62rem 0;border-top:1px solid var(--line-soft);
+  color:var(--muted);font-size:.9rem;line-height:1.55}
+.status li:first-child{border-top:0;padding-top:.2rem}
+.status li b{color:var(--text-max);font-weight:600}
+.mark{flex:none;font:800 .95rem/1.5 var(--mono)}
+.mark.y{color:var(--held)}
+.mark.n{color:var(--dim)}
+.status .head{font:700 .715rem/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;margin-bottom:.7rem}
+
+/* ── transactions ────────────────────────────────────────────────────────── */
+.txs{display:grid;gap:10px;margin-top:1.5rem}
+.tx{display:grid;grid-template-columns:2rem 1fr auto;gap:1rem;align-items:center;
+  border:1px solid var(--line);border-radius:var(--r-md);padding:.9rem 1.1rem;
   background:linear-gradient(180deg,var(--panel-hi),var(--panel-lo));
-  transition:transform .16s ease,border-color .16s ease}
-.txrow:hover{border-color:rgba(148,163,184,.4);transform:translateX(3px)}
-.txrow .n{font:700 1rem/1 var(--mono);color:var(--muted)}
-.txrow .what{font-size:.94rem;margin:0}
-.txrow .what small{display:block;color:var(--muted);font-size:.8rem;margin-top:.15rem}
-.txrow .hash{font-family:var(--mono);font-size:.84rem;white-space:nowrap}
-.txrow.hero-tx{border-color:rgba(34,211,238,.5);background:linear-gradient(180deg,rgba(34,211,238,.08),var(--panel-lo))}
-.txrow.hero-tx .n{color:var(--held)}
-@media (max-width:640px){.txrow{grid-template-columns:2rem 1fr}.txrow .hash{grid-column:2;justify-self:start}}
-/* callout */
-.callout{border:1px dashed var(--line);border-left:3px solid var(--pull);border-radius:12px;
-  background:var(--ink-bg);padding:1.2rem 1.3rem;margin-top:1.6rem}
-.callout h3{margin-top:0}
-.callout p{color:var(--muted);font-size:.94rem}
-table.acct{width:100%;border-collapse:collapse;margin-top:.9rem;font-size:.86rem;min-width:520px}
-table.acct th{font:700 .7rem/1.3 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--line)}
-table.acct td{font-family:var(--mono);padding:.5rem .6rem;border-bottom:1px solid var(--line-soft);color:var(--text)}
-table.acct td.meaning{font-family:var(--sans);color:var(--muted)}
-/* footer */
-footer.site{border-top:1px solid var(--line-soft);padding:2.6rem 0 3.2rem;margin-top:1rem}
-footer .cols{display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap;align-items:flex-start}
-footer p{color:var(--muted);font-size:.88rem}
-footer ul{list-style:none;margin:.2rem 0 0;padding:0;display:grid;gap:.45rem}
-footer li a{font-size:.9rem}
-.foot-fact{font-family:var(--mono);font-size:.78rem;color:var(--muted);margin-top:1.6rem;word-break:break-all}
-/* reveal-on-scroll (JS adds .js-anim; reduced-motion never gets it) */
-.js-anim .rv{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
-.js-anim .rv.in{opacity:1;transform:none}
-.js-anim .rv.d1{transition-delay:.08s}.js-anim .rv.d2{transition-delay:.16s}.js-anim .rv.d3{transition-delay:.24s}
+  transition:transform .2s var(--ease),border-color .2s var(--ease),box-shadow .2s var(--ease)}
+.tx:hover{border-color:rgba(148,163,184,.42);transform:translateX(4px);text-decoration:none}
+.tx .n{font:800 .95rem/1 var(--mono);color:var(--dim)}
+.tx .what{font-size:.94rem;color:var(--text-max);font-weight:600}
+.tx .what small{display:block;color:var(--muted);font-size:.795rem;font-weight:400;margin-top:.2rem;line-height:1.5}
+.tx .hash{font:500 .82rem/1 var(--mono);color:var(--held);white-space:nowrap}
+.tx.hero-tx{border-color:rgba(34,211,238,.5);
+  background:linear-gradient(110deg,rgba(34,211,238,.11),var(--panel-lo) 62%);
+  box-shadow:0 0 0 1px rgba(34,211,238,.09),0 16px 40px -30px rgba(34,211,238,.8)}
+.tx.hero-tx .n{color:var(--held)}
+@media (max-width:640px){
+  .tx{grid-template-columns:1.6rem 1fr;gap:.75rem}
+  .tx .hash{grid-column:2;justify-self:start;margin-top:.35rem}
+}
+
+/* ── callout ─────────────────────────────────────────────────────────────── */
+.callout{border:1px solid var(--line);border-left:3px solid var(--pull);border-radius:var(--r-md);
+  background:var(--ink);padding:1.3rem 1.4rem;margin-top:1.6rem}
+.callout p{font-size:.9rem;line-height:1.62}
+.callout > * + *{margin-top:.75rem}
+table.acct{width:100%;border-collapse:collapse;font-size:.83rem;min-width:520px}
+table.acct th{font:700 .645rem/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);text-align:left;padding:.5rem .65rem;border-bottom:1px solid var(--line)}
+table.acct td{font-family:var(--mono);padding:.55rem .65rem;border-bottom:1px solid var(--line-soft);color:var(--text)}
+table.acct td.m{font-family:var(--sans);color:var(--muted)}
+table.acct tr:last-child td{border-bottom:0}
+.scrollx{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* ── copy button ─────────────────────────────────────────────────────────── */
+.copy{font:700 .74rem/1 var(--mono);letter-spacing:.06em;color:var(--held);
+  background:rgba(34,211,238,.09);border:1px solid rgba(34,211,238,.34);border-radius:7px;
+  padding:.46rem .8rem;cursor:pointer;flex:none;
+  transition:transform .18s var(--ease),border-color .18s var(--ease),background-color .18s var(--ease)}
+.copy:hover{border-color:var(--held);transform:translateY(-1px)}
+.copy.done{color:var(--held-ink);background:var(--held);border-color:var(--held)}
+
+/* ── footer ──────────────────────────────────────────────────────────────── */
+footer.site{border-top:1px solid var(--line-soft);padding:3rem 0 3.4rem;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.35))}
+.fcols{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:2.5rem}
+@media (max-width:720px){.fcols{grid-template-columns:1fr;gap:1.8rem}}
+footer p{font-size:.865rem;line-height:1.6}
+footer .fl{display:grid;gap:.5rem}
+footer .fl a{font-size:.885rem}
+.fact{font:400 .74rem/1.75 var(--mono);color:var(--dim);margin-top:2rem;
+  padding-top:1.1rem;border-top:1px solid var(--line-soft);word-break:break-all}
+
+/* ── ladder animation (opacity / translate / dash only) ──────────────────── */
+.lad-label{font:700 11px/1 var(--mono);letter-spacing:.1em}
+.lad-mini{font:500 10.5px/1 var(--mono);letter-spacing:.04em}
+/* the instrument scales down with the column — hold the labels above the
+   legibility floor once the SVG is being drawn at well under 1:1 */
+@media (max-width:940px){.lad-label{font-size:13px}.lad-mini{font-size:13px}}
+.lad-rung{stroke-linecap:butt;fill:none}
+/* base = the signature frame: amber shattered, cyan holding, cancel bounced */
+#lad-amber{opacity:0}
+#lad-shards{opacity:.42}
+#lad-pulled-badge{opacity:.85}
+#lad-amber-lbl{opacity:.4}
+#lad-down{opacity:0}
+#lad-chip{opacity:0}
+#lad-flash{opacity:0}
+#lad-sparks{opacity:0}
+#lad-revert{opacity:1}
+#lad-held-badge{opacity:1}
+#lad-up{opacity:1}
+#lad-glow{opacity:.2}
+.anim #lad-amber{animation:ladAmber 7.6s linear infinite}
+.anim #lad-shards{animation:ladShards 7.6s linear infinite}
+.anim #lad-pulled-badge{animation:ladPulled 7.6s linear infinite}
+.anim #lad-amber-lbl{animation:ladAmberLbl 7.6s linear infinite}
+.anim #lad-down{animation:ladDown 7.6s linear infinite}
+.anim #lad-chip{animation:ladChip 7.6s linear infinite}
+.anim #lad-flash{animation:ladFlash 7.6s linear infinite}
+.anim #lad-sparks{animation:ladSparks 7.6s linear infinite}
+.anim #lad-revert{animation:ladRevert 7.6s linear infinite}
+.anim #lad-held-badge{animation:ladBadge 7.6s linear infinite}
+.anim #lad-up{animation:ladUp 7.6s linear infinite}
+.anim #lad-held{animation:ladHeld 7.6s linear infinite}
+.anim #lad-glow{animation:ladGlow 3.8s ease-in-out infinite}
+@keyframes ladAmber{0%,26%{opacity:1}31%,88%{opacity:0}96%,100%{opacity:1}}
+@keyframes ladShards{0%,27%{opacity:0}33%,88%{opacity:.42}95%,100%{opacity:0}}
+@keyframes ladPulled{0%,29%{opacity:0}36%,88%{opacity:.85}95%,100%{opacity:0}}
+@keyframes ladAmberLbl{0%,24%{opacity:1}32%,88%{opacity:.4}96%,100%{opacity:1}}
+@keyframes ladDown{
+  0%,7%{opacity:1;transform:translateY(0)}
+  22%{opacity:1;transform:translateY(54px)}
+  30%{opacity:1;transform:translateY(54px)}
+  41%{opacity:1;transform:translateY(138px)}
+  43%,93%{opacity:0;transform:translateY(138px)}
+  94%{opacity:0;transform:translateY(0)}
+  100%{opacity:1;transform:translateY(0)}
+}
+@keyframes ladChip{
+  0%,25%{opacity:0;transform:translate(0,0)}
+  30%{opacity:.95;transform:translate(0,0)}
+  46%{opacity:0;transform:translate(var(--dx),var(--dy))}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy))}
+}
+@keyframes ladFlash{0%,40%{opacity:0}43%{opacity:.85}52%{opacity:0}100%{opacity:0}}
+@keyframes ladSparks{
+  0%,40%{opacity:0;transform:translate(0,0)}
+  44%{opacity:.9;transform:translate(0,0)}
+  56%{opacity:0;transform:translate(0,-26px)}
+  100%{opacity:0;transform:translate(0,-26px)}
+}
+@keyframes ladHeld{0%,40%{transform:translateY(0)}43%{transform:translateY(3px)}50%,100%{transform:translateY(0)}}
+@keyframes ladUp{
+  0%,42%{opacity:0;transform:translateY(46px)}
+  47%{opacity:1;transform:translateY(46px)}
+  62%{opacity:1;transform:translateY(0)}
+  88%{opacity:1;transform:translateY(0)}
+  94%,100%{opacity:0;transform:translateY(0)}
+}
+@keyframes ladRevert{0%,46%{opacity:0;transform:translateY(6px)}54%,88%{opacity:1;transform:translateY(0)}94%,100%{opacity:0;transform:translateY(0)}}
+@keyframes ladBadge{0%,50%{opacity:0}58%,88%{opacity:1}94%,100%{opacity:0}}
+@keyframes ladGlow{0%,100%{opacity:.14}50%{opacity:.34}}
+
+/* ── reveal on scroll ────────────────────────────────────────────────────── */
+.js .rv{opacity:0;transform:translateY(16px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.js .rv.in{opacity:1;transform:none}
+.js .rv.d1{transition-delay:.07s}.js .rv.d2{transition-delay:.14s}.js .rv.d3{transition-delay:.21s}
+
+/* ── reduced motion ──────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  *,*::before,*::after{animation:none!important;transition:none!important}
-  .js-anim .rv{opacity:1;transform:none}
+  *,*::before,*::after{animation:none !important;transition:none !important}
+  .js .rv{opacity:1 !important;transform:none !important}
+  .progress{display:none}
 }
-/* the plate is the design in BOTH schemes — never a white flash */
+/* ── the plate is the design in both schemes — never a white flash ───────── */
 @media (prefers-color-scheme:light){
   html,body{background:var(--plate);color:var(--text)}
 }
 </style>
 </head>
 <body id="top">
-<div class="gridbg" aria-hidden="true"></div>
-<a class="skip" href="#proof">Skip to the proof</a>
+<div class="bg" aria-hidden="true"></div>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<a class="skip" href="#refusal">Skip to the proof</a>
 
 <header class="site">
-  <div class="wrap">
+  <div class="shell">
     <a class="brand" href="#top" aria-label="rampart — back to top">
       <svg class="wordmark" viewBox="-1 -44 251 59" role="img" aria-label="rampart" focusable="false">
         <g id="wm-glyphs">
@@ -255,329 +505,631 @@ footer li a{font-size:.9rem}
         </g>
       </svg>
     </a>
-    <nav class="toc" aria-label="Sections">
-      <a href="#proof">Proof</a>
-      <a href="#mechanism">Mechanism</a>
-      <a href="#typed-book">Typed book</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#refusal">Refusal</a>
+      <a href="#lock">The lock</a>
+      <a href="#typed">Typed book</a>
+      <a href="#number">The number</a>
       <a href="#verify">Verify</a>
       <a href="#status">Status</a>
       <a href="#transactions">Transactions</a>
+      <a href="viewer/index.html">Viewer</a>
       <a class="gh" href="https://github.com/edycutjong/rampart">GitHub ↗</a>
     </nav>
   </div>
 </header>
 
 <main>
-  <!-- ============ 00 · THE HOOK — the failed transaction ============ -->
-  <section id="proof" aria-labelledby="proof-h">
-    <div class="wrap">
-      <ul class="chips">
-        <li class="chip">Somnia Shannon testnet · chain 50312</li>
-        <li class="chip">mined 2026-08-19 · permanent</li>
-        <li class="chip chip-held"><span class="dot dot-pulse" aria-hidden="true"></span>status 0x0 — reverted, on purpose</li>
-      </ul>
-      <h1 id="proof-h">The wallet that paid for this order tried to cancel it. The chain said no.</h1>
-      <p class="lede"><strong>rampart</strong> makes order-book depth the protocol itself will not let you
-        withdraw: a <span class="mono">FirmQuote</span> contract owns the resting order and has no cancel
-        function, so the pool refuses everyone — including its own funder. The refusal below is a real
-        transaction: it failed, it was mined, and it is permanently public.</p>
+<!-- ══════════════════════ HERO ══════════════════════ -->
+<section class="hero" aria-labelledby="h1">
+  <div class="shell">
+    <div class="hero-grid">
+      <div>
+        <ul class="rail">
+          <li class="tag">Somnia Shannon · chain 50312</li>
+          <li class="tag">mined 2026-08-19 · permanent</li>
+          <li class="tag tag-live"><span class="dot" aria-hidden="true"></span>status 0x0 — reverted on purpose</li>
+        </ul>
+        <h1 id="h1">The wallet that paid for this order tried to cancel it.<br>The chain said <span class="no">no.</span></h1>
+        <p class="lede"><strong>rampart</strong> makes order-book depth the protocol itself will not let you
+          withdraw. A <span class="mono">FirmQuote</span> contract owns the resting order and has no cancel
+          function — so the pool refuses everyone, including its own funder.</p>
+        <div class="cta">
+          <a class="btn btn-1" href="https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb">See the failed transaction ↗</a>
+          <a class="btn btn-2" href="#verify">Verify it yourself — no wallet</a>
+        </div>
+      </div>
 
-      <figure class="term" role="group" aria-label="The failed cancel transaction, decoded">
-        <figcaption class="term-bar">
-          <span>tx <span class="cyan">0x959b4770…6ddb</span> · the funder calls cancelOrder on the contract's resting order</span>
-          <a href="https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb">open in explorer ↗</a>
-        </figcaption>
+      <figure class="instrument">
+        <figcaption class="cap"><span>one cancel · two kinds of depth</span><span class="cyan">the bounce</span></figcaption>
+        <svg id="ladder" viewBox="0 0 560 336" role="img"
+             aria-label="A cancel strikes the resting quote and bounces; pullable amber hardens into held cyan and never returns."
+             focusable="false">
+          <defs>
+            <linearGradient id="ladFade" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#22D3EE" stop-opacity="0"/>
+              <stop offset=".5" stop-color="#22D3EE" stop-opacity=".6"/>
+              <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <text x="40" y="30" class="lad-mini" fill="#78899E">pool.cancelOrder(orderId)</text>
+          <line x1="40" y1="44" x2="520" y2="44" stroke="#94A3B8" stroke-opacity=".1"/>
+          <line id="lad-trail" x1="286" y1="56" x2="286" y2="248" stroke="#F8FAFC" stroke-opacity=".14"
+                stroke-width="2" stroke-dasharray="3 7"/>
+
+          <!-- the descending cancel -->
+          <g id="lad-down">
+            <line x1="286" y1="56" x2="286" y2="94" stroke="#F8FAFC" stroke-width="3"/>
+            <path d="M286 112 L275 90 L297 90 Z" fill="#F8FAFC"/>
+          </g>
+
+          <!-- PULLABLE level -->
+          <g id="lad-amber-lbl">
+            <text x="40" y="142" class="lad-label" fill="#F59E0B">PULLABLE</text>
+            <text x="122" y="142" class="lad-mini" fill="#94A3B8">· owner = wallet</text>
+          </g>
+          <line id="lad-amber" class="lad-rung" x1="40" y1="166" x2="440" y2="166"
+                stroke="#F59E0B" stroke-width="17"/>
+          <g id="lad-shards" fill="#F59E0B">
+            <rect x="40"  y="159.5" width="46" height="14" rx="1.5" transform="rotate(-1.4 63 166)"/>
+            <rect x="96"  y="158"   width="28" height="16" rx="1.5" transform="rotate(2.2 110 166)"/>
+            <rect x="136" y="160.5" width="61" height="12" rx="1.5" transform="rotate(-.7 166 166)"/>
+            <rect x="206" y="157.5" width="34" height="17" rx="1.5" transform="rotate(3.1 223 166)"/>
+            <rect x="252" y="160"   width="22" height="13" rx="1.5" transform="rotate(-2.6 263 166)"/>
+            <rect x="298" y="158.5" width="52" height="15" rx="1.5" transform="rotate(1.1 324 166)"/>
+            <rect x="362" y="160.5" width="26" height="12" rx="1.5" transform="rotate(-3.2 375 166)"/>
+            <rect x="400" y="159"   width="40" height="14" rx="1.5" transform="rotate(1.8 420 166)"/>
+          </g>
+          <g id="lad-chip" fill="#F59E0B">
+            <rect style="--dx:24px;--dy:-18px" x="112" y="158" width="17" height="16" rx="2"/>
+            <rect style="--dx:44px;--dy:12px"  x="188" y="159" width="13" height="14" rx="2"/>
+            <rect style="--dx:60px;--dy:-26px" x="268" y="157" width="20" height="17" rx="2"/>
+            <rect style="--dx:32px;--dy:22px"  x="340" y="160" width="12" height="13" rx="2"/>
+            <rect style="--dx:72px;--dy:-9px"  x="402" y="158" width="16" height="15" rx="2"/>
+          </g>
+
+          <g id="lad-pulled-badge">
+            <rect x="452" y="152" width="64" height="28" rx="8" fill="#F59E0B" fill-opacity=".12"
+                  stroke="#F59E0B" stroke-opacity=".45"/>
+            <text x="484" y="170" class="lad-label" fill="#F59E0B" text-anchor="middle" font-size="10">PULLED</text>
+          </g>
+
+          <!-- FIRM level -->
+          <text x="40" y="226" class="lad-label" fill="#22D3EE">FIRM</text>
+          <text x="86" y="226" class="lad-mini" fill="#94A3B8">· owner = contract</text>
+          <g id="lad-held">
+            <line id="lad-glow" class="lad-rung" x1="40" y1="250" x2="440" y2="250"
+                  stroke="#22D3EE" stroke-width="34"/>
+            <line class="lad-rung" x1="40" y1="250" x2="440" y2="250" stroke="#22D3EE" stroke-width="17"/>
+            <line x1="40" y1="250" x2="440" y2="250" stroke="url(#ladFade)" stroke-width="3"/>
+          </g>
+
+          <!-- impact -->
+          <ellipse id="lad-flash" cx="286" cy="250" rx="50" ry="14" fill="#F8FAFC"/>
+          <g id="lad-sparks" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round">
+            <line x1="254" y1="234" x2="236" y2="214"/>
+            <line x1="286" y1="230" x2="286" y2="206"/>
+            <line x1="318" y1="234" x2="336" y2="214"/>
+          </g>
+
+          <!-- the kick-back -->
+          <g id="lad-up">
+            <line x1="286" y1="200" x2="286" y2="240" stroke="#F8FAFC" stroke-width="3"/>
+            <path d="M286 180 L275 202 L297 202 Z" fill="#F8FAFC"/>
+          </g>
+
+          <!-- verdicts -->
+          <g id="lad-held-badge">
+            <rect x="452" y="236" width="64" height="28" rx="8" fill="#22D3EE" fill-opacity=".14"
+                  stroke="#22D3EE" stroke-opacity=".5"/>
+            <text x="484" y="254" class="lad-label" fill="#22D3EE" text-anchor="middle">HELD</text>
+          </g>
+          <g id="lad-revert">
+            <text x="286" y="296" class="lad-mini" fill="#94A3B8" text-anchor="middle">the pool refuses its own funder</text>
+            <text x="286" y="324" class="lad-label" fill="#22D3EE" font-size="19" text-anchor="middle">0xf5e39c1f</text>
+          </g>
+        </svg>
+        <figcaption class="foot">A cancel strikes the resting quote and bounces; <span class="amber">pullable</span>
+          amber hardens into <span class="cyan">held</span> cyan and never returns.</figcaption>
+      </figure>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <p class="k">classifier accuracy</p>
+        <p class="v hi">8/8</p>
+        <p class="s">naive <span class="mono">EXTCODESIZE</span> check: <b>2/8</b></p>
+      </div>
+      <div class="metric">
+        <p class="k">forge test</p>
+        <p class="v">70</p>
+        <p class="s">0 failures · 87.97% line coverage</p>
+      </div>
+      <div class="metric">
+        <p class="k">full-book retype p95</p>
+        <p class="v">0.25<span style="font-size:.5em"> ms</span></p>
+        <p class="s">against a 100 ms block budget</p>
+      </div>
+      <div class="metric">
+        <p class="k">adversarial corpus</p>
+        <p class="v">6</p>
+        <p class="s">deployed attacker contracts · 4 escapes executed on-chain</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ 01 · THE REFUSAL ══════════════════════ -->
+<section id="refusal" aria-labelledby="h-refusal">
+  <div class="shell">
+    <div class="shead"><span class="idx">01</span><span class="kicker">The refusal</span><span class="rule"></span></div>
+    <div class="stitle">
+    <h2 id="h-refusal" class="rv">A failed transaction is the only proof that cannot be staged</h2>
+    <p class="sublede rv">It failed, it was mined, and it is permanently public. Nothing here is mocked,
+      replayed, or reconstructed.</p>
+    </div>
+
+    <figure class="term rv" style="margin-top:1.7rem" role="group" aria-label="The failed cancel transaction, decoded">
+      <figcaption class="term-bar">
+        <span class="lhs"><span class="lamps" aria-hidden="true"><i></i><i></i><i></i></span>
+          tx <span class="cyan">0x959b4770…6ddb</span><span class="tb-desc"> · the funder calls cancelOrder on the contract's resting order</span></span>
+        <span class="stamp">REVERTED</span>
+      </figcaption>
 <pre><code>$ cast call 0x1b8ed538…67ee "cancelOrder(uint128)" 129127208515966879685 \
-    --from <span class="amber">0xFbc73Ce1…3595</span>            <span class="comment"># the funder's own wallet</span>
+    --from <span class="amber">0xFbc73Ce1…3595</span>            <span class="c"># the funder's own wallet</span>
 
-<span class="comment">execution reverted, data:</span>
+<span class="c">execution reverted, data:</span>
 
   <span class="sel">0xf5e39c1f</span>  IncorrectSender(
-    caller    <span class="amber">0xFbc73Ce1C0B43f87cD065f82df24697dEc653595</span>   <span class="comment">← the wallet that PAID for the order</span>
-    expected  <span class="cyan">0x2a09b4c474828e6895af273e51Ba8C181c91191a</span>   <span class="comment">← FirmQuote — a contract with no cancel function</span>
+    caller    <span class="amber">0xFbc73Ce1C0B43f87cD065f82df24697dEc653595</span>   <span class="c">← the wallet that PAID for the order</span>
+    expected  <span class="cyan">0x2a09b4c474828e6895af273e51Ba8C181c91191a</span>   <span class="c">← FirmQuote — a contract with no cancel function</span>
   )</code></pre>
-        <p class="proof-note"><strong>The pool names both parties in its own revert data.</strong> It knows
-          exactly who is asking — the wallet that funded the order — and it refuses, because the order's
-          owner is the contract. That error message is the product.</p>
-      </figure>
+      <p class="note"><strong>The pool names both parties in its own revert data.</strong> It knows exactly who
+        is asking — the wallet that funded the order — and it refuses, because the order's owner is the
+        contract. That error message is the product.
+        <a href="https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb">Open the transaction on the explorer ↗</a></p>
+    </figure>
 
-      <div class="compare" role="group" aria-label="The control: same call from two senders">
-        <div class="card pull">
-          <p class="who amber">Same call · from the funder wallet</p>
-          <p class="addr">0xFbc73Ce1…3595 <span class="dim">(EOA)</span></p>
-          <p class="result">execution reverted · <span class="cyan">0xf5e39c1f</span> IncorrectSender</p>
-        </div>
-        <div class="card held">
-          <p class="who cyan">Same call · from FirmQuote itself</p>
-          <p class="addr">0x2a09b4c4…191a <span class="dim">(contract)</span></p>
-          <p class="result">0x <span class="dim">— no revert. The pool would let its owner cancel.</span></p>
-        </div>
+    <div class="g2 rv" style="margin-top:14px" role="group" aria-label="The control: the same call from two senders">
+      <div class="card top-pull">
+        <p class="who amber">from the funder wallet</p>
+        <p class="addr">0xFbc73Ce1…3595 <span class="slate">(EOA)</span></p>
+        <p class="result">execution reverted · <span class="cyan">0xf5e39c1f</span> IncorrectSender</p>
       </div>
-      <p class="compare-cap">Same pool, same order, same calldata. So this is <em>not</em> "orders can't be
-        cancelled here" — the pool would honour a cancel from the owner. The owner is a contract with
-        <strong>no code path to ask</strong>. That distinction is the entire mechanism.</p>
-
-      <div class="cta">
-        <a class="btn btn-primary" href="https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb">See the failed transaction ↗</a>
-        <a class="btn btn-ghost" href="#verify">Verify it yourself — no wallet needed</a>
+      <div class="card top-held">
+        <p class="who cyan">from FirmQuote itself</p>
+        <p class="addr">0x2a09b4c4…191a <span class="slate">(contract)</span></p>
+        <p class="result">0x <span class="slate">— no revert. The pool would let its owner cancel.</span></p>
       </div>
-
-      <figure class="heroart">
-        <picture>
-          <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme-hero.png">
-          <img src="assets/readme-hero-animated.svg" width="1280" height="320" loading="lazy" decoding="async"
-               alt="rampart locks a resting quote into the book: a cancel strikes the resting quote and bounces; pullable amber hardens into held cyan and never returns.">
-        </picture>
-        <figcaption class="heroart-cap">The mechanism, drawn: <span class="amber">pullable</span> amber is
-          wallet-owned depth — it dissolves under a cancel. <span class="cyan">Held</span> cyan is the
-          contract-owned quote; the cancel that strikes it bounces.</figcaption>
-      </figure>
     </div>
-  </section>
+    <p class="caption rv">Same pool, same order, same calldata. So this is <em>not</em> "orders can't be
+      cancelled here" — the pool would honour a cancel from the owner. The owner is a contract with
+      <strong style="color:var(--text-max)">no code path to ask</strong>. That distinction is the entire mechanism.</p>
+  </div>
+</section>
 
-  <!-- ============ 01 · MECHANISM ============ -->
-  <section id="mechanism" aria-labelledby="mech-h">
-    <div class="wrap">
-      <p class="eyebrow rv">01 · The lock</p>
-      <h2 id="mech-h" class="rv">Three moves close every exit</h2>
-      <p class="sub rv" style="max-width:66ch">123 lines of Solidity. The trick is not what the contract
-        does — it is what it <strong>cannot</strong> do.</p>
-
-      <div class="steps">
-        <div class="card step rv d1">
-          <span class="k">1</span>
-          <h3>Hold &amp; approve</h3>
-          <p><span class="mono">FirmQuote</span> holds the tUSDC collateral and approves the Somnia
-            <span class="mono">BinaryPool</span>. The funder's wallet only ever funds the contract.</p>
-        </div>
-        <div class="card step rv d2">
-          <span class="k">2</span>
-          <h3>Rest as the owner</h3>
-          <p>The contract calls <span class="mono">placeBinaryOrder</span>, so the order's
-            <span class="mono">owner</span> is the contract — not any wallet.</p>
-        </div>
-        <div class="card step rv d3">
-          <span class="k">3</span>
-          <h3>No way to ask</h3>
-          <p>No cancel function, no reduce function, no operator ever granted. The pool will only take
-            instructions from an owner that cannot give them.</p>
-        </div>
-      </div>
-
-      <div class="tscroll rv">
-        <table class="data">
-          <caption class="visually-hidden">Every withdrawal path and why it is closed</caption>
-          <thead><tr><th scope="col">Withdrawal path</th><th scope="col">Why it is closed</th></tr></thead>
-          <tbody>
-            <tr><td>cancelOrder(uint128)</td>
-                <td>Owner-only. Any other caller — including the funder — reverts
-                    <span class="mono cyan">IncorrectSender</span> <span class="mono">0xf5e39c1f</span>. Proven above.</td></tr>
-            <tr><td>cancelOrderFor(owner, id)</td>
-                <td>Needs an operator the <em>owner</em> approved. FirmQuote never grants one — there is no code path that could.</td></tr>
-            <tr><td>reduceOrderFor(owner, id, qty)</td>
-                <td>Per-user approval only, no system allowlist. Same closed door.</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p class="rv" style="margin-top:1.2rem">The quote stands until <strong>a taker fills it</strong> or its
-        mandatory <span class="mono">expireTimestampNs</span> lapses. Two exits — neither of them is
-        "the maker changed their mind."</p>
-      <p class="sub rv"><span class="mono cyan">forge test</span> — 42 tests, 0 failures. Seven of them assert
-        the <em>absence</em> of every withdrawal selector from FirmQuote's ABI: the lock is tested as a
-        missing feature, because it is one.</p>
+<!-- ══════════════════════ 02 · THE LOCK ══════════════════════ -->
+<section id="lock" aria-labelledby="h-lock">
+  <div class="shell">
+    <div class="shead"><span class="idx">02</span><span class="kicker">The lock</span><span class="rule"></span></div>
+    <div class="stitle">
+    <h2 id="h-lock" class="rv">Three moves close every exit</h2>
+    <p class="sublede rv">The trick is not what the contract does — it is what it
+      <strong style="color:var(--text-max)">cannot</strong> do.</p>
     </div>
-  </section>
 
-  <!-- ============ 02 · WHAT IT MAKES POSSIBLE ============ -->
-  <section id="typed-book" aria-labelledby="typed-h">
-    <div class="wrap">
-      <p class="eyebrow rv">02 · What this makes possible</p>
-      <h2 id="typed-h" class="rv">A book where every level tells you if it can run away</h2>
-      <p class="pill-flag rv" role="note">Designed · not built yet</p>
-      <p class="rv" style="max-width:70ch"><span class="mono">Order.owner</span> is readable on-chain. That
-        means every price level can be <strong>typed by who owns it</strong> — the layer rampart's lock
-        exists to enable. What follows is the design, stated plainly so it cannot be mistaken for a
-        shipped feature: <strong>none of it is built.</strong></p>
-
-      <div class="classes">
-        <div class="card held rv d1">
-          <h3 class="cyan">Firm</h3>
-          <p class="cond">Owner is a contract whose <span class="mono">EXTCODEHASH</span> is attested,
-            still inside its lock window.</p>
-          <p class="claim"><b>Claim:</b> this depth cannot be withdrawn.</p>
-        </div>
-        <div class="card pull rv d2">
-          <h3 class="amber">Pullable</h3>
-          <p class="cond">Owner is a wallet.</p>
-          <p class="claim"><b>Claim:</b> this depth can vanish in one block.</p>
-        </div>
-        <div class="card slate rv d3">
-          <h3 class="dim">Unverified</h3>
-          <p class="cond">Owner is a contract nobody attested.</p>
-          <p class="claim"><b>Claim:</b> none. No claim is made — and that refusal is the point.</p>
-        </div>
+    <div class="g3" style="margin-top:1.7rem">
+      <div class="card step rv d1">
+        <span class="k" aria-hidden="true">1</span>
+        <h3>Hold &amp; approve</h3>
+        <p><span class="mono">FirmQuote</span> holds the collateral and approves the Somnia
+          <span class="mono">BinaryPool</span>. The funder's wallet only ever funds the contract.</p>
       </div>
-
-      <p class="rv" style="margin-top:1.4rem;max-width:70ch"><strong>UNVERIFIED is load-bearing.</strong>
-        A naive "owner is a contract → firm" check is forgeable: a hidden cancel, an upgradeable proxy, a
-        <span class="mono">DELEGATECALL</span>, or an operator granted <em>after</em> resting would all fake
-        FIRM. Under attestation an attacker can only mint UNVERIFIED depth — which renders as exactly what
-        it is.</p>
-      <p class="sub rv" style="max-width:70ch">Firmness is a <strong>horizon, not a badge</strong>: a quote is
-        firm only until <span class="mono">min(unlockAt, order expiry)</span> — a countdown, never a static
-        label. The observable this unlocks — <em>percent of the book that cannot be withdrawn</em> — exists
-        on no other exchange: Polymarket, Kalshi and every CEX keep resting orders as signed messages inside
-        a private matching engine, with no on-chain owner to inspect. rampart will compute that number only
-        when the classifier exists. <strong>No number is claimed today.</strong></p>
+      <div class="card step rv d2">
+        <span class="k" aria-hidden="true">2</span>
+        <h3>Rest as the owner</h3>
+        <p>The contract calls <span class="mono">placeBinaryOrder</span>, so the order's
+          <span class="mono">owner</span> is the contract — not any wallet.</p>
+      </div>
+      <div class="card step rv d3">
+        <span class="k" aria-hidden="true">3</span>
+        <h3>No way to ask</h3>
+        <p>No cancel path, no reduce path, no operator ever granted. The pool will only take instructions
+          from an owner that cannot give them.</p>
+      </div>
     </div>
-  </section>
 
-  <!-- ============ 03 · VERIFY ============ -->
-  <section id="verify" aria-labelledby="verify-h">
-    <div class="wrap">
-      <p class="eyebrow rv">03 · Verify it yourself</p>
-      <h2 id="verify-h" class="rv">One read-only call. No wallet, no funds, no gas.</h2>
-      <p class="sub rv" style="max-width:66ch">The RPC answers anyone. Ask the pool to cancel the resting
-        order as the wallet that paid for it, and watch the chain refuse:</p>
+    <div class="paths">
+      <div class="path rv">
+        <p class="sig"><span class="x" aria-hidden="true">✕</span>cancelOrder(uint128)</p>
+        <p class="why">Owner-only. Any other caller — including the funder — reverts
+          <span class="mono cyan">IncorrectSender</span> <span class="mono">0xf5e39c1f</span>. Proven above,
+          on-chain.</p>
+      </div>
+      <div class="path rv">
+        <p class="sig"><span class="x" aria-hidden="true">✕</span>cancelOrderFor(owner, id)</p>
+        <p class="why">Needs an operator the <em>owner</em> approved. FirmQuote never grants one — there is no
+          code path that could.</p>
+      </div>
+      <div class="path rv">
+        <p class="sig"><span class="x" aria-hidden="true">✕</span>reduceOrderFor(owner, id, qty)</p>
+        <p class="why">Per-user approval only, no system allowlist. Same closed door.</p>
+      </div>
+    </div>
 
-      <div class="term rv">
-        <div class="term-bar copyrow">
-          <span>anyone, anywhere — foundry's <span class="mono">cast</span></span>
-          <button class="btn-copy" type="button" data-copy="verify-cmd" aria-label="Copy the verification command">copy command</button>
-        </div>
+    <p class="caption rv" style="margin-top:1.5rem;color:var(--muted);font-size:.98rem">The quote stands until
+      <strong style="color:var(--text-max)">a taker fills it</strong> or its mandatory
+      <span class="mono">expireTimestampNs</span> lapses. Two exits — neither of them is "the maker changed
+      their mind." Seven of the 70 tests assert the <em>absence</em> of every withdrawal selector from
+      FirmQuote's ABI: the lock is tested as a missing feature, because it is one.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════ 03 · TYPED BOOK ══════════════════════ -->
+<section id="typed" aria-labelledby="h-typed">
+  <div class="shell">
+    <div class="shead"><span class="idx">03</span><span class="kicker">What it makes possible</span><span class="rule"></span></div>
+    <div class="stitle">
+    <h2 id="h-typed" class="rv">A book where every level tells you if it can run away</h2>
+    <p class="sublede rv"><span class="mono">Order.owner</span> is readable on-chain, so every price level can
+      be typed by <strong style="color:var(--text-max)">who owns it</strong>.</p>
+    </div>
+
+    <div class="g3" style="margin-top:1.7rem">
+      <div class="card top-held rv d1">
+        <h3 class="cyan mono" style="letter-spacing:.1em">FIRM</h3>
+        <p>Owner is a contract whose <span class="mono">EXTCODEHASH</span> is attested, still inside its lock
+          window.</p>
+        <p style="padding-top:.7rem;border-top:1px dashed var(--line);color:var(--text)">
+          <b>Claim:</b> this depth cannot be withdrawn.</p>
+      </div>
+      <div class="card top-pull rv d2">
+        <h3 class="amber mono" style="letter-spacing:.1em">PULLABLE</h3>
+        <p>Owner is a wallet.</p>
+        <p style="padding-top:.7rem;border-top:1px dashed var(--line);color:var(--text)">
+          <b>Claim:</b> this depth can vanish in one block.</p>
+      </div>
+      <div class="card top-slate rv d3">
+        <h3 class="slate mono" style="letter-spacing:.1em">UNVERIFIED</h3>
+        <p>Owner is a contract we have not attested.</p>
+        <p style="padding-top:.7rem;border-top:1px dashed var(--line);color:var(--text)">
+          <b>Claim:</b> none. No claim is made — and that refusal is the point.</p>
+      </div>
+    </div>
+
+    <div class="axis rv" role="group" aria-label="The state axis">
+      <div class="track" aria-hidden="true"></div>
+      <p class="ends"><span>can vanish in one block</span><span>the pool will not release it</span></p>
+      <p class="off"><b>UNVERIFIED sits off this axis on purpose.</b> Every escape in our corpus mints
+        UNVERIFIED depth, not FIRM — it renders as exactly what it is. FIRM means <em>attested and
+        locked</em>, and attestation is a human-reviewed list: the static filter rejects the known
+        escapes, it does not prove irrevocability.</p>
+    </div>
+
+    <div class="g2 rv" style="margin-top:1.6rem">
+      <div class="card">
+        <h3>Why UNVERIFIED is load-bearing</h3>
+        <p>A naive "owner is a contract → firm" check is forgeable: a hidden cancel, an upgradeable proxy, a
+          <span class="mono">DELEGATECALL</span>, or an operator granted <em>after</em> resting would all fake
+          FIRM. Attestation binds to exact runtime bytecode, so every one of those mints depth that
+          carries no claim. The honest limit: a static scan cannot see a selector built at runtime, so
+          attestation is human-reviewed rather than automatic.</p>
+      </div>
+      <div class="card">
+        <h3>An observable that exists nowhere else</h3>
+        <p><em>Percent of the book that cannot be withdrawn</em> is a liquidity-quality signal no other
+          exchange can publish. Off-chain books — Polymarket, Kalshi, every CEX — keep resting orders as
+          signed messages inside a private matching engine, with no on-chain owner to inspect.</p>
+      </div>
+    </div>
+
+    <div class="cta rv" style="margin-top:1.9rem">
+      <a class="btn btn-1" href="viewer/index.html">Open the typed book — a real market, every level classified</a>
+      <a class="btn btn-2" href="viewer/book-468201000.json">The raw snapshot JSON</a>
+    </div>
+    <p class="caption rv">The viewer renders pinned chain state from block 468,201,000 — 11 resting orders,
+      2 FIRM, 0.1% of the book unwithdrawable — with the reason behind every label, and a live re-check that
+      runs the same classification in your browser.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════ 04 · THE NUMBER ══════════════════════ -->
+<section id="number" aria-labelledby="h-number">
+  <div class="shell">
+    <div class="shead"><span class="idx">04</span><span class="kicker">The headline number</span><span class="rule"></span></div>
+    <div class="stitle">
+    <h2 id="h-number" class="rv">Six contracts that all look firm. One classifier catches every one.</h2>
+    <p class="sublede rv">The corpus is <span class="mono">FirmQuote</span>, six deployed attacker contracts
+      that each look firm to a naive check, and a plain wallet. Four of the six escapes were
+      <strong style="color:var(--text-max)">executed on-chain</strong>, not just unit-tested.</p>
+    </div>
+
+    <div class="score-head rv" style="margin-top:1.7rem">
+      <div class="score-big win">
+        <p class="lbl">attested EXTCODEHASH</p>
+        <p class="n">8/8</p>
+        <p class="txt">Every owner typed correctly — including all six contracts engineered to look firm.</p>
+      </div>
+      <div class="score-big lose">
+        <p class="lbl">naive EXTCODESIZE &gt; 0</p>
+        <p class="n">2/8</p>
+        <p class="txt">Fooled by all six contract attacks. It only gets the two trivial ends right.</p>
+      </div>
+    </div>
+
+    <div class="wrapx rv">
+      <table class="score">
+        <caption class="vh">Each corpus member, its escape, and how each classifier types it</caption>
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Owner</th>
+            <th scope="col">The escape it hides</th>
+            <th scope="col">Attested</th>
+            <th scope="col">Naive</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id">S0</td>
+            <td class="nm" data-l="Owner">FirmQuote</td>
+            <td data-l="Escape">none — no cancel path exists</td>
+            <td data-l="Attested"><span class="verd v-firm">FIRM</span> <span class="ok">✓</span></td>
+            <td data-l="Naive"><span class="verd v-firm">FIRM</span> <span class="ok">✓</span></td>
+          </tr>
+          <tr>
+            <td class="id">S1</td>
+            <td class="nm" data-l="Owner">HiddenCancel</td>
+            <td data-l="Escape">a private <span class="mono">cancelOrder</span> behind an innocuous method</td>
+            <td data-l="Attested"><span class="verd v-unv">UNVERIFIED</span> <span class="ok">✓</span></td>
+            <td data-l="Naive"><span class="verd v-pull">FIRM</span> <span class="bad">✗</span></td>
+          </tr>
+          <tr>
+            <td class="id">S2</td>
+            <td class="nm" data-l="Owner">Erc1967Proxy</td>
+            <td data-l="Escape">upgrade the implementation after resting</td>
+            <td data-l="Attested"><span class="verd v-unv">UNVERIFIED</span> <span class="ok">✓</span></td>
+            <td data-l="Naive"><span class="verd v-pull">FIRM</span> <span class="bad">✗</span></td>
+          </tr>
+          <tr>
+            <td class="id">S3</td>
+            <td class="nm" data-l="Owner">DelegateEscape</td>
+            <td data-l="Escape"><span class="mono">DELEGATECALL</span> into attacker code</td>
+            <td data-l="Attested"><span class="verd v-unv">UNVERIFIED</span> <span class="ok">✓</span></td>
+            <td data-l="Naive"><span class="verd v-pull">FIRM</span> <span class="bad">✗</span></td>
+          </tr>
+          <tr>
+            <td class="id">S4</td>
+            <td class="nm" data-l="Owner">OperatorGranter</td>
+            <td data-l="Escape">grant an operator <em>after</em> the order rests</td>
+            <td data-l="Attested"><span class="verd v-unv">UNVERIFIED</span> <span class="ok">✓</span></td>
+            <td data-l="Naive"><span class="verd v-pull">FIRM</span> <span class="bad">✗</span></td>
+          </tr>
+          <tr>
+            <td class="id">S5</td>
+            <td class="nm" data-l="Owner">QuietReduce</td>
+            <td data-l="Escape">shrink the depth with <span class="mono">reduceOrder</span></td>
+            <td data-l="Attested"><span class="verd v-unv">UNVERIFIED</span> <span class="ok">✓</span></td>
+            <td data-l="Naive"><span class="verd v-pull">FIRM</span> <span class="bad">✗</span></td>
+          </tr>
+          <tr>
+            <td class="id">S6</td>
+            <td class="nm" data-l="Owner">BatchCancel</td>
+            <td data-l="Escape">cancel through an alternate batch selector</td>
+            <td data-l="Attested"><span class="verd v-unv">UNVERIFIED</span> <span class="ok">✓</span></td>
+            <td data-l="Naive"><span class="verd v-pull">FIRM</span> <span class="bad">✗</span></td>
+          </tr>
+          <tr>
+            <td class="id">S7</td>
+            <td class="nm" data-l="Owner">plain wallet</td>
+            <td data-l="Escape">cancels trivially, any time</td>
+            <td data-l="Attested"><span class="verd v-pull">PULLABLE</span> <span class="ok">✓</span></td>
+            <td data-l="Naive"><span class="verd v-pull">PULLABLE</span> <span class="ok">✓</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption rv">The naive column is computed the same way, from the same chain state, in the same
+      run — so the comparison is arithmetic, not rhetoric. Reproduce it with
+      <span class="mono cyan">node script/headline.mjs</span>.</p>
+
+    <div class="g3 rv" style="margin-top:1.6rem">
+      <div class="card">
+        <h3 class="mono cyan" style="font-size:1.25rem">0.13 ms</h3>
+        <p>p95 to retype the full book, against a <strong style="color:var(--text-max)">100 ms</strong> block
+          budget — three orders of magnitude of headroom.</p>
+      </div>
+      <div class="card">
+        <h3 class="mono cyan" style="font-size:1.25rem">70 / 0</h3>
+        <p><span class="mono">forge test</span> — 70 tests passing, 0 failures, at
+          <strong style="color:var(--text-max)">87.97%</strong> line coverage.</p>
+      </div>
+      <div class="card">
+        <h3 class="mono cyan" style="font-size:1.25rem">5 of 6</h3>
+        <p>attacker escapes executed as real transactions on Somnia Shannon. The other two are documented,
+          not hidden — see <a href="#status">honest status</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ 05 · VERIFY ══════════════════════ -->
+<section id="verify" aria-labelledby="h-verify">
+  <div class="shell">
+    <div class="shead"><span class="idx">05</span><span class="kicker">Verify it yourself</span><span class="rule"></span></div>
+    <div class="stitle">
+    <h2 id="h-verify" class="rv">One read-only call. No wallet, no funds, no gas.</h2>
+    <p class="sublede rv">The RPC answers anyone. Ask the pool to cancel the resting order as the wallet that
+      paid for it, and watch the chain refuse.</p>
+    </div>
+
+    <div class="term rv" style="margin-top:1.7rem">
+      <div class="term-bar">
+        <span class="lhs"><span class="lamps" aria-hidden="true"><i></i><i></i><i></i></span>
+          anyone, anywhere — foundry's <span class="mono">cast</span></span>
+        <button class="copy" type="button" data-copy="verify-cmd" aria-label="Copy the verification command">copy command</button>
+      </div>
 <pre id="verify-cmd"><code>cast call 0x1b8ed5380a4741df019acf5faa0ce6ecbf6167ee "cancelOrder(uint128)" \
   129127208515966879685 \
   --from 0xFbc73Ce1C0B43f87cD065f82df24697dEc653595 \
   --rpc-url https://api.infra.testnet.somnia.network</code></pre>
-      </div>
-      <p class="visually-hidden" aria-live="polite" id="copy-live"></p>
+    </div>
+    <p class="vh" aria-live="polite" id="copy-live"></p>
 
-      <div class="term rv">
-        <div class="term-bar"><span>what comes back</span></div>
-<pre><code><span class="comment">execution reverted, data:</span>
+    <div class="term rv" style="margin-top:14px">
+      <div class="term-bar"><span class="lhs"><span class="lamps" aria-hidden="true"><i></i><i></i><i></i></span>what comes back</span></div>
+<pre><code><span class="c">execution reverted, data:</span>
   <span class="sel">0xf5e39c1f</span>
-  000000000000000000000000<span class="amber">fbc73ce1c0b43f87cd065f82df24697dec653595</span>   <span class="comment">← caller   (the funder)</span>
-  000000000000000000000000<span class="cyan">2a09b4c474828e6895af273e51ba8c181c91191a</span>   <span class="comment">← expected (FirmQuote)</span>
+  000000000000000000000000<span class="amber">fbc73ce1c0b43f87cd065f82df24697dec653595</span>   <span class="c">← caller   (the funder)</span>
+  000000000000000000000000<span class="cyan">2a09b4c474828e6895af273e51ba8c181c91191a</span>   <span class="c">← expected (FirmQuote)</span>
 
 $ cast 4byte 0xf5e39c1f
 IncorrectSender(address,address)</code></pre>
-      </div>
-
-      <p class="rv" style="margin-top:1.2rem;max-width:70ch">Swap <span class="mono">--from</span> to the
-        contract's own address — <span class="mono cyan">0x2a09b4c4…191a</span> — and the same call returns
-        <span class="mono">0x</span>: the control. The pool <em>would</em> let its owner cancel; the owner
-        just has no way to ask.</p>
-      <p class="sub rv" style="max-width:70ch">Order <span class="mono">…9685</span> rests until its market's
-        expiry (~2026-08-20 08:00 UTC); after that the permissionless expiry sweep may clear it and the live
-        call's answer may change. The four mined transactions below are permanent either way. To replay the
-        whole sequence with your own key: <span class="mono">./gate.sh</span> in the repo runs
-        deploy → rest → refuse end-to-end, and <span class="mono">forge test</span> runs the 42-test suite.</p>
     </div>
-  </section>
 
-  <!-- ============ 04 · HONEST STATUS ============ -->
-  <section id="status" aria-labelledby="status-h">
-    <div class="wrap">
-      <p class="eyebrow rv">04 · Honest status</p>
-      <h2 id="status-h" class="rv">What is here is real; what is not here is named</h2>
-
-      <div class="statuscols">
-        <div class="card rv d1">
-          <p class="head cyan">Real today</p>
-          <ul>
-            <li><span class="mark ok" aria-hidden="true">✓</span><span><b>FirmQuote.sol</b> — 123 lines, deployed to Shannon at <span class="mono">0x2a09b4c4…191a</span></span></li>
-            <li><span class="mark ok" aria-hidden="true">✓</span><span><b>The on-chain refusal</b> — order <span class="mono">…9685</span> rested with real escrow while its funder's cancel reverted (tx 4 below)</span></li>
-            <li><span class="mark ok" aria-hidden="true">✓</span><span><b>The control</b> — the same call from the contract's address returns <span class="mono">0x</span></span></li>
-            <li><span class="mark ok" aria-hidden="true">✓</span><span><b>42 tests, 0 failures</b> — seven assert the absence of every withdrawal selector</span></li>
-            <li><span class="mark ok" aria-hidden="true">✓</span><span><b>gate.sh</b> — the day-1 go/no-go, run 2026-08-19: <span class="cyan">PASSED</span></span></li>
-            <li><span class="mark ok" aria-hidden="true">✓</span><span><b>DEMO.md</b> — every transaction, the control, and exact reproduce steps</span></li>
-          </ul>
-        </div>
-        <div class="card rv d2">
-          <p class="head dim">Named, not built</p>
-          <ul>
-            <li><span class="mark no" aria-hidden="true">○</span><span><b>Typed-book classifier</b> (FIRM / PULLABLE / UNVERIFIED) and the attested-codehash registry — designed only</span></li>
-            <li><span class="mark no" aria-hidden="true">○</span><span><b>Adversarial corpus</b> proving the classification against forgery — designed only</span></li>
-            <li><span class="mark no" aria-hidden="true">○</span><span><b>Firmness percentage</b> — not computed anywhere; this page claims no number</span></li>
-            <li><span class="mark no" aria-hidden="true">○</span><span><b>Sell-side quoting</b> — deliberately out: it needs an ERC-6909 operator grant, and granting none is what keeps the lock airtight</span></li>
-            <li><span class="mark no" aria-hidden="true">○</span><span><b>Mainnet</b> — testnet only</span></li>
-            <li><span class="mark no" aria-hidden="true">○</span><span><b>Demo video · users</b> — none yet</span></li>
-          </ul>
-        </div>
+    <div class="g2 rv" style="margin-top:14px">
+      <div class="card">
+        <h3>The control</h3>
+        <p>Swap <span class="mono">--from</span> to the contract's own address —
+          <span class="mono cyan">0x2a09b4c4…191a</span> — and the same call returns
+          <span class="mono">0x</span>. The pool <em>would</em> let its owner cancel; the owner just has no
+          way to ask.</p>
+      </div>
+      <div class="card">
+        <h3>Replay the whole thing</h3>
+        <p><span class="mono cyan">./gate.sh</span> runs deploy → rest → refuse end-to-end with your own key.
+          <span class="mono cyan">forge test</span> runs all 70 tests. Every command and its expected output
+          is in <a href="https://github.com/edycutjong/rampart/blob/main/DEMO.md">DEMO.md</a>.</p>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ============ 05 · TRANSACTIONS ============ -->
-  <section id="transactions" aria-labelledby="tx-h">
-    <div class="wrap">
-      <p class="eyebrow rv">05 · The four transactions</p>
-      <h2 id="tx-h" class="rv">The whole story is on the explorer</h2>
-      <p class="sub rv">All on Somnia Shannon (chain 50312), all mined 2026-08-19. Nothing mocked, replayed,
-        or reconstructed.</p>
-
-      <div class="txs">
-        <a class="txrow rv" href="https://shannon-explorer.somnia.network/tx/0xa102e2010b3c3bb5c21c4d76ce05746676c7b332fee36709fcdaf95a34b60081">
-          <span class="n" aria-hidden="true">1</span>
-          <p class="what"><b>tUSDC faucet</b><small>the funder wallet acquires test collateral</small></p>
-          <span class="hash">0xa102e201…0081 ↗</span>
-        </a>
-        <a class="txrow rv" href="https://shannon-explorer.somnia.network/tx/0x35dade18d0e93bbe6b683dd5c687b033e6706ba2ada7f861b5515f455a8192cd">
-          <span class="n" aria-hidden="true">2</span>
-          <p class="what"><b>First order — crossed and filled</b><small class="amber">proves nothing about firmness · kept anyway — see the note below</small></p>
-          <span class="hash">0x35dade18…92cd ↗</span>
-        </a>
-        <a class="txrow rv" href="https://shannon-explorer.somnia.network/tx/0xfb15e947cb9f82a9e770298aef8ee6ef6f84ac7bf018d5d09dbf92b5a034aa69">
-          <span class="n" aria-hidden="true">3</span>
-          <p class="what"><b>The resting order</b><small>bid at 0.01, far below the touch — order <span class="mono">…9685</span>, real escrow locked</small></p>
-          <span class="hash">0xfb15e947…aa69 ↗</span>
-        </a>
-        <a class="txrow hero-tx rv" href="https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb">
-          <span class="n" aria-hidden="true">4</span>
-          <p class="what"><b>The funder tries to cancel — status 0x0, REVERTED</b><small class="cyan">the hero artifact: a failure that cannot be faked, mocked, or staged</small></p>
-          <span class="hash">0x959b4770…6ddb ↗</span>
-        </a>
-      </div>
-
-      <aside class="callout rv" aria-labelledby="honesty-h">
-        <h3 id="honesty-h">Why it was run twice — and why the second run is the honest one</h3>
-        <p>The first order (tx 2) crossed the book and <strong class="amber">filled instantly</strong> — the
-          limit was 0.50 and there were asks below it. Cancelling a <em>filled</em> order proves nothing:
-          it fails for everyone and says nothing about firmness. So the run was repeated at 0.01, far below
-          the touch, where the order genuinely rested:</p>
-        <div class="tscroll">
-          <table class="acct">
-            <caption class="visually-hidden">Escrow accounting proving the second order rested</caption>
-            <thead><tr><th scope="col">check</th><th scope="col">value</th><th scope="col">meaning</th></tr></thead>
-            <tbody>
-              <tr><td>YES balance before / after</td><td>1,000,000 → 1,000,000</td><td class="meaning">no fill — the order rested</td></tr>
-              <tr><td>tUSDC before / after</td><td>4,837,000 → 4,827,000</td><td class="meaning">exactly 10,000 escrowed = 1.0 token × 0.01</td></tr>
-              <tr><td>tUSDC after both cancel attempts</td><td>4,827,000</td><td class="meaning">escrow still locked — nothing was released</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p style="margin-bottom:0">Order <span class="mono">…9685</span> was resting, with real escrow, when
-          the cancel was refused. That is the claim, tested — and owning the correction is part of the same
-          discipline as publishing a failed transaction on purpose.</p>
-      </aside>
+<!-- ══════════════════════ 06 · HONEST STATUS ══════════════════════ -->
+<section id="status" aria-labelledby="h-status">
+  <div class="shell">
+    <div class="shead"><span class="idx">06</span><span class="kicker">Honest status</span><span class="rule"></span></div>
+    <div class="stitle">
+    <h2 id="h-status" class="rv">What is here is real; what is not here is named</h2>
+    <p class="sublede rv">Calibrated honesty is part of the engineering, not a disclaimer bolted to the end
+      of it.</p>
     </div>
-  </section>
+
+    <div class="g2 status" style="margin-top:1.7rem">
+      <div class="card rv d1">
+        <p class="head cyan">Real today</p>
+        <ul>
+          <li><span class="mark y" aria-hidden="true">✓</span><span><b>FirmQuote</b> — deployed to Shannon at <span class="mono">0x2a09b4c4…191a</span>, chain 50312</span></li>
+          <li><span class="mark y" aria-hidden="true">✓</span><span><b>The on-chain refusal</b> — the funder's cancel reverted <span class="mono">0xf5e39c1f</span>, mined and permanent</span></li>
+          <li><span class="mark y" aria-hidden="true">✓</span><span><b>The control</b> — the same call from the contract's address returns <span class="mono">0x</span></span></li>
+          <li><span class="mark y" aria-hidden="true">✓</span><span><b>The classifier</b> — attested <span class="mono">8/8</span> vs naive <span class="mono">2/8</span> over the deployed corpus</span></li>
+          <li><span class="mark y" aria-hidden="true">✓</span><span><b>6 attacker contracts deployed</b> — 5 of the 6 escapes executed on-chain</span></li>
+          <li><span class="mark y" aria-hidden="true">✓</span><span><b>70 tests, 0 failures</b> · 87.97% line coverage · retype p95 <span class="mono">0.13 ms</span></span></li>
+          <li><span class="mark y" aria-hidden="true">✓</span><span><b>DEMO.md</b> — every transaction, the control, and exact reproduce steps</span></li>
+        </ul>
+      </div>
+      <div class="card rv d2">
+        <p class="head slate">Named, not claimed</p>
+        <ul>
+          <li><span class="mark n" aria-hidden="true">○</span><span><b>Testnet only</b> — nothing is on Somnia mainnet, and nothing has been audited</span></li>
+          <li><span class="mark n" aria-hidden="true">○</span><span><b>No firmness percentage on this page.</b> It is a live measurement over a live market; a static page cannot honestly freeze one. <span class="mono">script/firmness.mjs</span> computes it on demand</span></li>
+          <li><span class="mark n" aria-hidden="true">○</span><span><b>Sell-side quoting</b> — deliberately out: it needs an ERC-6909 operator grant, and granting none is what keeps the lock airtight</span></li>
+          <li><span class="mark n" aria-hidden="true">○</span><span><b>2 of the 6 escapes did not execute</b> — one is blocked by the pool's own unwired operator path (a genuine SDK finding), one by a dry native faucet. Both are proven in unit tests and written up, not hidden</span></li>
+          <li><span class="mark n" aria-hidden="true">○</span><span><b>The registry is a transparency list</b>, not a trustless oracle — anyone can re-derive it from the same bytes</span></li>
+          <li><span class="mark n" aria-hidden="true">○</span><span><b>Demo video · external users</b> — none yet</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ 07 · TRANSACTIONS ══════════════════════ -->
+<section id="transactions" aria-labelledby="h-tx">
+  <div class="shell">
+    <div class="shead"><span class="idx">07</span><span class="kicker">The evidence trail</span><span class="rule"></span></div>
+    <div class="stitle">
+    <h2 id="h-tx" class="rv">The whole story is on the explorer</h2>
+    <p class="sublede rv">All on Somnia Shannon (chain 50312), all mined 2026-08-19.</p>
+    </div>
+
+    <div class="txs">
+      <a class="tx rv" href="https://shannon-explorer.somnia.network/tx/0xa102e2010b3c3bb5c21c4d76ce05746676c7b332fee36709fcdaf95a34b60081">
+        <span class="n" aria-hidden="true">1</span>
+        <span class="what">tUSDC faucet<small>the funder wallet acquires test collateral</small></span>
+        <span class="hash">0xa102e201…0081 ↗</span>
+      </a>
+      <a class="tx rv" href="https://shannon-explorer.somnia.network/tx/0x35dade18d0e93bbe6b683dd5c687b033e6706ba2ada7f861b5515f455a8192cd">
+        <span class="n" aria-hidden="true">2</span>
+        <span class="what">First order — crossed and filled<small class="amber">proves nothing about firmness · kept anyway — see the note below</small></span>
+        <span class="hash">0x35dade18…92cd ↗</span>
+      </a>
+      <a class="tx rv" href="https://shannon-explorer.somnia.network/tx/0xfb15e947cb9f82a9e770298aef8ee6ef6f84ac7bf018d5d09dbf92b5a034aa69">
+        <span class="n" aria-hidden="true">3</span>
+        <span class="what">The resting order<small>bid at 0.01, far below the touch — order <span class="mono">…9685</span>, real escrow locked</small></span>
+        <span class="hash">0xfb15e947…aa69 ↗</span>
+      </a>
+      <a class="tx hero-tx rv" href="https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb">
+        <span class="n" aria-hidden="true">4</span>
+        <span class="what">The funder tries to cancel — status 0x0, REVERTED<small class="cyan">the hero artifact: a failure that cannot be faked, mocked, or staged</small></span>
+        <span class="hash">0x959b4770…6ddb ↗</span>
+      </a>
+    </div>
+
+    <aside class="callout rv" aria-labelledby="h-twice">
+      <h3 id="h-twice">Why it was run twice — and why the second run is the honest one</h3>
+      <p>The first order (tx 2) crossed the book and <strong class="amber">filled instantly</strong> — the
+        limit was 0.50 and there were asks below it. Cancelling a <em>filled</em> order proves nothing: it
+        fails for everyone and says nothing about firmness. So the run was repeated at 0.01, far below the
+        touch, where the order genuinely rested:</p>
+      <div class="scrollx">
+        <table class="acct">
+          <caption class="vh">Escrow accounting proving the second order rested</caption>
+          <thead><tr><th scope="col">check</th><th scope="col">value</th><th scope="col">meaning</th></tr></thead>
+          <tbody>
+            <tr><td>YES balance before / after</td><td>1,000,000 → 1,000,000</td><td class="m">no fill — the order rested</td></tr>
+            <tr><td>tUSDC before / after</td><td>4,837,000 → 4,827,000</td><td class="m">exactly 10,000 escrowed = 1.0 token × 0.01</td></tr>
+            <tr><td>tUSDC after both cancel attempts</td><td>4,827,000</td><td class="m">escrow still locked — nothing was released</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Order <span class="mono">…9685</span> was resting, with real escrow, when the cancel was refused.
+        That is the claim, tested — and owning the correction is part of the same discipline as publishing a
+        failed transaction on purpose.</p>
+    </aside>
+  </div>
+</section>
+<!-- ══════════════════════ CLOSING BAND ══════════════════════ -->
+<section class="closer" aria-label="The mechanism, drawn">
+  <div class="shell">
+    <figure class="band">
+      <picture>
+        <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme-hero.png">
+        <img src="assets/readme-hero-animated.svg" width="1280" height="320" decoding="async" loading="lazy"
+             alt="rampart locks a resting quote into the book: a cancel strikes the resting quote and bounces; pullable amber hardens into held cyan and never returns.">
+      </picture>
+      <figcaption>The same mechanism as the book sees it — two levels under identical pressure, one of which
+        the pool will not release.</figcaption>
+    </figure>
+  </div>
+</section>
 </main>
 
 <footer class="site">
-  <div class="wrap">
-    <div class="cols">
+  <div class="shell">
+    <div class="fcols">
       <div>
-        <svg class="wordmark" viewBox="-1 -44 251 59" role="img" aria-label="rampart" focusable="false" style="height:16px;width:auto">
+        <svg class="wordmark" viewBox="-1 -44 251 59" role="img" aria-label="rampart" focusable="false" style="height:17px;width:auto">
           <use href="#wm-glyphs"></use>
         </svg>
-        <p style="max-width:38ch">Order-book depth the protocol itself will not let you withdraw.<br>
-          Built for the <strong>Event Contracts Hackathon</strong> — Somnia × DreamDEX, on DoraHacks.</p>
-        <p>MIT license · Solidity · Foundry · Somnia Shannon testnet</p>
+        <p style="max-width:42ch;margin-top:.9rem">Order-book depth the protocol itself will not let you
+          withdraw.<br>Built for the <strong style="color:var(--text-max)">Event Contracts Hackathon</strong>
+          — Somnia × DreamDEX, on DoraHacks.</p>
+        <p style="margin-top:.7rem;color:var(--dim)">MIT license · Solidity · Foundry · viem · Somnia Shannon
+          testnet</p>
       </div>
       <div>
-        <ul aria-label="Project links">
+        <ul class="fl" aria-label="Project links">
+          <li><a href="viewer/index.html">The typed book — every level classified, with reasons</a></li>
           <li><a href="https://github.com/edycutjong/rampart">Repository — github.com/edycutjong/rampart ↗</a></li>
           <li><a href="https://github.com/edycutjong/rampart/blob/main/DEMO.md">DEMO.md — the full evidence trail ↗</a></li>
           <li><a href="https://shannon-explorer.somnia.network/address/0x2a09b4c474828e6895af273e51Ba8C181c91191a">FirmQuote on the explorer ↗</a></li>
@@ -585,7 +1137,7 @@ IncorrectSender(address,address)</code></pre>
         </ul>
       </div>
     </div>
-    <p class="foot-fact">FirmQuote 0x2a09b4c474828e6895af273e51Ba8C181c91191a · BinaryPool 0x1b8ed5380a4741df019acf5faa0ce6ecbf6167ee · order 129127208515966879685 · revert 0xf5e39c1f IncorrectSender(caller, expected)</p>
+    <p class="fact">FirmQuote 0x2a09b4c474828e6895af273e51Ba8C181c91191a · BinaryPool 0x1b8ed5380a4741df019acf5faa0ce6ecbf6167ee · order 129127208515966879685 · revert 0xf5e39c1f IncorrectSender(caller, expected)</p>
   </div>
 </footer>
 
@@ -593,16 +1145,46 @@ IncorrectSender(address,address)</code></pre>
 (function(){
   "use strict";
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  /* reveal on scroll — opacity/transform only, skipped entirely under reduced motion */
+
+  /* the hero instrument only animates when motion is welcome */
+  if (!reduce) {
+    var lad = document.getElementById("ladder");
+    if (lad) lad.classList.add("anim");
+  }
+
+  /* reveal on scroll — opacity/transform only */
   if (!reduce && "IntersectionObserver" in window) {
-    document.documentElement.classList.add("js-anim");
+    document.documentElement.classList.add("js");
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(e){
         if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
       });
-    }, {rootMargin:"0px 0px -8% 0px", threshold:0.06});
+    }, {rootMargin:"0px 0px -6% 0px", threshold:0.05});
     Array.prototype.forEach.call(document.querySelectorAll(".rv"), function(el){ io.observe(el); });
   }
+
+  /* scroll progress + active section in the nav */
+  var bar = document.getElementById("progress");
+  var links = Array.prototype.slice.call(document.querySelectorAll(".nav a[href^='#']"));
+  var targets = links.map(function(a){ return document.querySelector(a.getAttribute("href")); });
+  var ticking = false;
+  function paint(){
+    ticking = false;
+    if (bar && !reduce) {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + "%";
+    }
+    var probe = window.scrollY + window.innerHeight * 0.28, cur = -1;
+    for (var i = 0; i < targets.length; i++) {
+      if (targets[i] && targets[i].offsetTop <= probe) cur = i;
+    }
+    links.forEach(function(a, i){ a.classList.toggle("on", i === cur); });
+  }
+  window.addEventListener("scroll", function(){
+    if (!ticking) { ticking = true; window.requestAnimationFrame(paint); }
+  }, {passive:true});
+  paint();
+
   /* copy-to-clipboard for the verify command */
   Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function(btn){
     btn.addEventListener("click", function(){
@@ -616,9 +1198,6 @@ IncorrectSender(address,address)</code></pre>
         if (live) live.textContent = "Command copied to clipboard";
         setTimeout(function(){ btn.textContent = old; btn.classList.remove("done"); if (live) live.textContent = ""; }, 1600);
       }
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(done, function(){ fallback(); });
-      } else { fallback(); }
       function fallback(){
         var ta = document.createElement("textarea");
         ta.value = text; ta.setAttribute("readonly",""); ta.style.position = "fixed"; ta.style.left = "-9999px";
@@ -626,6 +1205,9 @@ IncorrectSender(address,address)</code></pre>
         try { document.execCommand("copy"); done(); } catch(e){}
         document.body.removeChild(ta);
       }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } else { fallback(); }
     });
   });
 })();

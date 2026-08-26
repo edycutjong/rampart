@@ -1,0 +1,254 @@
+{
+  "_provenance": {
+    "generatedAt": "2026-08-26T06:22:29.862Z",
+    "generatedBy": "node site/viewer/make-snapshot.mjs --block 468201000",
+    "reproduce": "node script/firmness.mjs --block 468201000",
+    "rpc": "https://api.infra.testnet.somnia.network",
+    "pinned": true,
+    "note": "Every value below is read or derived from Somnia Shannon chain state at the pinned block. Owner labels are attached only where the on-chain owner address matches a recorded rampart corpus deployment (script/corpus.deployed.json)."
+  },
+  "chainId": 50312,
+  "pool": "0x54d90260fe949940a80602e7fda8ebd729c5be00",
+  "market": "0xf03c5f0648F77A4BF7358DC2c914BDB5e9c3303E",
+  "collateral": "0x70a86D8842FB63C4Ad2b7cdddF530eBf1BB25d8E",
+  "explorer": "https://shannon-explorer.somnia.network",
+  "block": 468201000,
+  "blockTimestamp": 1787392892,
+  "counts": {
+    "orders": 11,
+    "bids": 8,
+    "asks": 3,
+    "distinctOwners": 6,
+    "FIRM": 2,
+    "PULLABLE": 0,
+    "UNVERIFIED": 9
+  },
+  "units": {
+    "firm": "2000000",
+    "pullable": "0",
+    "unverified": "1983000000",
+    "total": "1985000000"
+  },
+  "firmPct": 0.1,
+  "attestedSet": [
+    {
+      "codehash": "0xc60110e004cce8ade40d4e6d958c873715cac060b839b6b42a4fb762a16358b5",
+      "name": "FirmQuote(live)",
+      "source": "S0 0x8116c3a4DE042D4A215B532B7C4054F36e074B68 runtime code, read at the pinned block"
+    }
+  ],
+  "owners": {
+    "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c": {
+      "address": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "codehash": "0x718f029518961be8f76a5a91d56b8f3b9bfd8b47d8bf40648c05c3992c4dd388",
+      "codeBytes": 291,
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM",
+      "analyzerReason": "DELEGATECALL present (1)",
+      "unlockAt": null,
+      "label": null
+    },
+    "0x8116c3a4de042d4a215b532b7c4054f36e074b68": {
+      "address": "0x8116c3a4de042d4a215b532b7c4054f36e074b68",
+      "codehash": "0xc60110e004cce8ade40d4e6d958c873715cac060b839b6b42a4fb762a16358b5",
+      "codeBytes": 2424,
+      "class": "FIRM",
+      "reason": "attested + locked",
+      "naiveClass": "FIRM",
+      "analyzerReason": null,
+      "unlockAt": 1787443200,
+      "label": {
+        "id": "S0",
+        "name": "FirmQuote",
+        "attack": "none"
+      }
+    },
+    "0xc9d977db64c61ad8ff5e0887c22fe897a09efd1f": {
+      "address": "0xc9d977db64c61ad8ff5e0887c22fe897a09efd1f",
+      "codehash": "0xa6ecab4ec0ee48949784f21a75acfc5dd20edc2918b74a9efdde485a0cd8367a",
+      "codeBytes": 2816,
+      "class": "UNVERIFIED",
+      "reason": "forbidden selector setOperatorApprovalForPool(address,address,bytes4[],bool)",
+      "naiveClass": "FIRM",
+      "analyzerReason": "forbidden selector setOperatorApprovalForPool(address,address,bytes4[],bool)",
+      "unlockAt": null,
+      "label": null
+    },
+    "0xa13166927bcf78d8e04f125d3ed0e8a076f021f8": {
+      "address": "0xa13166927bcf78d8e04f125d3ed0e8a076f021f8",
+      "codehash": "0xed1950fe8a01423a91381abcdf0cc6c589ce058aeb258cb1116c92476cd76940",
+      "codeBytes": 2987,
+      "class": "UNVERIFIED",
+      "reason": "forbidden selector setOperatorApprovalForPool(address,address,bytes4[],bool); forbidden selector setOperatorApprovalGlobal(address,bytes4[],bool)",
+      "naiveClass": "FIRM",
+      "analyzerReason": "forbidden selector setOperatorApprovalForPool(address,address,bytes4[],bool); forbidden selector setOperatorApprovalGlobal(address,bytes4[],bool)",
+      "unlockAt": null,
+      "label": {
+        "id": "S4",
+        "name": "OperatorGranter",
+        "attack": "late operator grant (A4)"
+      }
+    },
+    "0xdcec48656c5c6ed78e91d04b2dbf1dcc069a0b4e": {
+      "address": "0xdcec48656c5c6ed78e91d04b2dbf1dcc069a0b4e",
+      "codehash": "0xc60110e004cce8ade40d4e6d958c873715cac060b839b6b42a4fb762a16358b5",
+      "codeBytes": 2424,
+      "class": "FIRM",
+      "reason": "attested + locked",
+      "naiveClass": "FIRM",
+      "analyzerReason": null,
+      "unlockAt": 1787443200,
+      "label": null
+    },
+    "0x797fe26f8a6a65ea757347b71915119c49c049a7": {
+      "address": "0x797fe26f8a6a65ea757347b71915119c49c049a7",
+      "codehash": "0x7a5815d7be4d257622cc9cecf9909f1f0c8e9cf403d66e494a4895124057131e",
+      "codeBytes": 2634,
+      "class": "UNVERIFIED",
+      "reason": "forbidden selector reduceOrder(uint128,uint256)",
+      "naiveClass": "FIRM",
+      "analyzerReason": "forbidden selector reduceOrder(uint128,uint256)",
+      "unlockAt": null,
+      "label": {
+        "id": "S5",
+        "name": "QuietReduce",
+        "attack": "quiet reduce, no fill (A5)"
+      }
+    }
+  },
+  "orders": [
+    {
+      "orderId": "36893488147419216676",
+      "side": "bid",
+      "owner": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "price": "24000",
+      "fullQuantity": "200000000",
+      "quantityRemaining": "200000000",
+      "expireTimestampNs": "1787392922000000000",
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "166020696663386077984",
+      "side": "bid",
+      "owner": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "price": "17000",
+      "fullQuantity": "330000000",
+      "quantityRemaining": "330000000",
+      "expireTimestampNs": "1787392914000000000",
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "92233720368547870994",
+      "side": "bid",
+      "owner": "0x8116c3a4de042d4a215b532b7c4054f36e074b68",
+      "price": "10000",
+      "fullQuantity": "1000000",
+      "quantityRemaining": "1000000",
+      "expireTimestampNs": "1787443200000000000",
+      "class": "FIRM",
+      "reason": "attested + locked",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "18446744073709664558",
+      "side": "bid",
+      "owner": "0xc9d977db64c61ad8ff5e0887c22fe897a09efd1f",
+      "price": "10000",
+      "fullQuantity": "1000000",
+      "quantityRemaining": "1000000",
+      "expireTimestampNs": "1787443200000000000",
+      "class": "UNVERIFIED",
+      "reason": "forbidden selector setOperatorApprovalForPool(address,address,bytes4[],bool)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "110680464442257422795",
+      "side": "bid",
+      "owner": "0xa13166927bcf78d8e04f125d3ed0e8a076f021f8",
+      "price": "10000",
+      "fullQuantity": "1000000",
+      "quantityRemaining": "1000000",
+      "expireTimestampNs": "1787443200000000000",
+      "class": "UNVERIFIED",
+      "reason": "forbidden selector setOperatorApprovalForPool(address,address,bytes4[],bool); forbidden selector setOperatorApprovalGlobal(address,bytes4[],bool)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "184467440737095629365",
+      "side": "bid",
+      "owner": "0xdcec48656c5c6ed78e91d04b2dbf1dcc069a0b4e",
+      "price": "10000",
+      "fullQuantity": "1000000",
+      "quantityRemaining": "1000000",
+      "expireTimestampNs": "1787443200000000000",
+      "class": "FIRM",
+      "reason": "attested + locked",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "202914184810805181207",
+      "side": "bid",
+      "owner": "0x797fe26f8a6a65ea757347b71915119c49c049a7",
+      "price": "10000",
+      "fullQuantity": "1000000",
+      "quantityRemaining": "1000000",
+      "expireTimestampNs": "1787443200000000000",
+      "class": "UNVERIFIED",
+      "reason": "forbidden selector reduceOrder(uint128,uint256)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "129127208515966974754",
+      "side": "bid",
+      "owner": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "price": "10000",
+      "fullQuantity": "460000000",
+      "quantityRemaining": "460000000",
+      "expireTimestampNs": "1787392914000000000",
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "147573952589676526373",
+      "side": "ask",
+      "owner": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "price": "45000",
+      "fullQuantity": "200000000",
+      "quantityRemaining": "200000000",
+      "expireTimestampNs": "1787392922000000000",
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "55340232221128768289",
+      "side": "ask",
+      "owner": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "price": "53000",
+      "fullQuantity": "330000000",
+      "quantityRemaining": "330000000",
+      "expireTimestampNs": "1787392914000000000",
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM"
+    },
+    {
+      "orderId": "73786976294838319907",
+      "side": "ask",
+      "owner": "0x3bdc2b632abebf868eeb12df2c6d8a882e68c25c",
+      "price": "61000",
+      "fullQuantity": "460000000",
+      "quantityRemaining": "460000000",
+      "expireTimestampNs": "1787392914000000000",
+      "class": "UNVERIFIED",
+      "reason": "DELEGATECALL present (1)",
+      "naiveClass": "FIRM"
+    }
+  ]
+}
