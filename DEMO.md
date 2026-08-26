@@ -89,7 +89,7 @@ Order `…9685` was resting, with real escrow, when the cancel was refused. That
 
 ```bash
 cd build
-forge test                                   # 42 passing
+forge test                                   # 93 passing
 
 export PRIVATE_KEY=0x…                       # a funded Shannon key
 ./gate.sh                                    # full deploy → rest → refuse sequence
@@ -97,11 +97,19 @@ export PRIVATE_KEY=0x…                       # a funded Shannon key
 # or verify the standing proof directly, no key needed, no gas:
 cast call 0x1b8ed5380a4741df019acf5faa0ce6ecbf6167ee "cancelOrder(uint128)" \
   129127208515966879685 --from 0xFbc73Ce1C0B43f87cD065f82df24697dEc653595 \
-  --rpc-url https://api.infra.testnet.somnia.network
+  --block 465697720 --rpc-url https://api.infra.testnet.somnia.network
 # → execution reverted, 0xf5e39c1f IncorrectSender(caller, expected)
+#   caller   = 0xfbc73ce1c0b43f87cd065f82df24697dec653595
+#   expected = 0x2a09b4c474828e6895af273e51ba8c181c91191a   ← the FirmQuote contract
 ```
 
 The last command needs no wallet and no funds. Anyone can run it and watch the chain refuse.
+
+`--block 465697720` pins the call to a block where the order was still resting; Somnia's public RPC
+is archival, so no special endpoint is required. **Without** the pin the call still reverts with the
+same `IncorrectSender` selector, but `expected` decodes to `0x00…00` — the order has since expired
+out of the book, so you get the right selector attached to a weaker claim. We would rather you ran
+the pinned version and saw the contract address named.
 
 ---
 
@@ -117,7 +125,11 @@ cancel, sit behind an upgradeable proxy, `DELEGATECALL` to attacker code, grant 
 after resting, shrink itself with `reduceOrder`, or cancel through an alternate selector — all
 while reading FIRM to a naive check. So Rampart classifies on **attested `EXTCODEHASH`** (a
 keccak-256 commitment to exact runtime bytecode, EIP-1052) under a static policy. Unattested
-code is **UNVERIFIED — no claim**. An attacker cannot mint fake FIRM depth, only UNVERIFIED depth.
+code is **UNVERIFIED — no claim**. Every escape in the corpus mints UNVERIFIED depth, not FIRM.
+
+The policy is a **pre-filter, not a prover**: `FIRM` means attested *and* locked, and attestation is
+a human-reviewed transparency list. A selector computed arithmetically at runtime evades any static
+bytecode scan, so a green `analyze()` gates review rather than replacing it. See "Honest limits".
 
 ## THE HEADLINE NUMBER — one command
 
@@ -164,20 +176,29 @@ all tx hashes: [`script/corpus.deployed.json`](script/corpus.deployed.json). Sum
 | S5 | [`0x797FE26F…49A7`](https://shannon-explorer.somnia.network/address/0x797FE26F8A6a65ea757347b71915119c49c049A7) | **pulled** — `trim()` shrank 2,000,000 → 1,000,000, no fill | [`0x9bc3f55b…9395`](https://shannon-explorer.somnia.network/tx/0x9bc3f55bfb559cef03246ff8a15a60c94af6beb73f7f7bd80cccc73e212f9395) |
 | S6 | [`0xb3e60902…af54`](https://shannon-explorer.somnia.network/address/0xb3e609021C6839dF5A407d62D26Add74a2C8af54) | **rested**; `tidy()` gas-blocked (see below) | — |
 
-**Four escapes execute a full on-chain withdrawal** (S1 hidden cancel, S2 proxy upgrade, S3
+**Five escapes execute a full on-chain withdrawal** (S1 hidden cancel, S2 proxy upgrade, S3
 delegatecall, S5 quiet reduce), and S0's firm quote stands with its funder's cancel reverted.
 
 ## % of book that cannot be withdrawn — over the live market
 
 ```bash
-node script/firmness.mjs           # pool 0x54d9…be00 (ETH 24h), live
+node script/firmness.mjs                     # defaults to pool 0x54d9…be00 (ETH 24h)
+node script/firmness.mjs --pool 0x…          # any currently-active binary pool
 ```
 
 Reads the resting book via `getAllOpenOrdersOffChain`, takes each distinct owner's `EXTCODEHASH`,
-classifies, and reports `Σ firm ÷ Σ displayed`. On the live pool the number is **~0.1%** — only the
-small attested `FirmQuote` is firm against a market-maker bot flooding the book with UNVERIFIED
-depth. That low number is the honest point: **UNVERIFIED depth cannot masquerade as firm**, so the
-metric never overstates. This observable exists on no off-chain exchange.
+classifies, and reports `Σ firm ÷ Σ displayed`. When measured on 2026-08-22 the number was **~0.1%**
+— only the small attested `FirmQuote` was firm against a market-maker bot flooding the book with
+UNVERIFIED depth. That low number is the honest point: **UNVERIFIED depth cannot masquerade as
+firm**, so the metric never overstates. This observable exists on no off-chain exchange.
+
+> **Running it today gives a different answer, and that is by design.** Shannon's binary pools cycle
+> roughly every 24 h, so pool `0x54d9…be00` is now expired with an empty book. `firmness.mjs`
+> **exits 1** on an empty book rather than printing `0%`: a ratio over zero orders is what *any*
+> market returns, so reporting it as a result would be a check that cannot fail. Use
+> `node script/find-pool.mjs` to get a live pool, or `--block <n>` against an archive RPC to
+> reproduce a historical book. The deterministic, always-reproducible evidence is
+> `node script/headline.mjs` (8/8 vs 2/8) and `forge test` (93/93).
 
 ## Bench gate — retype inside one 100 ms block
 
@@ -189,25 +210,61 @@ Full-book retype (classify every order against memoised owner code hashes, aggre
 
 | | p50 | p95 | max |
 |---|---|---|---|
-| live book (12 orders) | 0.00 ms | 0.00 ms | 0.08 ms |
-| synthetic 2,000 orders | 0.05 ms | **0.25 ms** | 0.51 ms |
+| **synthetic 2,000 orders** (deterministic) | 0.03 ms | **0.13 ms** | 0.42 ms |
+| live book | *measured only when the pool has depth — see below* | | |
 
-**p95 0.25 ms ≤ 100 ms block → PASS.** Network hydration (cold read + EXTCODEHASH per distinct
+**p95 0.13 ms ≤ 100 ms block → PASS.** Network hydration (cold read + EXTCODEHASH per distinct
 owner) is a separate ~2–3 s one-time cost, reported alongside; the per-block *retype* is what must
-fit the block, and it does with three orders of magnitude to spare.
+fit the block, and it does with nearly three orders of magnitude to spare.
+
+The synthetic book is **generated deterministically** — 2,000 orders over 64 fixed owners, a 1-in-4
+firm mix, quantities from a fixed-seed LCG — precisely so this number reproduces on any machine on
+any day. It used to be built by replicating the *live* orders, which meant it silently became a
+0-order benchmark reporting `p95 0.00 ms → PASS` once the testnet pool cycled. The live book is now
+measured and reported when it exists and **excluded from the gate when it does not**, with the run
+stating `scored on: synthetic only`. Small run-to-run variation in the third decimal is expected.
 
 ## Reproduce the whole thing
 
 ```bash
 cd build
-forge test                         # 70 passing (FirmQuote 42 · FirmnessRegistry 21 · Adversarial 7)
-node script/test.mjs               # 12 off-chain checks (keccak vectors, static policy, headline)
+forge test                         # 93 passing (FirmQuote 42 · Registry 22 · Adversarial 26 · Invariant 3)
+npm run prove                      # 5 symbolic proofs over every caller and every timestamp
+node script/test.mjs               # 17 off-chain checks (keccak vectors, static policy, evasions)
 node script/headline.mjs           # 8/8 attested vs 2/8 naive (offline, deterministic)
-node script/headline.mjs --live    # same, classified from EXTCODEHASH read live off Shannon
-node script/firmness.mjs           # % of the live book that cannot be withdrawn
-node script/bench.mjs              # retype p50/p95 vs the 100 ms block budget
+node script/bench.mjs              # retype p50/p95 vs the 100 ms block budget (synthetic: always runs)
 node script/analyze.mjs --corpus   # the static policy verdict + reason for each contract
+npm run verify                     # syntax + lint + typecheck + tests + headline, one gate
 ```
+
+Those five are **deterministic and offline** — they give the same answer on any machine, today or in
+six months. The two below read live testnet state and therefore depend on it:
+
+```bash
+node script/headline.mjs --live    # same corpus, classified from EXTCODEHASH read off Shannon
+node script/firmness.mjs           # % of the live book that cannot be withdrawn
+```
+
+Run at `latest` today, both report their state honestly and **exit 1**: `S0 FirmQuote`'s `unlockAt`
+was 2026-08-23 00:00 UTC and has lapsed — a lapsed lock is *not* firm, so S0 correctly reclassifies
+`UNVERIFIED` (7/8) — and the default pool has since cycled to an empty book. Neither is a defect;
+both are the checks refusing to report a stale or vacuous number as a result.
+
+**Pin the block and both reproduce exactly.** Somnia's public RPC is archival, so no special
+endpoint is needed:
+
+```bash
+node script/headline.mjs --live --block 468201000    # → 8/8 vs 2/8, exit 0
+node script/firmness.mjs --block 468201000           # → 11 orders, 2 FIRM, 0.1%
+node script/bench.mjs --block 468201000              # → scored on: synthetic + live
+```
+
+`--block` pins the block **and** evaluates the lock window against that block's own `timestamp`.
+That second half matters: `unlockAt` is an `immutable`, so reading it at a historical block returns
+the same lapsed value — pinning the state alone would still compare it against today's wall clock
+and never restore `FIRM`. Block `468201000` is the first block after the whole corpus (S0…S6) was
+deployed; pin earlier and the scripts stop with *"the block PREDATES its deployment"* rather than
+scoring a misleading 2/8.
 
 ## Honest limits
 
@@ -221,14 +278,51 @@ node script/analyze.mjs --corpus   # the static policy verdict + reason for each
   withdraw here; the classifier still types the contract UNVERIFIED because its bytecode *can* grant
   operators. The escape mechanism is proven in `test/Adversarial.t.sol` against a faithful mock, and
   the pool-block is reproducible: `cast call 0x54d9…be00 "cancelOrderFor(address,uint128)" 0xa131…21F8 110680464442257422795`. This is a genuine finding for the SDK feedback report.
-- **S6 (batch cancel) — deployed, funded, RESTED; `tidy()` gas-blocked.** The batch-cancel succeeds
-  in simulation (`cast call` returns success; `cancelOrders([id])` returns `cleaned = 1`) but the
-  live send needs ~3 M gas and the funder key ran dry at 0.009 SOMI (native STT is browser-faucet
-  only). One command finishes it when funded: `cast send 0xb3e6…af54 "tidy()" --gas-limit 4000000`.
-  The mechanism is proven in `test/Adversarial.t.sol` (`test_A1b`).
-- So **four of the six attacker escapes execute a full on-chain withdrawal**; the other two are a
-  documented pool limitation (S4) and a documented faucet-gas blocker (S6), neither faked. The
+- **S6 (batch cancel) — EXECUTED 2026-08-26, on a second deployment.** The original S6
+  (`0xb3e6…af54`) was deployed, funded and rested on 2026-08-22, but its `tidy()` was never sent: the
+  funder key was down to 0.009 SOMI (native STT is browser-faucet only). By the time it was funded,
+  that pool's market had reached **status 4 (terminal)** and the order had been swept —
+  `getOrder` reverts `IncorrectOrder()`. Sending `tidy()` there today would **succeed while
+  cancelling nothing**, because `cancelOrders` is best-effort and silently skips ids it does not own.
+  A green transaction proving nothing is worse than an honest gap, so we did not send it.
+
+  `QuoteBase.pool` is immutable, so that instance can never rest again. The escape was instead run in
+  full against a **Trading** pool: `BatchCancel` at
+  [`0xE3202c08…0ea8`](https://shannon-explorer.somnia.network/address/0xE3202c084f3A0E52804ec5Ae467c533ce0FE0ea8)
+  → rested order `18446744073709832684` → `tidy()`
+  ([`0xb55516e4…9bcc7`](https://shannon-explorer.somnia.network/tx/0xb55516e484bbad70ed2a1e2e9bb88c53945cf771d7dc366b6914af802a29bcc7),
+  status `1`, block 471724333).
+
+  **It was a cancel, not a fill, and the escrow proves it:** the contract was funded with `500000`,
+  the resting order escrowed `10000`, and after `tidy()` the balance is **back to `500000`**. A fill
+  consumes escrow and returns outcome tokens; a cancel refunds it. The depth vanished with no trade.
+  Full record: [`script/s6.executed.json`](script/s6.executed.json).
+
+- So **five of the six attacker escapes execute a full on-chain withdrawal**; the remaining one is a
+  documented pool limitation (S4 — the binary pool's operator-cancel path is unwired), not faked. The
   classification result (8/8 vs 2/8) is computed from **live on-chain EXTCODEHASH** and does not
   depend on the escapes running.
-- The static analyzer is **sound for the six known escapes, not a general proof of irrevocability**.
+- **The static analyzer is a necessary pre-filter, NOT a proof of irrevocability — and we found the
+  hole ourselves.** Our 2026-08-26 audit built `StealthCancel`: a contract that computes the
+  `cancelOrder` selector arithmetically (`add(0xdbc91395, 1)` in Yul) and calls the pool with it. The
+  four selector bytes appear nowhere in its runtime, so it passed every clause of the policy while
+  remaining fully withdrawable. Two things came out of that:
+  1. **We hardened what could be hardened.** The scan used to match only a `PUSH4` immediate, which
+     misses the *ordinary* Yul idiom `mstore(shl(224, sel))` — the compiler emits that as a `PUSH32`
+     with the selector left-aligned. The policy now matches any **literal** occurrence at any byte
+     alignment, and refuses to honour an implausible CBOR-metadata length that would otherwise excise
+     live code from the scan. Both evasions are pinned by tests in `script/test.mjs`.
+  2. **We retracted the claim we could not support.** A selector built by *arithmetic* is invisible
+     to any static scan, and no scan over a language with arbitrary `CALL` can be made sound. So
+     `FIRM` means **attested and inside its lock window**, where attestation is a **human-reviewed
+     transparency list** that a green `analyze()` gates rather than decides. Every `FIRM_CAPABLE`
+     record carries a `guarantee: "necessary-not-sufficient"` field so no consumer can misread it.
   The registry is a transparency list anyone can re-derive from the same bytes, not a trustless oracle.
+- **The shipped demo is unaffected by that hole**, and we are precise about why rather than leaning
+  on it: the attested set is a fixed, committed corpus (`buildAttestedSet` over the known S0…S6), so
+  nothing can be injected into it at demo time. The finding breaks the *general soundness claim*, not
+  the running demo. We changed the claim anyway.
+- **Live-state commands depend on live state.** `headline.mjs --live` reports 7/8 today because S0's
+  lock lapsed on 2026-08-23 — the classifier is right and says so, then exits 1. `firmness.mjs` and
+  the live half of `bench.mjs` need a pool with depth. The deterministic evidence (`forge test`,
+  `headline.mjs`, `bench.mjs` synthetic, `analyze.mjs`) does not rot.
