@@ -82,6 +82,33 @@ contract FirmnessRegistryTest is Test {
         reg.attest(keccak256("c"), RECORD);
         assertTrue(reg.isAttested(keccak256("c")));
         assertEq(reg.attestedCount(), 1);
+        assertEq(reg.activeCount(), 1);
+    }
+
+    /// @dev The two counters mean different things and must not be conflated:
+    ///      `attestedList` is append-only so the transparency record cannot erase
+    ///      its own history, which means `attestedCount()` keeps counting revoked
+    ///      hashes. `activeCount()` is the one a UI should surface.
+    function test_revoke_shrinksActiveCountButNotHistory() public {
+        vm.startPrank(ATTESTER);
+        reg.attest(keccak256("a"), RECORD);
+        reg.attest(keccak256("b"), RECORD);
+        assertEq(reg.attestedCount(), 2);
+        assertEq(reg.activeCount(), 2);
+
+        reg.revoke(keccak256("a"));
+        assertEq(reg.attestedCount(), 2, "history must not shrink");
+        assertEq(reg.activeCount(), 1, "active count must drop");
+
+        reg.revoke(keccak256("b"));
+        assertEq(reg.attestedCount(), 2);
+        assertEq(reg.activeCount(), 0);
+
+        // Re-attesting restores the active count without re-listing.
+        reg.attest(keccak256("a"), RECORD);
+        assertEq(reg.attestedCount(), 2);
+        assertEq(reg.activeCount(), 1);
+        vm.stopPrank();
     }
 
     function test_attest_rejectsDuplicate() public {

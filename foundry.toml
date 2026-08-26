@@ -6,7 +6,21 @@ solc = "0.8.28"
 optimizer = true
 optimizer_runs = 200
 evm_version = "cancun"
+# halmos needs the solc AST in the artifacts to find `check_` functions.
+# Without it it silently reports "No tests" — which looks like a pass in CI.
+ast = true
 
 [rpc_endpoints]
 shannon = "${SOMNIA_TESTNET_RPC}"
 somnia  = "${SOMNIA_MAINNET_RPC}"
+
+# Invariant campaign for test/FirmQuoteInvariant.t.sol. The security property is an
+# ABSENCE, so the campaign needs enough depth to build long call sequences rather than
+# many shallow ones. `fail_on_revert = false` is deliberate: the handler's whole job is
+# to attempt calls that SHOULD revert (wrong actor, wrong kind, locked sweep), and a
+# revert there is the contract working, not the test failing.
+[invariant]
+runs = 384
+depth = 96
+fail_on_revert = false
+shrink_run_limit = 2000

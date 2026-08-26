@@ -8,6 +8,7 @@ import {QuietReduce} from "../src/adversarial/QuietReduce.sol";
 import {OperatorGranter} from "../src/adversarial/OperatorGranter.sol";
 import {DelegateEscape, EscapeLogic} from "../src/adversarial/DelegateEscape.sol";
 import {BatchCancel} from "../src/adversarial/BatchCancel.sol";
+import {QuoteBase} from "../src/adversarial/QuoteBase.sol";
 import {
     Erc1967Proxy, ProxyLogicFirm, ProxyLogicEvil
 } from "../src/adversarial/Erc1967Proxy.sol";
@@ -300,5 +301,245 @@ contract AdversarialTest is Test {
         a.trim(1_000_000); // the escape: shrink 2,000,000 -> 1,000,000, no fill
         assertEq(pool.remainingOf(id), 1_000_000);
         assertTrue(pool.isActive(id)); // technically survives; the depth it advertised did not
+    }
+
+    // ---- QuoteBase: the camouflage's own surface ---------------------------
+    //
+    // These do not prove an escape — they cover the honest-looking half every
+    // attacker inherits. Left untested, `QuoteBase` sat at 14% branch coverage
+    // (2026-08-26 audit, F-9), which meant the corpus's *shared* code was the
+    // least-exercised code in the repo. Uses HiddenCancel as an arbitrary
+    // concrete subclass; the behaviour under test is entirely QuoteBase's.
+
+    function test_quoteBase_restRejectsSellSide() public {
+        HiddenCancel a = new HiddenCancel(address(pool), UNLOCK);
+        _fund(address(a));
+        vm.expectRevert(bytes("buy-side only"));
+        a.rest(1, 10000, QTY, uint64(block.timestamp + 1000)); // kind 1 == sell
+    }
+
+    function test_quoteBase_restRejectsUnknownKind() public {
+        HiddenCancel a = new HiddenCancel(address(pool), UNLOCK);
+        _fund(address(a));
+        vm.expectRevert(bytes("buy-side only"));
+        a.rest(7, 10000, QTY, uint64(block.timestamp + 1000));
+    }
+
+    function test_quoteBase_restOnlyDepositor() public {
+        HiddenCancel a = new HiddenCancel(address(pool), UNLOCK);
+        _fund(address(a));
+        vm.prank(ATTACKER_EOA);
+        vm.expectRevert(
+            abi.encodeWithSelector(QuoteBase.NotDepositor.selector, ATTACKER_EOA, address(this))
+        );
+        a.rest(0, 10000, QTY, uint64(block.timestamp + 1000));
+    }
+
+    function test_quoteBase_restRevertsWhenPoolReportsFailure() public {
+        HiddenCancel a = new HiddenCancel(address(pool), UNLOCK);
+        _fund(address(a));
+        // Make the pool report a failed placement without reverting.
+        vm.mockCall(
+            address(pool),
+            abi.encodeWithSelector(MockPool.placeBinaryOrder.selector),
+            abi.encode(false, uint128(0))
+        );
+        vm.expectRevert(QuoteBase.PlacementFailed.selector);
+        a.rest(0, 10000, QTY, uint64(block.timestamp + 1000));
+        vm.clearMockedCalls();
+    }
+
+    function test_quoteBase_orderCountTracksRests() public {
+        HiddenCancel a = new HiddenCancel(address(pool), UNLOCK);
+        _fund(address(a));
+        assertEq(a.orderCount(), 0);
+        a.rest(0, 10000, QTY, uint64(block.timestamp + 1000));
+        assertEq(a.orderCount(), 1);
+        a.rest(2, 10000, QTY, uint64(block.timestamp + 1000));
+        assertEq(a.orderCount(), 2);
+    }
+
+    function test_quoteBase_sweepIsLockedBeforeUnlock() public {
+        HiddenCancel a = new HiddenCancel(address(pool), UNLOCK);
+        _fund(address(a));
+        vm.expectRevert(
+            abi.encodeWithSelector(QuoteBase.Locked.selector, UNLOCK, uint64(block.timestamp))
+        );
+        a.sweep();
+    }
+
+    function test_quoteBase_sweepOnlyDepositor() public {
+        HiddenCancel a = new HiddenCancel(address(pool), UNLOCK);
+        vm.warp(UNLOCK);
+        vm.prank(ATTACKER_EOA);
+        vm.expectRevert(
+            abi.encodeWithSelector(QuoteBase.NotDepositor.selector, ATTACKER_EOA, address(this))
+        );
+        a.sweep();
+    }
+
+    function test_quoteBase_sweepDrainsVaultThenBalance() public {
+        HiddenCancel a = new HiddenCancel(address(pool), UNLOCK);
+        _fund(address(a)); // 10,000,000 sitting on the contract
+        // Report a non-zero pool-vault credit so the `vaulted > 0` branch runs.
+        vm.mockCall(
+            address(pool),
+            abi.encodeWithSelector(MockPool.getWithdrawableBalance.selector),
+            abi.encode(uint256(5_000_000))
+        );
+        uint256 before = token.balanceOf(address(this));
+        vm.warp(UNLOCK);
+        a.sweep();
+        vm.clearMockedCalls();
+        // Both branches ran: the vault withdraw was attempted and the balance swept home.
+        assertEq(token.balanceOf(address(a)), 0, "contract balance must be swept");
+        assertEq(token.balanceOf(address(this)), before + 10_000_000);
+    }
+
+    function test_quoteBase_sweepToleratesEmptyContract() public {
+        HiddenCancel a = new HiddenCancel(address(pool), UNLOCK);
+        vm.warp(UNLOCK); // never funded: both `vaulted > 0` and `bal > 0` are false
+        a.sweep();
+        assertEq(token.balanceOf(address(a)), 0);
+    }
+
+    function test_quoteBase_sweepExactlyAtUnlockIsAllowed() public {
+        HiddenCancel a = new HiddenCancel(address(pool), UNLOCK);
+        vm.warp(UNLOCK); // boundary: `block.timestamp < unlockAt` is false
+        a.sweep();
+    }
+
+    // ---- DelegateEscape: the revert-reason bubbling ------------------------
+
+    function test_delegateEscape_bubblesLongRevertString() public {
+        DelegateEscape a = new DelegateEscape(address(pool), UNLOCK);
+        _fund(address(a));
+        a.rest(0, 10000, QTY, uint64(block.timestamp + 1000));
+        // RevertingLogic reverts with a >68-byte string, so `_reason` takes the
+        // abi.decode arm and the original message survives the delegatecall.
+        RevertingLogic bad = new RevertingLogic();
+        vm.expectRevert(bytes(LONG_REASON));
+        a.escape(address(bad));
+    }
+
+    function test_delegateEscape_fallsBackWhenReasonIsShort() public {
+        DelegateEscape a = new DelegateEscape(address(pool), UNLOCK);
+        _fund(address(a));
+        a.rest(0, 10000, QTY, uint64(block.timestamp + 1000));
+        // An EOA target: delegatecall to a codeless address returns empty data,
+        // so `ret.length < 68` and `_reason` takes the "delegate failed" arm.
+        SilentRevertLogic quiet = new SilentRevertLogic();
+        vm.expectRevert(bytes("delegate failed"));
+        a.escape(address(quiet));
+    }
+
+    // ---- Erc1967Proxy: the shell's own surface -----------------------------
+
+    function test_proxy_upgradeToRejectsNonAdmin() public {
+        ProxyLogicFirm v1 = new ProxyLogicFirm();
+        Erc1967Proxy proxy = new Erc1967Proxy(address(v1), address(this));
+        vm.prank(ATTACKER_EOA);
+        vm.expectRevert(bytes("not admin"));
+        proxy.upgradeTo(address(0xBEEF));
+    }
+
+    function test_proxy_implementationGetterTracksUpgrade() public {
+        ProxyLogicFirm v1 = new ProxyLogicFirm();
+        ProxyLogicEvil v2 = new ProxyLogicEvil();
+        Erc1967Proxy proxy = new Erc1967Proxy(address(v1), address(this));
+        assertEq(proxy.implementation(), address(v1));
+        proxy.upgradeTo(address(v2));
+        assertEq(proxy.implementation(), address(v2));
+        // The shell's runtime code — and so its EXTCODEHASH — is unchanged by the
+        // upgrade. That is precisely why hashing a proxy commits to nothing.
+    }
+
+    function test_proxy_initCannotBeCalledTwice() public {
+        ProxyLogicFirm v1 = new ProxyLogicFirm();
+        Erc1967Proxy proxy = new Erc1967Proxy(address(v1), address(this));
+        ProxyLogicFirm(address(proxy)).init(address(pool), UNLOCK);
+        vm.expectRevert(bytes("init"));
+        ProxyLogicFirm(address(proxy)).init(address(pool), UNLOCK);
+    }
+
+    function test_proxy_fallbackBubblesRevertFromImplementation() public {
+        ProxyLogicFirm v1 = new ProxyLogicFirm();
+        ProxyLogicEvil v2 = new ProxyLogicEvil();
+        Erc1967Proxy proxy = new Erc1967Proxy(address(v1), address(this));
+        ProxyLogicFirm(address(proxy)).init(address(pool), UNLOCK);
+        proxy.upgradeTo(address(v2));
+        // No order has been rested, so `_orders[_orders.length - 1]` underflows in
+        // the implementation. The fallback's `case 0 { revert }` arm must bubble it.
+        vm.expectRevert();
+        ProxyLogicEvil(address(proxy)).pull();
+    }
+
+    function test_proxy_restRejectsSellAndPlacementFailure() public {
+        ProxyLogicFirm v1 = new ProxyLogicFirm();
+        Erc1967Proxy proxy = new Erc1967Proxy(address(v1), address(this));
+        ProxyLogicFirm(address(proxy)).init(address(pool), UNLOCK);
+        _fund(address(proxy));
+
+        vm.expectRevert(bytes("buy-side only"));
+        ProxyLogicFirm(address(proxy)).rest(1, 10000, QTY, uint64(block.timestamp + 1000));
+
+        vm.mockCall(
+            address(pool),
+            abi.encodeWithSelector(MockPool.placeBinaryOrder.selector),
+            abi.encode(false, uint128(0))
+        );
+        vm.expectRevert(bytes("placement"));
+        ProxyLogicFirm(address(proxy)).rest(0, 10000, QTY, uint64(block.timestamp + 1000));
+        vm.clearMockedCalls();
+    }
+
+    function test_proxy_storageGettersReadThroughDelegate() public {
+        ProxyLogicFirm v1 = new ProxyLogicFirm();
+        Erc1967Proxy proxy = new Erc1967Proxy(address(v1), address(this));
+        ProxyLogicFirm(address(proxy)).init(address(pool), UNLOCK);
+        _fund(address(proxy));
+
+        assertEq(ProxyLogicFirm(address(proxy)).depositor(), address(this));
+        assertEq(ProxyLogicFirm(address(proxy)).unlockAt(), UNLOCK);
+        assertEq(ProxyLogicFirm(address(proxy)).orderCount(), 0);
+
+        uint128 id = ProxyLogicFirm(address(proxy)).rest(0, 10000, QTY, uint64(block.timestamp + 1000));
+        assertEq(ProxyLogicFirm(address(proxy)).orderCount(), 1);
+        assertEq(ProxyLogicFirm(address(proxy)).orders(0), id);
+    }
+
+    function test_proxy_receiveAcceptsNativeValue() public {
+        ProxyLogicFirm v1 = new ProxyLogicFirm();
+        Erc1967Proxy proxy = new Erc1967Proxy(address(v1), address(this));
+        (bool ok,) = address(proxy).call{value: 1 ether}("");
+        assertTrue(ok, "receive() must accept plain value transfers");
+        assertEq(address(proxy).balance, 1 ether);
+    }
+
+    receive() external payable {}
+}
+
+string constant LONG_REASON =
+    "delegate target refused: this reason is deliberately longer than sixty-eight bytes so the decoder takes the abi.decode arm";
+
+/// @dev Delegatecall target that reverts with a LONG string — exercises
+///      `DelegateEscape._reason`'s `abi.decode` arm.
+contract RevertingLogic {
+    uint128[] public orders; // storage-layout mirror, as EscapeLogic does
+
+    function pull(address) external pure {
+        revert(LONG_REASON);
+    }
+}
+
+/// @dev Delegatecall target whose `pull` reverts with NO return data — exercises
+///      `_reason`'s `ret.length < 68` fallback arm.
+contract SilentRevertLogic {
+    uint128[] public orders;
+
+    function pull(address) external pure {
+        assembly {
+            revert(0, 0)
+        }
     }
 }
