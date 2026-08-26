@@ -2,17 +2,8 @@
 // Public-domain style implementation, dependency-free. Verified against
 // `cast keccak` in script/lib/keccak.test.mjs.
 
-const RC = [
-  0x00000001n, 0x00008082n, 0x0000808an, 0x80008000n, 0x0000808bn, 0x80000001n,
-  0x80008081n, 0x00008009n, 0x0000008an, 0x00000088n, 0x80008009n, 0x8000000an,
-  0x8000808bn, 0x0000008bn, 0x00008089n, 0x00008003n, 0x00008002n, 0x00000080n,
-  0x0000800an, 0x8000000an, 0x80008081n, 0x00008080n, 0x80000001n, 0x80008008n,
-].map((x, i) => {
-  // RC constants above are the low 32 bits; keccak uses 64-bit lane RCs.
-  return null;
-});
-
-// Full 64-bit round constants.
+// The 24 64-bit round constants (ι step). Hand-rolled crypto invites scrutiny, so
+// there is exactly ONE constant table here and it is the one the permutation uses.
 const RC64 = [
   0x0000000000000001n, 0x0000000000008082n, 0x800000000000808an, 0x8000000080008000n,
   0x000000000000808bn, 0x0000000080000001n, 0x8000000080008081n, 0x8000000000008009n,
@@ -29,6 +20,11 @@ const R = [
   [27n, 20n, 39n, 8n, 14n],
 ];
 const MASK = (1n << 64n) - 1n;
+/**
+ * Rotate a 64-bit lane left by n bits. Both operands are BigInt — the lanes are
+ * genuinely 64-bit and Number would silently lose the top 11 bits.
+ * @param {bigint} x @param {bigint} n @returns {bigint}
+ */
 const rotl = (x, n) => ((x << n) | (x >> (64n - n))) & MASK;
 
 function keccakF(s) {
@@ -89,4 +85,19 @@ export function keccakHex(hex) {
   const bytes = new Uint8Array(h.length / 2);
   for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(h.substr(i * 2, 2), 16);
   return keccak256(bytes);
+}
+
+/**
+ * 4-byte function/error selector of a CANONICAL signature — no spaces, no
+ * parameter names, e.g. `selectorOf('cancelOrder(uint128)') === '0xdbc91396'`.
+ *
+ * The signature must already be canonical; this does not normalise aliases
+ * (`uint` → `uint256`) or strip whitespace, because silently "fixing" a
+ * malformed signature is how a wrong selector gets computed with confidence.
+ *
+ * @param {string} signature canonical ABI signature
+ * @returns {string} 0x-prefixed 4-byte selector (10 chars)
+ */
+export function selectorOf(signature) {
+  return keccak256(new TextEncoder().encode(signature)).slice(0, 10);
 }

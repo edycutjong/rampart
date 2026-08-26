@@ -28,8 +28,16 @@ interface IFirmQuoteView {
 ///      commitment to exact runtime bytecode (EIP-1052). An attestation binds to
 ///      CODE, not to an address, so it can never be re-pointed at different
 ///      behaviour. Code that is not attested is UNVERIFIED, and UNVERIFIED makes
-///      no claim at all. An attacker therefore cannot mint fake FIRM depth; they
-///      can only mint UNVERIFIED depth, which the book renders as exactly that.
+///      no claim at all. Every escape in the published corpus therefore mints
+///      UNVERIFIED depth, not FIRM.
+///
+///      SCOPE OF THE CLAIM. This registry is a TRANSPARENCY LIST, not an oracle
+///      of irrevocability. Being attested means a human reviewed the code after
+///      it passed the off-chain static pre-filter; it does NOT mean the filter
+///      proved the code cannot withdraw. No static scan can prove that over a
+///      language with arbitrary CALL — a withdrawal selector computed at runtime
+///      appears nowhere in the bytecode. Consumers must read FIRM as "attested by
+///      this registry's attesters and inside its lock window", nothing stronger.
 library Firmness {
     /// @dev PULLABLE = wallet. UNVERIFIED = code we have not attested — NO CLAIM.
     ///      FIRM = attested code inside its lock window.
@@ -143,8 +151,23 @@ contract FirmnessRegistry {
         return a.attestedAt != 0 && !a.revoked;
     }
 
+    /// @notice How many code hashes have EVER been attested, including ones since
+    ///         revoked. `attestedList` is append-only by design — the transparency
+    ///         record must not be able to erase its own history.
+    /// @dev NOT a count of currently-firm code. Use `activeCount()` for that.
+    ///      (2026-08-26 audit, F-10: this was previously documented as if it were
+    ///      the active count, which overstates after any revoke.)
     function attestedCount() external view returns (uint256) {
         return attestedList.length;
+    }
+
+    /// @notice How many attestations are currently live (attested and not revoked).
+    ///         This is the number a UI should show next to "attested code".
+    function activeCount() external view returns (uint256 n) {
+        uint256 len = attestedList.length;
+        for (uint256 i; i < len; ++i) {
+            if (isAttested(attestedList[i])) ++n;
+        }
     }
 
     /// @notice Type one order owner.
