@@ -44,7 +44,8 @@ function forgeCreate(pathName, ctor = []) {
   return { address: j.deployedTo, tx: j.transactionHash };
 }
 function send(to, sig, a = []) { const j = JSON.parse(cast(['send', to, sig, ...a, '--rpc-url', RPC, '--private-key', KEY, ...GP, ...GL_SEND, '--json'])); return { tx: j.transactionHash, status: j.status }; }
-function sendRevert(to, sig, a = []) {
+// Kept for the S4/S6 escape paths, which expect the tx to revert on-chain.
+function _sendRevert(to, sig, a = []) {
   try { const j = JSON.parse(execFileSync('cast', ['send', to, sig, ...a, '--rpc-url', RPC, '--private-key', KEY, '--gas-limit', '250000', '--json'], { cwd: BUILD, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })); return { tx: j.transactionHash, reverted: j.status === '0x0' }; }
   catch (e) { const m = ((e.stdout || '') + (e.stderr || '')).match(/0x[0-9a-fA-F]{64}/); return { tx: m ? m[0] : null, reverted: true }; }
 }

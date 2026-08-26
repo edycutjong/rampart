@@ -15,9 +15,10 @@
 
 import { CORPUS, artifactRuntime, loadDeployment, liveRuntime } from './lib/corpus.mjs';
 import { buildAttestedSet, attestedClassify, naiveClassify } from './lib/classify.mjs';
-import { ethCall } from './lib/rpc.mjs';
+import { ethCall, pinFromArgs, isPinned, now, BLOCK, assertPinnedStateAvailable } from './lib/rpc.mjs';
 
 const LIVE = process.argv.includes('--live');
+if (LIVE) pinFromArgs();
 const UNLOCK_AT_SEL = '0xaa5dec6f'; // unlockAt()
 
 function pad(s, n) { return String(s).padEnd(n); }
@@ -31,6 +32,10 @@ async function collect() {
     deployment = loadDeployment();
     if (!deployment) {
       console.error('--live needs script/corpus.deployed.json (run deploy-corpus.mjs first). Falling back to offline.');
+    } else if (deployment.S0) {
+      // A pin at a block before the corpus existed scores ~2/8 and reads as a
+      // classifier defect. Fail first, and say which cause it is.
+      await assertPinnedStateAvailable(deployment.S0.address, deployment._meta && deployment._meta.pool);
     }
   }
   for (const m of CORPUS) {
@@ -38,12 +43,13 @@ async function collect() {
     if (LIVE && deployment && deployment[m.id]) {
       addr = deployment[m.id].address;
       ({ code } = await liveRuntime(addr));
-      // Apply the lock-window clause live: read unlockAt() and compare to now.
+      // Apply the lock-window clause live: read unlockAt() and compare to the
+      // clock of the block we are reading (pinned block timestamp, or wall clock).
       if (m.expected === 'FIRM') {
         try {
           const ret = await ethCall(addr, UNLOCK_AT_SEL);
           const unlockAt = ret && ret !== '0x' ? parseInt(ret, 16) : 0;
-          lockOk = unlockAt > Math.floor(Date.now() / 1000);
+          lockOk = unlockAt > (await now());
         } catch { lockOk = true; }
       }
     } else {
@@ -59,7 +65,10 @@ async function main() {
   // Attested set = every corpus member the static policy accepts (only FirmQuote).
   const attestedSet = buildAttestedSet(rows.map((r) => ({ name: r.name, code: r.code })));
 
-  console.log(`\n  rampart — adversarial corpus classification  ${LIVE && deployment ? '(LIVE on Shannon 50312)' : '(offline, local artifacts)'}\n`);
+  const where = LIVE && deployment
+    ? `(LIVE on Shannon 50312${isPinned() ? `, pinned @ block ${parseInt(BLOCK, 16)}` : ', block latest'})`
+    : '(offline, local artifacts)';
+  console.log(`\n  rampart — adversarial corpus classification  ${where}\n`);
   console.log(`  ${pad('#', 3)}${pad('owner', 20)}${pad('attack', 34)}${pad('expected', 12)}${pad('attested', 12)}${pad('naive EXTCODESIZE', 18)}`);
   console.log('  ' + '-'.repeat(96));
 
@@ -91,8 +100,21 @@ async function main() {
 
   if (attestedScore !== n) {
     console.error(`\x1b[31mFAIL: attested classifier scored ${attestedScore}/${n}, expected ${n}/${n}.\x1b[0m`);
+    // The overwhelmingly common cause on a testnet is a lapsed lock, not a
+    // classifier defect. Say which, so nobody reads chain rot as a wrong verdict.
+    const lapsed = rows.filter((r) => r.expected === 'FIRM' && !r.lockOk);
+    if (lapsed.length) {
+      const clock = isPinned() ? `pinned block ${parseInt(BLOCK, 16)}` : 'wall clock';
+      console.error(
+        `\x1b[33m  Cause: ${lapsed.map((r) => r.name).join(', ')} — lock window lapsed against the ${clock}.\n` +
+        `  This is the classifier working correctly: a lapsed lock is not firm.\n` +
+        `  To reproduce the FIRM state, pin the block AND its clock:\n` +
+        `      node script/headline.mjs --live --block <n>   (needs an archive RPC)\n` +
+        `  Or redeploy the corpus with a fresh lock: node script/deploy-corpus.mjs\x1b[0m`,
+      );
+    }
     process.exit(1);
   }
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => { console.error(`\x1b[31m${e.message || e}\x1b[0m`); process.exit(1); });

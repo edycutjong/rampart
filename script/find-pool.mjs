@@ -1,3 +1,14 @@
+#!/usr/bin/env node
+// DEV UTILITY — find a currently-active binary pool to point the live scripts at.
+//
+// Shannon markets expire on a fixed interval, so the pool address baked into
+// firmness.mjs/bench.mjs goes cold within ~24h. This queries the Somnia markets
+// subgraph for markets with real headroom and prints a CANDIDATE POOL to pass as
+// `--pool`. Not part of the judged path; no assertions, no gate.
+//
+//   node script/find-pool.mjs
+
+/** @param {string} query @returns {Promise<any>} the raw GraphQL envelope */
 const q = async (query) => (await (await fetch("https://dev.smk.somnia.host/v1/graphql", {
   method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({query})})).json());
 const e = await q(`{ __type(name:"markettype"){ enumValues { name } } }`);
