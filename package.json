@@ -1,6 +1,6 @@
 {
   "name": "rampart-firm-book",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Types a Somnia binary order book FIRM / PULLABLE / UNVERIFIED by attested EXTCODEHASH. Ships a dependency-free keccak-256, an EVM disassembler + static bytecode policy, a zero-auth BinaryPool book reader, and a block-pinned JSON-RPC client — zero runtime dependencies, CI-checked against @somnia-chain/markets-sdk.",
   "keywords": [
