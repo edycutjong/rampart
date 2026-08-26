@@ -1,30 +1,78 @@
 name: pages
-# Deploys the judge-facing surface in docs/ to GitHub Pages.
-# NOTE: Pages on a private repo requires a paid plan. This workflow builds on every push
-# regardless; the deploy job only runs once Pages is enabled (i.e. after the repo is public).
+
+# Deploys the judge-facing web surface in site/ to GitHub Pages at
+# https://rampart.edycu.dev :
+#   site/index.html        the landing page
+#   site/pitch/index.html  the pitch deck
+#   site/assets/           icon, og-image, hero, thumbnails
+#   site/CNAME             the custom domain — see the guard below
+#
+# Pages on a PRIVATE repo requires a paid plan. The build job runs regardless so the
+# surface is validated on every push; deploy only succeeds once Pages is enabled —
+# in practice, once the repo is public. A public repo also restores free Actions
+# minutes, so the public flip unblocks this workflow and CI at the same time.
+
 on:
   push: { branches: [main] }
+  pull_request:
   workflow_dispatch:
+
 permissions: { contents: read, pages: write, id-token: write }
+
 concurrency: { group: pages, cancel-in-progress: true }
 
 jobs:
   build:
+    name: validate + package surface
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify the surface exists and is self-contained
+
+      - name: Surfaces exist
         run: |
-          test -f docs/index.html || { echo "::error::docs/index.html missing"; exit 1; }
-          # no runtime CDN dependencies — everything inline or beside the page
-          if grep -nE '<(script|link)[^>]+(src|href)="https?://' docs/index.html; then
-            echo "::error::external CDN reference in docs/index.html — must be self-contained"; exit 1; fi
-          echo "surface OK: $(wc -c < docs/index.html) bytes"
+          # The landing page is the deploy target and is required. The pitch deck is an
+          # optional deliverable for this event, so a missing deck warns rather than
+          # blocking the landing page from shipping.
+          [ -f site/index.html ] || { echo "::error::site/index.html missing"; exit 1; }
+          echo "  ✓ site/index.html ($(wc -c < site/index.html) bytes)"
+          if [ -f site/pitch/index.html ]; then
+            echo "  ✓ site/pitch/index.html ($(wc -c < site/pitch/index.html) bytes)"
+          else
+            echo "::warning::site/pitch/index.html missing — deck not published"
+          fi
+
+      # A GitHub Pages artifact is a flat upload — anything reachable from the pages
+      # must live under site/. An external <script>/<link> also breaks the offline
+      # guarantee the judge-facing surface is built on.
+      # The artifact IS the published root, so the custom domain lives or dies by this
+      # file. Setting the domain only in repo Settings is not enough — an Actions deploy
+      # whose artifact lacks CNAME drops the custom domain and the site silently reverts
+      # to the github.io URL, breaking every og: tag and every link already handed out.
+      - name: Custom domain survives the deploy
+        run: |
+          [ -f site/CNAME ] || { echo "::error::site/CNAME missing — deploying would drop rampart.edycu.dev"; exit 1; }
+          got="$(tr -d '[:space:]' < site/CNAME)"
+          [ "$got" = "rampart.edycu.dev" ] || { echo "::error::site/CNAME is '$got', expected rampart.edycu.dev"; exit 1; }
+          echo "custom domain: $got"
+
+      - name: Self-contained (no external CDN)
+        run: |
+          if grep -rnE '<(script|link)[^>]+(src|href)="https?://' site/ --include='*.html'; then
+            echo "::error::external CDN reference — the surface must be self-contained"; exit 1; fi
+          echo "no external script/link references"
+
+      # A broken relative path renders as a missing image on the one surface judges
+      # actually look at, and nothing else in CI would catch it.
+      - name: Referenced local assets resolve
+        run: node .github/scripts/check-links.mjs site
+
       - uses: actions/upload-pages-artifact@v3
-        with: { path: docs }
+        with: { path: site }
 
   deploy:
+    name: deploy to github pages
     needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

@@ -1,36 +1,207 @@
 name: ci
+
 on:
   push: { branches: [main] }
   pull_request:
+  schedule:
+    # The live-proof job re-reads Shannon daily. Firmness has a horizon, not a badge —
+    # a lapsed lock window is real information, so it is surfaced, never hidden.
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
 permissions: { contents: read }
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FOUNDRY_PROFILE: default
+
 jobs:
+  # ── STAGE 1: Contracts ────────────────────────────────────────────────
   contracts:
-    name: forge build + test
+    name: "Stage 1 · forge build + test"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with: { submodules: recursive }
+
       - uses: foundry-rs/foundry-toolchain@v1
+
+      # Advisory, and deliberately so. `forge fmt` would collapse the multi-line
+      # function headers in src/ — which rewrites the source, which changes the
+      # source metadata hash the compiler appends to the runtime bytecode, which
+      # breaks the attested-EXTCODEHASH match against contracts ALREADY DEPLOYED
+      # on Shannon. The attested classifier is the entire product; a formatter is
+      # not allowed to invalidate it. Style drift is reported, never enforced.
+      - name: forge fmt (advisory — see comment)
+        run: forge fmt --check
+        continue-on-error: true
+
       - name: forge build
         run: forge build --sizes
+
       - name: forge test
         run: forge test -vv
+
       - name: gate.sh is syntactically valid
         run: bash -n gate.sh
 
-  classifier:
-    name: off-chain classifier self-test
+      # The security property is an ABSENCE, so it gets two complementary checks:
+      # an invariant campaign (128k concrete sequences, in `forge test` above) and
+      # symbolic proofs that quantify over EVERY caller and EVERY timestamp at once.
+      # Both are mutation-verified — see the header comments in each test file.
+      - name: install halmos
+        run: pip install --quiet halmos
+      - name: symbolic proofs (halmos)
+        run: halmos --match-contract FirmQuoteSymbolicTest
+
+  # ── STAGE 2: Coverage gate ────────────────────────────────────────────
+  coverage:
+    name: "Stage 2 · coverage gate (≥80% lines)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with: { submodules: recursive }
+
+      - uses: foundry-rs/foundry-toolchain@v1
+
+      - name: forge coverage
+        run: |
+          forge coverage --report summary | tee coverage.txt
+          # Summary row is: | Total | <lines>% (a/b) | <stmts>% | <branches>% | <funcs>% |
+          # Split on '|' and take field 3 — a greedy `.*` regex silently grabs the LAST
+          # column (functions) instead of the first (lines), which is a gate that reports
+          # a number it is not actually measuring.
+          read -r lines funcs <<<"$(awk -F'|' '/^\| Total/ {
+              for (i = 3; i <= 6; i++) if (match($i, /[0-9]+\.[0-9]+%/)) v[i] = substr($i, RSTART, RLENGTH - 1)
+              print v[3], v[6]; exit }' coverage.txt)"
+          echo "line coverage: ${lines}%   function coverage: ${funcs}%"
+          awk -v p="$lines" 'BEGIN { if (p+0 < 80) { print "::error::line coverage " p "% < 80% floor"; exit 1 } print "coverage gate PASS (lines " p "%)" }'
+
+  # ── STAGE 3: Off-chain classifier (deterministic, no network) ─────────
+  classifier:
+    name: "Stage 3 · classifier self-test"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+
       - uses: foundry-rs/foundry-toolchain@v1
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
+
       # analyzer + headline run over the compiled artifacts, so build first.
       - run: forge build
-      - name: off-chain self-test (keccak, static policy, headline tally)
+
+      - name: self-test (keccak vectors, static policy, headline tally)
         run: node script/test.mjs
-      - name: headline (offline, deterministic)
+
+      - name: headline — attested 8/8 vs naive 2/8 (offline, deterministic)
         run: node script/headline.mjs
+
+      - name: static policy verdict per corpus contract
+        run: node script/analyze.mjs --corpus
+
+  # ── STAGE 3b: Static quality on the off-chain engine ──────────────────
+  # Slither and 90 forge tests cover the Solidity half. This is the JS half —
+  # the code the demo actually runs its classification on — plus the differential
+  # against the sponsor SDK that keeps the hand-written ABI from drifting.
+  quality:
+    name: "Stage 3b · lint + typecheck"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+
+      # devDependencies only — the classifier itself keeps ZERO runtime deps, so
+      # the verification loop in CONTRIBUTING.md still runs with nothing installed.
+      - run: npm ci
+
+      # Parses every module without executing it. Zero-dependency smoke test that
+      # would still work if the devDeps below were ever dropped.
+      - name: syntax
+        run: npm run syntax
+
+      - name: eslint
+        run: npm run lint
+
+      # No TypeScript in the repo — `tsc --noEmit` typechecks the plain .mjs via
+      # checkJs. Static analysis pass, not a compile target. See tsconfig.json.
+      - name: typecheck
+        run: npm run typecheck
+
+      - name: judge-facing links resolve
+        run: npm run links
+
+      # The hand-transcribed pool surface in src/IBinaryPool.sol and the forbidden
+      # selector table in script/lib/analyzer.mjs are checked against the REAL
+      # @somnia-chain/markets-sdk (a devDependency — the shipped engine keeps zero
+      # runtime deps). This is what stops a silent ABI drift: a uint256 where the
+      # pool wants a uint96 is a different selector and reverts undecodably.
+      - name: sponsor SDK differential — our ABI vs @somnia-chain/markets-sdk
+        run: npm run sdk-verify
+
+  # ── STAGE 4: Performance gate ─────────────────────────────────────────
+  bench:
+    name: "Stage 4 · retype p95 inside one 100ms block"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+
+      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+
+      - run: forge build
+
+      # bench.mjs exits non-zero when worst p95 > 100 ms. The metric cannot claim
+      # to be live if retyping the book does not fit inside a block.
+      - name: bench
+        run: node script/bench.mjs --n 200 --scale 2000
+
+  # ── STAGE 5: Live proof (ENFORCED — pinned to a block, so it cannot rot) ─
+  live-proof:
+    name: "Stage 5 · live on-chain proof (pinned — enforced)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+
+      # ENFORCED. Pinned to block 468201000 — the first block after the whole
+      # corpus (S0…S6) was deployed, and inside S0's lock window. Because --block
+      # pins the block AND evaluates the lock against that block's own timestamp,
+      # this is reproducible forever against an archive node: 8/8, exit 0. It is a
+      # real gate, not a hope about today's chain state.
+      - name: headline — 8/8 from live EXTCODEHASH, pinned
+        run: node script/headline.mjs --live --block 468201000
+
+      - name: firmness of the live book, pinned
+        run: node script/firmness.mjs --block 468201000
+
+      # ADVISORY. The same commands at HEAD of chain. Expected to fail today and
+      # that is the classifier being correct, not the build breaking: S0's lock
+      # lapsed 2026-08-23, and a lapsed lock is not firm; the default pool has
+      # cycled to an empty book. Kept visible so the rot is observable rather than
+      # hidden. Re-rest the corpus (script/deploy-corpus.mjs) to restore it.
+      - name: "advisory · same commands at chain HEAD (may fail by design)"
+        continue-on-error: true
+        run: |
+          node script/headline.mjs --live || echo "::notice::--live at HEAD failed as expected (lapsed lock)"
+          node script/firmness.mjs      || echo "::notice::firmness at HEAD failed as expected (pool cycled)"
+
+  # ── STAGE 6: Gate ─────────────────────────────────────────────────────
+  gate:
+    name: "Stage 6 · all gates passed"
+    needs: [contracts, coverage, classifier, quality, bench, live-proof]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All blocking gates passed
+        run: echo "contracts · coverage · classifier · quality · bench · live-proof — all green"

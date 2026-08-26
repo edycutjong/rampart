@@ -1,0 +1,55 @@
+name: "Escape report — a withdrawal path the classifier misses"
+description: You found a contract the static policy calls FIRM_CAPABLE that can actually withdraw its resting order.
+title: "escape: "
+labels: [escape, security]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the highest-value report in the repo — it breaks the central claim.
+
+        If the escape affects deployed funds rather than the classifier's verdict, please use a
+        [private security advisory](https://github.com/edycutjong/rampart/security/advisories/new)
+        instead.
+
+  - type: textarea
+    id: mechanism
+    attributes:
+      label: The withdrawal path
+      description: How does the contract get its resting order out of the book?
+      placeholder: e.g. a fallback that forwards an arbitrary call to the pool
+    validations: { required: true }
+
+  - type: textarea
+    id: policy
+    attributes:
+      label: Why the static policy waves it through
+      description: Which check in `script/lib/analyzer.mjs` fails to catch it, and why?
+    validations: { required: true }
+
+  - type: textarea
+    id: proof
+    attributes:
+      label: Proof
+      description: |
+        Best: a `forge test` case in `test/Adversarial.t.sol` style. Also good: a Shannon
+        transaction hash where the escape actually executed. Unit-test-returns-true is weaker
+        than an executed withdrawal — say which one you have.
+      render: solidity
+    validations: { required: true }
+
+  - type: input
+    id: address
+    attributes:
+      label: Deployed address (if any)
+      placeholder: "0x… on Somnia Shannon (50312)"
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmations
+      options:
+        - label: The contract classifies as `FIRM_CAPABLE` under `node script/analyze.mjs`
+          required: true
+        - label: I understand `src/adversarial/` contracts are unsafe by design and are not the bug
+          required: true

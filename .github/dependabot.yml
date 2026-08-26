@@ -1,0 +1,36 @@
+version: 2
+
+# Note on coverage: Foundry dependencies (lib/forge-std) are git submodules, which
+# Dependabot's `gitsubmodule` ecosystem tracks by commit rather than semver. The
+# Solidity toolchain itself is pinned in foundry.toml (solc 0.8.28) and bumped by hand
+# — a compiler bump changes the source metadata hash embedded in the deployed bytecode,
+# so it can never be an automated PR here. See SECURITY.md.
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels: [dependencies, ci]
+    commit-message:
+      prefix: "ci"
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    labels: [dependencies, javascript]
+    commit-message:
+      prefix: "deps"
+    # The off-chain classifier deliberately has zero runtime dependencies — it speaks
+    # JSON-RPC over global fetch and implements keccak locally. This block exists to
+    # catch anything that creeps into devDependencies.
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: gitsubmodule
+    directory: /
+    schedule:
+      interval: weekly
+    labels: [dependencies, foundry]
+    commit-message:
+      prefix: "deps"

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/edycutjong/rampart/security/advisories/new
+    about: Report privately. Anything affecting deployed funds belongs here, not in a public issue.
+  - name: Somnia / DreamDEX protocol issue
+    url: https://docs.dreamdex.io/developers/event-contracts
+    about: Rampart consumes the Somnia binary pool; it does not maintain it. Pool-level bugs go to Somnia.
+  - name: How firmness is defined
+    url: https://github.com/edycutjong/rampart/blob/main/DEMO.md
+    about: FIRM / PULLABLE / UNVERIFIED, the horizon rule, and the honest limits — read before filing.

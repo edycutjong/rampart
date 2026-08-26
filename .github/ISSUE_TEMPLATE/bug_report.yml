@@ -1,0 +1,48 @@
+name: "Bug report"
+description: Something in the repo does not behave as documented.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: a **live** command failing is often not a bug.
+        `node script/headline.mjs --live` legitimately drops below 8/8 once a deployed
+        `FirmQuote`'s `unlockAt` lock window lapses — firmness has a horizon, so the classifier
+        reclassifying it as `UNVERIFIED` is correct behavior. The offline
+        `node script/headline.mjs` is the deterministic one.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Solidity (src/)
+        - Off-chain classifier (script/)
+        - Tests (test/)
+        - Docs (README / DEMO)
+        - CI
+        - Other
+    validations: { required: true }
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what happened
+      description: Quote the documented claim you are testing against.
+    validations: { required: true }
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Exact command and full output
+      render: shell
+    validations: { required: true }
+
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: Output of `forge --version` and `node --version`, plus your OS.
+      render: shell
+    validations: { required: true }

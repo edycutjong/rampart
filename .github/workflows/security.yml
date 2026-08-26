@@ -1,0 +1,70 @@
+name: security
+
+on:
+  push: { branches: [main] }
+  pull_request:
+  schedule:
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+
+permissions: { contents: read }
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Secret scanning over the full history ─────────────────────────────
+  # This repo went public at submission. The pre-flip scan is the one that
+  # mattered; this keeps it true for every commit after.
+  gitleaks:
+    name: gitleaks (full history)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── Solidity static analysis ──────────────────────────────────────────
+  slither:
+    name: slither
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - uses: crytic/slither-action@v0
+        id: slither
+        with:
+          fail-on: high
+          slither-args: --exclude-dependencies --filter-paths "lib/|test/"
+        continue-on-error: true
+
+      # The adversarial corpus in src/adversarial/ is SUPPOSED to look dangerous —
+      # six contracts that each hide a withdrawal path on purpose. Slither findings
+      # there are the point, not a defect, so high-severity findings are reported
+      # rather than enforced. FirmQuote itself is the contract to read.
+      - name: note on src/adversarial
+        if: always()
+        run: echo "::notice::src/adversarial contains deliberately-unsafe attacker contracts; findings there are expected"
+
+  # ── Solidity build determinism ─────────────────────────────────────────
+  # The attested classifier compares a compiled artifact hash against on-chain
+  # EXTCODEHASH. If the build is not reproducible, the whole claim is unfalsifiable.
+  determinism:
+    name: build determinism
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: build twice, compare artifact hashes
+        run: |
+          forge build --force
+          find out -name '*.json' -print0 | sort -z | xargs -0 sha256sum | sha256sum > /tmp/a
+          rm -rf out
+          forge build --force
+          find out -name '*.json' -print0 | sort -z | xargs -0 sha256sum | sha256sum > /tmp/b
+          if diff /tmp/a /tmp/b; then echo "build is reproducible"; else
+            echo "::error::forge build is not reproducible — the attested-codehash claim depends on it"; exit 1; fi
