@@ -20,7 +20,8 @@
     <a href="https://rampart.edycu.dev/viewer/">Typed-book viewer</a> ·
     <a href="https://youtu.be/DhxuWFHOsyM">Demo video (2:44)</a> ·
     <a href="DEMO.md">Evidence trail</a> ·
-    <a href="SDK_FEEDBACK.md">SDK &amp; docs feedback (12 findings)</a>
+    <a href="SDK_FEEDBACK.md">SDK &amp; docs feedback (12 findings)</a> ·
+    <a href="https://dorahacks.io/buidl/48111">BUIDL #48111</a>
   </p>
 
   <br/>
@@ -30,6 +31,7 @@
   [![Pitch Deck](https://img.shields.io/badge/📊_Pitch-Deck-f59e0b?style=for-the-badge)](https://rampart.edycu.dev/pitch/)
   [![Demo Video](https://img.shields.io/badge/🎬_Demo-Video-ef4444?style=for-the-badge)](https://youtu.be/DhxuWFHOsyM)
   [![Built for Event Contracts](https://img.shields.io/badge/DoraHacks-Event_Contracts-8b5cf6?style=for-the-badge)](https://dorahacks.io/hackathon/event-contracts)
+  [![BUIDL 48111](https://img.shields.io/badge/%F0%9F%A7%A9_BUIDL-%2348111-6366f1?style=for-the-badge)](https://dorahacks.io/buidl/48111)
 
   <br/>
 

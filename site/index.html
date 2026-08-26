@@ -183,6 +183,14 @@ h1 .no{
 .btn-1:hover{transform:translateY(-2px);box-shadow:0 16px 40px -14px rgba(34,211,238,1);text-decoration:none}
 .btn-2{border-color:var(--line);color:var(--text);background:rgba(148,163,184,.06)}
 .btn-2:hover{border-color:rgba(34,211,238,.55);transform:translateY(-2px);text-decoration:none;color:var(--text-max)}
+/* Judges arrive from the BUIDL page and may never scroll. The evidence trail was
+   previously first mentioned in section 07, ~500 lines below the fold. */
+.jnav{margin-top:1.15rem;font:500 .82rem/1.75 var(--sans);color:var(--dim)}
+.jnav b{color:var(--text);font-weight:700}
+.jnav a{color:var(--text);text-decoration:none;border-bottom:1px solid rgba(34,211,238,.35)}
+.jnav a:hover{color:var(--held);border-bottom-color:var(--held)}
+.jnav .sep{color:var(--line);padding:0 .1rem}
+@media (max-width:640px){.jnav{font-size:.78rem}}
 
 /* the ladder instrument */
 .instrument{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;
@@ -546,6 +554,15 @@ footer .fl a{font-size:.885rem}
           <a class="btn btn-1" href="https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb">See the failed transaction ↗</a>
           <a class="btn btn-2" href="#verify">Verify it yourself — no wallet</a>
         </div>
+        <p class="jnav">
+          <b>Judges — start here:</b>
+          <a href="https://github.com/edycutjong/rampart">Repo</a><span class="sep"> · </span>
+          <a href="viewer/index.html">Typed-book viewer</a><span class="sep"> · </span>
+          <a href="https://youtu.be/DhxuWFHOsyM">Demo video (2:44)</a><span class="sep"> · </span>
+          <a href="pitch/index.html">Pitch deck</a><span class="sep"> · </span>
+          <a href="https://github.com/edycutjong/rampart/blob/main/DEMO.md">Evidence trail</a><span class="sep"> · </span>
+          <a href="https://github.com/edycutjong/rampart/blob/main/SDK_FEEDBACK.md">SDK &amp; docs feedback (12 findings)</a>
+        </p>
       </div>
 
       <figure class="instrument">
@@ -650,8 +667,8 @@ footer .fl a{font-size:.885rem}
       </div>
       <div class="metric">
         <p class="k">forge test</p>
-        <p class="v">70</p>
-        <p class="s">0 failures · 87.97% line coverage</p>
+        <p class="v">93</p>
+        <p class="s">0 failures · 100% line coverage of <span class="mono">src/</span></p>
       </div>
       <div class="metric">
         <p class="k">full-book retype p95</p>
@@ -661,7 +678,7 @@ footer .fl a{font-size:.885rem}
       <div class="metric">
         <p class="k">adversarial corpus</p>
         <p class="v">6</p>
-        <p class="s">deployed attacker contracts · 4 escapes executed on-chain</p>
+        <p class="s">deployed attacker contracts · 5 escapes executed on-chain</p>
       </div>
     </div>
   </div>
@@ -768,7 +785,7 @@ footer .fl a{font-size:.885rem}
     <p class="caption rv" style="margin-top:1.5rem;color:var(--muted);font-size:.98rem">The quote stands until
       <strong style="color:var(--text-max)">a taker fills it</strong> or its mandatory
       <span class="mono">expireTimestampNs</span> lapses. Two exits — neither of them is "the maker changed
-      their mind." Seven of the 70 tests assert the <em>absence</em> of every withdrawal selector from
+      their mind." Seven of the 93 tests assert the <em>absence</em> of every withdrawal selector from
       FirmQuote's ABI: the lock is tested as a missing feature, because it is one.</p>
   </div>
 </section>
@@ -949,8 +966,8 @@ footer .fl a{font-size:.885rem}
       </div>
       <div class="card">
         <h3 class="mono cyan" style="font-size:1.25rem">70 / 0</h3>
-        <p><span class="mono">forge test</span> — 70 tests passing, 0 failures, at
-          <strong style="color:var(--text-max)">87.97%</strong> line coverage.</p>
+        <p><span class="mono">forge test</span> — 93 tests passing, 0 failures, at
+          <strong style="color:var(--text-max)">100%</strong> line coverage of <span class="mono">src/</span>.</p>
       </div>
       <div class="card">
         <h3 class="mono cyan" style="font-size:1.25rem">5 of 6</h3>
@@ -1006,7 +1023,7 @@ IncorrectSender(address,address)</code></pre>
       <div class="card">
         <h3>Replay the whole thing</h3>
         <p><span class="mono cyan">./gate.sh</span> runs deploy → rest → refuse end-to-end with your own key.
-          <span class="mono cyan">forge test</span> runs all 70 tests. Every command and its expected output
+          <span class="mono cyan">forge test</span> runs all 93 tests. Every command and its expected output
           is in <a href="https://github.com/edycutjong/rampart/blob/main/DEMO.md">DEMO.md</a>.</p>
       </div>
     </div>
@@ -1032,7 +1049,7 @@ IncorrectSender(address,address)</code></pre>
           <li><span class="mark y" aria-hidden="true">✓</span><span><b>The control</b> — the same call from the contract's address returns <span class="mono">0x</span></span></li>
           <li><span class="mark y" aria-hidden="true">✓</span><span><b>The classifier</b> — attested <span class="mono">8/8</span> vs naive <span class="mono">2/8</span> over the deployed corpus</span></li>
           <li><span class="mark y" aria-hidden="true">✓</span><span><b>6 attacker contracts deployed</b> — 5 of the 6 escapes executed on-chain</span></li>
-          <li><span class="mark y" aria-hidden="true">✓</span><span><b>70 tests, 0 failures</b> · 87.97% line coverage · retype p95 <span class="mono">0.13 ms</span></span></li>
+          <li><span class="mark y" aria-hidden="true">✓</span><span><b>93 tests, 0 failures</b> · 100% line coverage of <span class="mono">src/</span> · retype p95 <span class="mono">0.13 ms</span></span></li>
           <li><span class="mark y" aria-hidden="true">✓</span><span><b>DEMO.md</b> — every transaction, the control, and exact reproduce steps</span></li>
         </ul>
       </div>
