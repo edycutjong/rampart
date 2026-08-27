@@ -527,7 +527,7 @@ body.debug-contrast .val,body.debug-contrast .big,body.debug-contrast .n{
         <li class="chip chip-held">Somnia Shannon · 50312</li>
         <li class="chip">@somnia-chain/markets-sdk</li>
         <li class="chip">Foundry</li>
-        <li class="chip">viem</li>
+        <li class="chip">zero runtime deps</li>
       </ul>
     </div>
     <div class="cover-mark">
@@ -773,7 +773,7 @@ $ cast call … --from 0x2a09b4c4…191a
 
       <!-- sponsor SDK bracket under stages 2–3 -->
       <path d="M332 200 L332 210 L936 210 L936 200" fill="none" stroke="#22D3EE" stroke-opacity=".4" stroke-width="1.5"/>
-      <text x="634" y="230" text-anchor="middle" fill="#22D3EE" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" letter-spacing="1.6">@somnia-chain/markets-sdk + viem</text>
+      <text x="634" y="230" text-anchor="middle" fill="#22D3EE" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="15" letter-spacing="1.6">@somnia-chain/markets-sdk — CI differential</text>
     </svg>
 
     <div class="bench">
@@ -795,7 +795,7 @@ $ cast call … --from 0x2a09b4c4…191a
 <section class="slide" id="s9" data-title="Three findings the docs do not have" data-sub="Sponsor SDK">
   <p class="eyebrow"><span class="num">09</span><span class="bar"></span>Sponsor SDK — the engine, not the decoration</p>
   <h1 class="tight" style="font-size:62px;margin-bottom:16px">Three findings the docs do not have.</h1>
-  <p class="lede" style="margin-bottom:30px;max-width:76ch">Rampart is built on <strong class="mono">@somnia-chain/markets-sdk</strong> and viem against a live Somnia binary pool. Integrating it turned up three things that are not written down anywhere.</p>
+  <p class="lede" style="margin-bottom:30px;max-width:76ch">Rampart runs against a live Somnia binary pool with <strong class="mono">zero runtime dependencies</strong> — hand-rolled keccak-256 and raw JSON-RPC. <strong class="mono">@somnia-chain/markets-sdk</strong> is a <em>dev</em> dependency: CI diffs our hand-transcribed ABI against it, 35/35. Building that turned up three things written down nowhere.</p>
   <div class="finds">
     <div class="find">
       <div class="n">01</div>

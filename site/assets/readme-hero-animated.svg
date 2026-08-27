@@ -203,7 +203,7 @@
     </text>
 
     <!-- tech pills -->
-    <text x="140" y="288" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" letter-spacing="0.5" fill="#94A3B8" opacity="0.78">Solidity · Somnia · markets-sdk · Foundry · viem</text>
+    <text x="140" y="288" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" letter-spacing="0.5" fill="#94A3B8" opacity="0.78">Solidity · Somnia · DreamDEX · Foundry · halmos</text>
 
   </g>
 </svg>
