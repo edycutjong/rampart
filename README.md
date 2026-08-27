@@ -293,6 +293,12 @@ Order `…9685` rested with real escrow while its own funder's cancel **reverted
 )
 ```
 
+<p align="center">
+  <img src="screenshots/09-explorer-failed-cancel.png" width="100%"
+       alt="Shannon explorer, transaction 0x959b4770…6ddb: Status Failed, method cancelOrder, revert reason IncorrectSender(address sender, address expected) with sender 0xFbc73Ce1…653595 (the funder) and expected 0x2a09b4c4…91191a (the FirmQuote contract).">
+  <br><em>The explorer, unedited. <strong>Failed</strong> · <code>f5e39c1f</code> · and the pool names both parties itself.</em>
+</p>
+
 The failed transaction is public and permanent:
 **[`0x959b4770…6ddb`](https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb)** (status `0x0`).
 Control: the same call `--from` the contract returns `0x` — the pool *would* allow its owner to

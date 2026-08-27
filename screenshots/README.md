@@ -36,12 +36,18 @@ Both are cut from the demo video rather than re-recorded, so what loops here is 
 judges see on YouTube. They exist because **GitHub will not embed a YouTube video** — a reader who
 never clicks out still sees something run.
 
-## Still to capture by hand
+| 09 | `09-explorer-failed-cancel.png` | The Shannon explorer: **Failed** · `cancelOrder` · `IncorrectSender(sender, expected)` with both addresses | ⛓️ Live Deployment |
+
+Captured 2026-08-27 with a render guard — the script asserts the page really contains "Failed"
+and "IncorrectSender" before saving, so a half-loaded third-party render can never be shipped.
+
+## Previously listed as manual
 
 The **Shannon explorer page for the failed cancel** —
 [`0x959b4770…6ddb`](https://shannon-explorer.somnia.network/tx/0x959b47704d493dd48f2e724f2692facf1609a2cdc738f1a7ceb1fd070b3c6ddb)
-showing **status `0x0`**. It is the single strongest image the project has, but it is a third-party
-page: capturing it automatically risks shipping a half-loaded render, so grab it in a browser once.
+showing **status `0x0`** — now captured as `09` above. The concern was that an automated capture
+could ship a half-loaded third-party page; the script guards against exactly that by refusing to
+save unless the rendered text contains both "Failed" and "IncorrectSender".
 
 ## Specs
 
