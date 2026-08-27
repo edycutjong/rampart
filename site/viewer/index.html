@@ -329,7 +329,7 @@ footer .fact{margin-top:2rem;padding-top:1.2rem;border-top:1px dashed var(--line
 
 <header class="site">
   <div class="shell">
-    <a class="brand" href="../index.html" aria-label="rampart — back to the overview">
+    <a class="brand" href="../index.html" aria-label="Typed book — back to the rampart overview">
       <svg class="wordmark" viewBox="-1 -44 251 59" role="img" aria-label="rampart" focusable="false">
         <g id="wm-glyphs">
           <path fill="#E2E8F0" d="M12.54 0L4.48 0L4.48-31.74L12.42-31.74L12.42-28.16L13.57-28.16Q14.27-30.08 15.90-30.98Q17.54-31.87 19.71-31.87L23.55-31.87L23.55-24.70L19.58-24.70Q16.51-24.70 14.53-23.07Q12.54-21.44 12.54-18.05L12.54 0M38.91 0.90Q35.52 0.90 32.83-0.29Q30.14-1.47 28.58-3.74Q27.01-6.02 27.01-9.28Q27.01-12.54 28.58-14.75Q30.14-16.96 32.93-18.08Q35.71-19.20 39.30-19.20L48-19.20L48-20.99Q48-23.23 46.59-24.67Q45.18-26.11 42.11-26.11Q39.10-26.11 37.63-24.74Q36.16-23.36 35.71-21.18L28.29-23.68Q29.06-26.11 30.75-28.13Q32.45-30.14 35.30-31.39Q38.14-32.64 42.24-32.64Q48.51-32.64 52.16-29.50Q55.81-26.37 55.81-20.42L55.81-8.58Q55.81-6.66 57.60-6.66L60.16-6.66L60.16 0L54.78 0Q52.42 0 50.88-1.15Q49.34-2.30 49.34-4.22L49.34-4.29L48.13-4.29Q47.87-3.52 46.98-2.27Q46.08-1.02 44.16-0.06Q42.24 0.90 38.91 0.90M40.32-5.63Q43.71-5.63 45.86-7.52Q48-9.41 48-12.54L48-13.18L39.87-13.18Q37.63-13.18 36.35-12.22Q35.07-11.26 35.07-9.54Q35.07-7.81 36.42-6.72Q37.76-5.63 40.32-5.63M74.11 0L66.05 0L66.05-31.74L73.98-31.74L73.98-28.29L75.14-28.29Q75.97-29.89 77.89-31.07Q79.81-32.26 82.94-32.26Q86.34-32.26 88.38-30.94Q90.43-29.63 91.52-27.52L92.67-27.52Q93.76-29.57 95.74-30.91Q97.73-32.26 101.38-32.26Q104.32-32.26 106.72-31.01Q109.12-29.76 110.56-27.23Q112-24.70 112-20.86L112 0L103.94 0L103.94-20.29Q103.94-22.91 102.59-24.22Q101.25-25.54 98.82-25.54Q96.06-25.54 94.56-23.78Q93.06-22.02 93.06-18.75L93.06 0L84.99 0L84.99-20.29Q84.99-22.91 83.65-24.22Q82.30-25.54 79.87-25.54Q77.12-25.54 75.62-23.78Q74.11-22.02 74.11-18.75"/>
@@ -941,7 +941,7 @@ function render(){
         '<span class="sizebar ' + m.bar + '" aria-hidden="true"><b style="width:' + w.toFixed(1) + '%"></b></span></td>' +
       "<td>" + badge(o.class) + "</td>" +
       '<td class="owner-cell"><a href="' + esc(S.explorer) + "/address/" + esc(o.owner) +
-        '" aria-label="Owner ' + esc(o.owner) + ' on the Shannon explorer">' + esc(shortAddr(o.owner)) + "</a>" + lbl + "</td>" +
+        '" aria-label="' + esc(shortAddr(o.owner)) + ' — owner ' + esc(o.owner) + ' on the Shannon explorer">' + esc(shortAddr(o.owner)) + "</a>" + lbl + "</td>" +
       '<td><span class="reason">' + esc(o.reason) + '<span class="hz">' + esc(horizon) + "</span></span></td></tr>";
   }
 
