@@ -1253,5 +1253,16 @@ IncorrectSender(address,address)</code></pre>
   });
 })();
 </script>
+
+<script>
+  // Offline support for a repeat visitor. Registration is deliberately deferred to load
+  // so it never competes with first paint, and every failure is swallowed: a browser
+  // without service workers, or a file:// open of this page, must behave exactly as before.
+  if ('serviceWorker' in navigator && window.isSecureContext) {
+    addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+    });
+  }
+</script>
 </body>
 </html>
