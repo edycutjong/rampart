@@ -111,8 +111,15 @@ a{color:var(--held);text-decoration:none}
 }
 .slide.active{opacity:1;visibility:visible;pointer-events:auto}
 @media (prefers-reduced-motion:reduce){
-  .slide{transition:none}
-  #stage,.slide,*{animation-duration:.001ms !important;animation-iteration-count:1 !important}
+  /* The previous rule neutralised animations but left transitions running: an audit still
+     measured 26 elements in motion here. Transitions need their own kill, and scroll-behaviour
+     counts as motion too (WCAG 2.3.3). */
+  *,*::before,*::after{
+    animation-duration:.001ms !important;animation-iteration-count:1 !important;
+    animation-delay:0s !important;
+    transition-duration:.001ms !important;transition-delay:0s !important;
+    scroll-behavior:auto !important;
+  }
 }
 
 /* ── shared type ─────────────────────────────────────────────────────────── */
@@ -122,11 +129,11 @@ a{color:var(--held);text-decoration:none}
 }
 .eyebrow .num{color:var(--dim);letter-spacing:.1em}
 .eyebrow .bar{width:44px;height:2px;background:var(--held);opacity:.55;flex:none}
-h1{
+h1,h2{
   font-size:88px;line-height:1.04;letter-spacing:-.028em;font-weight:700;
   margin:0 0 22px;max-width:20ch;
 }
-h1.tight{font-size:76px;max-width:24ch}
+h1.tight,h2.tight{font-size:76px;max-width:24ch}
 .lede{font-size:31px;line-height:1.5;color:var(--muted);max-width:58ch;margin:0}
 .lede strong,.kick strong{color:var(--text);font-weight:600}
 .kick{
@@ -479,7 +486,7 @@ body.gridding #grid{display:block}
 
 /* ── contrast debug (press C) — projector legibility check ───────────────── */
 /* Press C to toggle contrast debug mode */
-body.debug-contrast h1,body.debug-contrast .lede,body.debug-contrast p,
+body.debug-contrast h1,body.debug-contrast h2,body.debug-contrast .lede,body.debug-contrast p,
 body.debug-contrast li,body.debug-contrast .eyebrow,body.debug-contrast pre,
 body.debug-contrast .hook-h,body.debug-contrast .wordmark,body.debug-contrast .name,
 body.debug-contrast .val,body.debug-contrast .big,body.debug-contrast .n{
@@ -549,7 +556,7 @@ body.debug-contrast .val,body.debug-contrast .big,body.debug-contrast .n{
 <!-- ══ 02 · HOOK ═══════════════════════════════════════════════════════════ -->
 <section class="slide" id="s2" data-title="He could not take his own order back" data-sub="The hero moment">
   <p class="eyebrow"><span class="num">02</span><span class="bar"></span>The hero moment</p>
-  <h1 class="hook-h">He could not take his own&nbsp;order&nbsp;back.</h1>
+  <h2 class="hook-h">He could not take his own&nbsp;order&nbsp;back.</h2>
   <p class="lede">The wallet that <strong>paid for</strong> the resting order called <span class="mono c-text">cancelOrder</span>. The pool refused it and named both parties in its own revert data.</p>
   <div class="selector-slab">
     <div class="big mono">0xf5e39c1f</div>
@@ -564,7 +571,7 @@ body.debug-contrast .val,body.debug-contrast .big,body.debug-contrast .n{
 <!-- ══ 03 · PROBLEM ════════════════════════════════════════════════════════ -->
 <section class="slide" id="s3" data-title="Displayed depth is only a promise" data-sub="The problem">
   <p class="eyebrow"><span class="num">03</span><span class="bar"></span>The problem</p>
-  <h1 class="tight">Displayed depth is only a promise.</h1>
+  <h2 class="tight">Displayed depth is only a promise.</h2>
   <p class="lede" style="margin-bottom:38px">On every order book that exists, the size at a level is size the maker can cancel in one block. Takers price that uncertainty in, and no venue can tell them which depth is real.</p>
   <div class="two">
     <div class="state-card pull">
@@ -587,7 +594,7 @@ body.debug-contrast .val,body.debug-contrast .big,body.debug-contrast .n{
 <!-- ══ 04 · MECHANISM ══════════════════════════════════════════════════════ -->
 <section class="slide" id="s4" data-title="Make the contract the owner" data-sub="The mechanism">
   <p class="eyebrow"><span class="num">04</span><span class="bar"></span>The mechanism</p>
-  <h1 class="tight">Make the contract the owner.</h1>
+  <h2 class="tight">Make the contract the owner.</h2>
   <p class="lede" style="margin-bottom:34px"><span class="mono c-text">FirmQuote</span> holds the collateral, approves the Somnia <span class="mono c-text">BinaryPool</span>, and calls <span class="mono c-text">placeBinaryOrder</span> — so <strong>Order.owner is the contract, not a wallet.</strong> It exposes no cancel path, no reduce path, and grants no operator. Every withdrawal route is therefore closed by the pool's own rules.</p>
   <div class="paths">
     <div class="path">
@@ -613,7 +620,7 @@ body.debug-contrast .val,body.debug-contrast .big,body.debug-contrast .n{
 <!-- ══ 05 · PROOF / LIVE DEMO ══════════════════════════════════════════════ -->
 <section class="slide" id="s5" data-title="The chain refuses its own funder" data-sub="Proof on Shannon">
   <p class="eyebrow"><span class="num">05</span><span class="bar"></span>Proof on Shannon · 2026-08-19</p>
-  <h1 class="tight" style="font-size:64px;margin-bottom:26px">The chain refuses its own funder.</h1>
+  <h2 class="tight" style="font-size:64px;margin-bottom:26px">The chain refuses its own funder.</h2>
   <div class="two" style="grid-template-columns:1.42fr .58fr;gap:34px;align-items:start">
     <div class="term">
       <div class="term-bar"><span class="tl"><i></i><i></i><i></i></span>cast — Somnia Shannon · no wallet, no funds, no gas</div>
@@ -648,7 +655,7 @@ $ cast call … --from 0x2a09b4c4…191a
 <!-- ══ 06 · THE PRODUCT: TYPED BOOK ════════════════════════════════════════ -->
 <section class="slide" id="s6" data-title="Three classes, not two" data-sub="The product">
   <p class="eyebrow"><span class="num">06</span><span class="bar"></span>The product</p>
-  <h1 class="tight">Three classes, not two.</h1>
+  <h2 class="tight">Three classes, not two.</h2>
   <p class="lede" style="margin-bottom:34px"><span class="mono c-text">Order.owner</span> is readable on-chain, so every price level can be <strong>typed</strong>. The third class is the one that makes the metric honest.</p>
   <div class="three">
     <div class="cls firm">
@@ -677,7 +684,7 @@ $ cast call … --from 0x2a09b4c4…191a
 <!-- ══ 07 · THE NUMBER ═════════════════════════════════════════════════════ -->
 <section class="slide" id="s7" data-title="8/8 attested · 2/8 naive" data-sub="The headline number">
   <p class="eyebrow"><span class="num">07</span><span class="bar"></span>The headline number</p>
-  <h1 class="tight" style="font-size:64px;margin-bottom:14px">A naive check is fooled six times out of six.</h1>
+  <h2 class="tight" style="font-size:64px;margin-bottom:14px">A naive check is fooled six times out of six.</h2>
   <p class="lede" style="margin-bottom:32px;max-width:74ch">Typing a level FIRM on <span class="mono c-text">EXTCODESIZE&nbsp;&gt;&nbsp;0</span> is forgeable. Rampart attests <strong>EXTCODEHASH</strong> under a static bytecode policy instead.</p>
   <div class="score">
     <div>
@@ -715,7 +722,7 @@ $ cast call … --from 0x2a09b4c4…191a
 <!-- ══ 08 · ARCHITECTURE ═══════════════════════════════════════════════════ -->
 <section class="slide" id="s8" data-title="One read path, block-budget headroom" data-sub="Architecture">
   <p class="eyebrow"><span class="num">08</span><span class="bar"></span>Architecture</p>
-  <h1 class="tight" style="font-size:60px;margin-bottom:16px">Owner in, typed book out.</h1>
+  <h2 class="tight" style="font-size:60px;margin-bottom:16px">Owner in, typed book out.</h2>
   <p class="lede" style="max-width:78ch">The pool is the source of truth for who owns each resting order. Everything Rampart adds is a <strong>read</strong> — no indexer to trust, no off-chain state to keep in sync, nothing a maker can influence.</p>
   <div class="archwrap">
     <svg viewBox="0 0 1600 232" width="100%" role="img" aria-label="Data flow: FirmQuote escrows collateral and calls placeBinaryOrder on the Somnia BinaryPool; the resting book is read back through the markets SDK; each distinct owner's EXTCODEHASH is checked against the attested set under a static bytecode policy; the output is a book typed FIRM, PULLABLE or UNVERIFIED.">
@@ -794,7 +801,7 @@ $ cast call … --from 0x2a09b4c4…191a
 <!-- ══ 09 · SPONSOR DEPTH ══════════════════════════════════════════════════ -->
 <section class="slide" id="s9" data-title="Three findings the docs do not have" data-sub="Sponsor SDK">
   <p class="eyebrow"><span class="num">09</span><span class="bar"></span>Sponsor SDK — the engine, not the decoration</p>
-  <h1 class="tight" style="font-size:62px;margin-bottom:16px">Three findings the docs do not have.</h1>
+  <h2 class="tight" style="font-size:62px;margin-bottom:16px">Three findings the docs do not have.</h2>
   <p class="lede" style="margin-bottom:30px;max-width:76ch">Rampart runs against a live Somnia binary pool with <strong class="mono">zero runtime dependencies</strong> — hand-rolled keccak-256 and raw JSON-RPC. <strong class="mono">@somnia-chain/markets-sdk</strong> is a <em>dev</em> dependency: CI diffs our hand-transcribed ABI against it, 35/35. Building that turned up three things written down nowhere.</p>
   <div class="finds">
     <div class="find">
@@ -817,7 +824,7 @@ $ cast call … --from 0x2a09b4c4…191a
 <!-- ══ 10 · ECOSYSTEM IMPACT ═══════════════════════════════════════════════ -->
 <section class="slide" id="s10" data-title="An observable no off-chain book can produce" data-sub="Ecosystem impact">
   <p class="eyebrow"><span class="num">10</span><span class="bar"></span>Ecosystem impact</p>
-  <h1 class="tight" style="font-size:62px">An observable no off-chain book can produce.</h1>
+  <h2 class="tight" style="font-size:62px">An observable no off-chain book can produce.</h2>
   <p class="lede" style="margin-bottom:34px;max-width:70ch"><strong>“Percent of book that cannot be withdrawn”</strong> needs an on-chain <span class="mono c-text">Order.owner</span> to inspect. That requirement is the whole argument.</p>
   <div class="two">
     <div class="state-card pull">
@@ -838,7 +845,7 @@ $ cast call … --from 0x2a09b4c4…191a
 <!-- ══ 11 · HONEST LIMITS ══════════════════════════════════════════════════ -->
 <section class="slide" id="s11" data-title="The limits, stated up front" data-sub="What this is not">
   <p class="eyebrow"><span class="num">11</span><span class="bar"></span>What this is not</p>
-  <h1 class="tight" style="font-size:62px;margin-bottom:26px">The limits, stated up front.</h1>
+  <h2 class="tight" style="font-size:62px;margin-bottom:26px">The limits, stated up front.</h2>
   <div class="limits">
     <div class="limit"><div class="k">Testnet only</div><div class="v">Somnia Shannon, chain 50312. <strong>Nothing is deployed to mainnet and nothing has been audited.</strong></div></div>
     <div class="limit"><div class="k">Buy side only</div><div class="v">Selling firm needs an ERC-6909 operator grant — and granting no operator is exactly what keeps the lock airtight. v1 quotes the buy side and says so.</div></div>
@@ -853,7 +860,7 @@ $ cast call … --from 0x2a09b4c4…191a
 <!-- ══ 12 · THE ASK ════════════════════════════════════════════════════════ -->
 <section class="slide" id="s12" data-title="Run one command. Watch the chain refuse." data-sub="The ask">
   <p class="eyebrow"><span class="num">12</span><span class="bar"></span>The ask</p>
-  <h1 class="tight" style="font-size:62px;margin-bottom:26px">Don't take our word. Take the chain's.</h1>
+  <h2 class="tight" style="font-size:62px;margin-bottom:26px">Don't take our word. Take the chain's.</h2>
   <div class="ask">
     <div>
       <div class="term">
@@ -896,7 +903,7 @@ $ cast call … --from 0x2a09b4c4…191a
 
 </div><!-- /#stage -->
 
-<div id="hint">← → navigate · esc overview · p notes</div>
+<footer id="hint" aria-label="Keyboard shortcuts">← → navigate · esc overview · p notes</footer>
 
 <div id="notes" role="region" aria-label="Speaker notes">
   <p class="t">Speaker notes — slide <span id="ncur">1</span></p>

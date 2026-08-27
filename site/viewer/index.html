@@ -148,6 +148,10 @@ h3{font-size:1.02rem;line-height:1.35;font-weight:700;color:var(--text-max);lett
 .tag{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--line);
   border-radius:var(--r-pill);padding:.36rem .8rem;background:rgba(148,163,184,.05);
   font:600 .705rem/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+/* WCAG 1.4.10 reflow: at 400% zoom (360 CSS px) the pinned-block chip measures 348px and nowrap
+   pushed the document 14px wider than the viewport. Below 420px it wraps — the page itself must
+   never scroll sideways, even though the data table legitimately may. */
+@media (max-width:420px){.tag{white-space:normal;line-height:1.35;text-align:left}}
 .tag-live{color:var(--held);border-color:rgba(34,211,238,.4);background:rgba(34,211,238,.08)}
 h1{
   font-size:clamp(2rem,1rem + 4vw,3.5rem);line-height:1.08;letter-spacing:-.03em;
@@ -516,7 +520,7 @@ node site/viewer/make-snapshot.mjs --block 468201000</pre>
       </div>
       <div class="term rv d2">
         <div class="term-bar"><span>the attested set behind FIRM</span></div>
-        <pre><span class="c"># exactly ONE code hash is attested — FirmQuote's live runtime code,</span>
+        <pre tabindex="0" role="region" aria-label="The attested code hash, read from the chain"><span class="c"># exactly ONE code hash is attested — FirmQuote's live runtime code,</span>
 <span class="c"># read from S0 at the pinned block, hashed with our own keccak-256:</span>
 0xc60110e004cce8ade40d4e6d958c873715
   cac060b839b6b42a4fb762a16358b5</pre>
