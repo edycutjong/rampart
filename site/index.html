@@ -5,11 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0B1220">
+  <meta name="author" content="Edy Cu Tjong">
+  <meta name="twitter:creator" content="@edycutjong">
 <title>rampart — the cancel the chain refused</title>
-<meta name="description" content="Order-book depth the protocol itself will not let you withdraw. A contract-owned resting order on Somnia whose own funder's cancel reverts IncorrectSender — proven by a failed transaction, mined and permanent.">
+<meta name="description" content="Order-book depth the protocol itself will not let you withdraw. A resting order on Somnia whose own funder's cancel reverts — a failed tx, permanently on-chain.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="rampart — the cancel the chain refused">
-<meta property="og:description" content="The wallet that paid for a resting order tried to cancel it and the chain said no: IncorrectSender, status 0x0, mined and permanent on Somnia Shannon testnet. Depth the pool itself will not release.">
+<meta property="og:description" content="The wallet that paid for this order tried to cancel it. The chain said no — status 0x0, permanently on Somnia.">
 <meta property="og:url" content="https://rampart.edycu.dev/">
 <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -190,6 +192,12 @@ h1 .no{
 .jnav a{color:var(--text);text-decoration:none;border-bottom:1px solid rgba(34,211,238,.35)}
 .jnav a:hover{color:var(--held);border-bottom-color:var(--held)}
 .jnav .sep{color:var(--line);padding:0 .1rem}
+/* Build status. The release badge is fetched live rather than baked in: a hardcoded
+   "v1.1.9" is wrong the moment the next tag lands, and this page is not rebuilt per
+   release. width/height are set so the badges reserve their box and do not shift layout. */
+.badges{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-top:1rem}
+.badges img{height:20px;width:auto;display:block;border-radius:3px}
+.badges a{display:inline-flex;line-height:0}
 @media (max-width:640px){.jnav{font-size:.78rem}}
 
 /* the ladder instrument */
@@ -1149,8 +1157,16 @@ IncorrectSender(address,address)</code></pre>
         <p style="max-width:42ch;margin-top:.9rem">Order-book depth the protocol itself will not let you
           withdraw.<br>Built for the <strong style="color:var(--text-max)">Event Contracts Hackathon</strong>
           — Somnia × DreamDEX, on DoraHacks.</p>
-        <p style="margin-top:.7rem;color:var(--dim)">MIT license · Solidity · Foundry · viem · Somnia Shannon
-          testnet</p>
+        <p style="margin-top:.7rem;color:var(--dim)">MIT license · Solidity 0.8.28 · Foundry · Node ≥ 20 with zero
+          runtime dependencies · Somnia Shannon testnet</p>
+        <p class="badges">
+          <a href="https://github.com/edycutjong/rampart/actions/workflows/ci.yml"><img
+            src="https://github.com/edycutjong/rampart/actions/workflows/ci.yml/badge.svg"
+            alt="CI build status" width="118" height="20" loading="lazy" decoding="async"></a>
+          <a href="https://github.com/edycutjong/rampart/releases/latest"><img
+            src="https://img.shields.io/github/v/release/edycutjong/rampart?label=release&amp;color=22d3ee"
+            alt="Latest release version" width="104" height="20" loading="lazy" decoding="async"></a>
+        </p>
       </div>
       <div>
         <ul class="fl" aria-label="Project links">

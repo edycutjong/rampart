@@ -42,6 +42,7 @@
   ![Halmos](https://img.shields.io/badge/halmos-symbolic_proofs-8b5cf6?style=flat)
   [![License](https://img.shields.io/badge/License-MIT-yellow)](https://opensource.org/licenses/MIT)
   [![CI](https://github.com/edycutjong/rampart/actions/workflows/ci.yml/badge.svg)](https://github.com/edycutjong/rampart/actions/workflows/ci.yml)
+  [![Release](https://img.shields.io/github/v/release/edycutjong/rampart?label=release&color=22d3ee)](https://github.com/edycutjong/rampart/releases/latest)
 
 </div>
 
