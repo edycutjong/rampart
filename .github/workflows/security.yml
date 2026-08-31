@@ -58,7 +58,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { submodules: recursive }
+      # Pinned to match ci.yml — this job compares two builds for byte-identical
+      # artifacts, so the compiler toolchain must not move underneath it either.
       - uses: foundry-rs/foundry-toolchain@v1
+        with: { version: "v1.7.1" }
       - name: build twice, compare artifact hashes
         run: |
           forge build --force

@@ -27,7 +27,16 @@ jobs:
       - uses: actions/checkout@v4
         with: { submodules: recursive }
 
+      # PINNED, not `stable`. On 2026-08-27 foundry v1.8.0 was released at 12:30 UTC.
+      # Commit 0f5e899 passed this workflow on `stable` at 03:24 (forge 1.7.1) and the
+      # scheduled run failed at 17:40 on the SAME commit (forge 1.8.0), because 1.8.0
+      # lowers test-contract creation through the `deployCode(string,bytes)` cheatcode,
+      # which halmos does not implement — so `setUp()` has no successful path and all
+      # five symbolic proofs error out before any property is even evaluated. A toolchain
+      # upgrade must not be able to silently void the proofs; bump this deliberately,
+      # after confirming halmos supports the new lowering.
       - uses: foundry-rs/foundry-toolchain@v1
+        with: { version: "v1.7.1" }   # pinned — see Stage 1
 
       # Advisory, and deliberately so. `forge fmt` would collapse the multi-line
       # function headers in src/ — which rewrites the source, which changes the
@@ -52,8 +61,11 @@ jobs:
       # an invariant campaign (128k concrete sequences, in `forge test` above) and
       # symbolic proofs that quantify over EVERY caller and EVERY timestamp at once.
       # Both are mutation-verified — see the header comments in each test file.
+      # Pinned for the same reason as the toolchain: an unpinned prover is a gate whose
+      # strictness can change without a commit. 0.3.3 is what both the passing and the
+      # failing run above resolved to, so it is not implicated in that break.
       - name: install halmos
-        run: pip install --quiet halmos
+        run: pip install --quiet halmos==0.3.3
       - name: symbolic proofs (halmos)
         run: halmos --match-contract FirmQuoteSymbolicTest
 
@@ -66,6 +78,7 @@ jobs:
         with: { submodules: recursive }
 
       - uses: foundry-rs/foundry-toolchain@v1
+        with: { version: "v1.7.1" }   # pinned — see Stage 1
 
       - name: forge coverage
         run: |
@@ -89,6 +102,7 @@ jobs:
         with: { submodules: recursive }
 
       - uses: foundry-rs/foundry-toolchain@v1
+        with: { version: "v1.7.1" }   # pinned — see Stage 1
       - uses: actions/setup-node@v7
         with: { node-version: 20 }
 
@@ -154,6 +168,7 @@ jobs:
         with: { submodules: recursive }
 
       - uses: foundry-rs/foundry-toolchain@v1
+        with: { version: "v1.7.1" }   # pinned — see Stage 1
       - uses: actions/setup-node@v7
         with: { node-version: 20 }
 
