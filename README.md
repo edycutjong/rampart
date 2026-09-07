@@ -401,7 +401,7 @@ sixth (late operator grant) is rested on-chain with its exact blocked state docu
 | Foundry tests | **93 passing, 0 failures** |
 | `src/` coverage | **100%** line / statement / branch / function (168/168 lines) |
 | Symbolic proofs | **5** (halmos) — quantify over every caller and every timestamp |
-| Invariant campaigns | **3**, 128k call sequences over the bytecode's real dispatch surface |
+| Invariant campaigns | **3**, 110k calls (384 runs × depth 96, each) over the bytecode's real dispatch surface |
 | Off-chain checks | **17** (`node script/test.mjs`) |
 | Sponsor-SDK differential | **35/35** (`npm run sdk-verify`) |
 | Full-book retype | **p95 0.13 ms** on a deterministic 2,000-order book, inside a 100 ms block |
@@ -420,7 +420,7 @@ sixth (late operator grant) is rested on-chain with its exact blocked state docu
 - `src/FirmQuote.sol` — a resting quote the pool will not let its funder withdraw. Buy-side only by
   design: a sell escrows outcome tokens, which needs an ERC-6909 `setOperator` grant, and granting
   no operator is what keeps the lock airtight. (42 unit tests incl. seven asserting the *absence* of
-  every withdrawal selector, **3 invariant campaigns** over 128k call sequences, and **5 halmos
+  every withdrawal selector, **3 invariant campaigns** over 110k calls, and **5 halmos
   symbolic proofs** — the security property is an absence, so it is attacked three different ways.)
 - `src/FirmnessRegistry.sol` — the ternary classifier (**FIRM / PULLABLE / UNVERIFIED**) expressed as
   a Solidity contract: attested-`EXTCODEHASH` set + `classify` / `classifyBatch` with the lock-window

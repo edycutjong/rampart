@@ -117,7 +117,7 @@ ok(
 // ABI entry hashes to it; a wider candidate sweep found the match: it is the
 // SPOT pool's operator placement, i.e. `placeOrderFor` = owner-prefixed
 // `placeOrder(bool,uint64,...)` from spotPoolWriteAbi. Two consequences, both
-// filed in the SDK feedback report (findings 9 + 13):
+// filed in the SDK feedback report (findings 9 + 10):
 //   * the constant is now verifiable — asserted below, with our keccak;
 //   * it is a TRAP for binary integrators: the SDK's operator-grant docs say to
 //     grant it "to place", but on a binary pool the generic `placeOrderFor`
@@ -132,7 +132,7 @@ ok(
 );
 notes.push(
   `PLACE_ORDER_FOR_SELECTOR ${PLACE_ORDER_FOR_SELECTOR} — signature identified (spot placeOrderFor) but ` +
-  'STILL absent from every exported ABI; useless-by-revert on binary pools (findings 9 + 13)',
+  'STILL absent from every exported ABI; useless-by-revert on binary pools (findings 9 + 10)',
 );
 
 // ── 4. The buy-side-only invariant is the SDK's own enum ────────────────────
@@ -212,7 +212,7 @@ ok(
 ok(
   selectorOf(BINARY_PLACE_FOR) !== PLACE_ORDER_FOR_SELECTOR,
   'its selector differs from the exported PLACE_ORDER_FOR_SELECTOR',
-  `${selectorOf(BINARY_PLACE_FOR)} ≠ ${PLACE_ORDER_FOR_SELECTOR} — the exported constant cannot place on a binary pool (finding 13)`,
+  `${selectorOf(BINARY_PLACE_FOR)} ≠ ${PLACE_ORDER_FOR_SELECTOR} — the exported constant cannot place on a binary pool (finding 10)`,
 );
 
 // ── 8. The operator-grant escape, grounded in the SDK's own ERC-6909 ABI ────
@@ -244,7 +244,7 @@ absent = absent.filter((s) => !e6909Sigs.includes(s));
 // ── 9. IncorrectSender — the centrepiece constant ───────────────────────────
 // `0xf5e39c1f` is hardcoded in gate.sh, README, DEMO and the Foundry tests: the
 // pool refusing the funder's cancel with IncorrectSender(caller, expected) IS
-// the on-chain proof. v0.28.1 does not export its error ABI (finding 15), so
+// the on-chain proof. v0.28.1 does not export its error ABI (finding 12), so
 // the arg ORDER — which word is the expected owner — is checked against the
 // shipped source, `src/contractErrorsAbi.ts`.
 console.log(`\n  ${B}9. IncorrectSender — the selector the whole proof decodes${X}`);
@@ -265,7 +265,7 @@ ok(
 // ── 10. The zero-auth book read, against the shipped read ABI ───────────────
 // lib/book.mjs speaks `getAllOpenOrdersOffChain` with a hand-transcribed
 // selector and a fixed 8-word Order layout. v0.28.1 does NOT export
-// `binaryPoolReadAbi` (finding 14), so the layout is checked against the
+// `binaryPoolReadAbi` (finding 11), so the layout is checked against the
 // shipped source, `src/readsAbi.ts`. If the SDK moves or reshapes it, these
 // fail loudly — which beats decoding neighbouring words into plausible garbage.
 console.log(`\n  ${B}10. getAllOpenOrdersOffChain — the read the classifier stands on${X}`);
@@ -297,11 +297,11 @@ ok(
 );
 notes.push(
   'binaryPoolReadAbi (getAllOpenOrdersOffChain, getOrder, …) is NOT exported from the package — ' +
-  'checked against the shipped src/readsAbi.ts instead (finding 14)',
+  'checked against the shipped src/readsAbi.ts instead (finding 11)',
 );
 notes.push(
   'the contract-error ABI (incl. IncorrectSender) is NOT exported — ' +
-  'checked against the shipped src/contractErrorsAbi.ts instead (finding 15)',
+  'checked against the shipped src/contractErrorsAbi.ts instead (finding 12)',
 );
 
 // ── 11. The corpus price constant, in the SDK's own units ───────────────────
