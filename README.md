@@ -21,6 +21,7 @@
     <a href="https://youtu.be/DhxuWFHOsyM">Demo video (2:44)</a> ·
     <a href="DEMO.md">Evidence trail</a> ·
     <a href="SDK_FEEDBACK.md">SDK &amp; docs feedback (12 findings)</a> ·
+    <a href="https://dev.to/edycutjong/six-contracts-that-pass-extcodesizeowner-0-and-still-withdraw-their-order-11e0">Write-up: how the six attackers beat <code>EXTCODESIZE</code></a> ·
     <a href="https://dorahacks.io/buidl/48111">BUIDL #48111</a>
   </p>
 
